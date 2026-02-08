@@ -27,19 +27,49 @@ Select a project that:
 
 ### Week 0 — Setup (before pilot starts)
 
+**Step 1: Select project and confirm team**
+
 | Task | Owner | Deliverable |
 |---|---|---|
 | Select pilot project | Kuan | Project name confirmed |
-| Set up Google Drive structure per repo schemas | PM | Drive folders for project logs, submittals, pay apps |
-| Create RFI log (from `rfi-log.csv` headers) | PM | Google Sheet or CSV |
-| Create CO log (from `change-order-log.csv` headers) | PM | Google Sheet or CSV |
-| Create submittal register (from `submittal-register-schema.md`) | PM + Procurement | Google Sheet or CSV |
-| Create lead-time tracker (from `lead-time-tracker-schema.md`) | Procurement | Google Sheet or CSV |
-| Create decision log (from `decision-log-schema.md`) | Concierge | Google Sheet or CSV |
-| Backfill existing RFIs, COs, and submittals into logs | PM | Logs populated with current data |
-| Set up Slack channel for pilot project | Kuan | `#pilot-[project-name]` |
-| Configure Slack slash commands (draft mode only) | Kuan / AI | `/rfi`, `/co`, `/decision`, `/daily` active |
-| Brief PM and Superintendent on the system | Kuan | 30-min walkthrough |
+| Confirm PM and Super are available and willing | Kuan | Names confirmed |
+| Set project-defined CO approval threshold | Kuan + Owner's Rep | Dollar amount documented |
+
+**Step 2: Google Drive setup (per `drive-project-structure.md`)**
+
+| Task | Owner | Deliverable |
+|---|---|---|
+| Create project folder from template structure | PM | `Foundry Projects/[PROJECT-NAME]/` with all subfolders |
+| Create RFI Log Sheet (from `rfi-log.csv` headers) | PM | Sheet in `03-construction/logs/` |
+| Create CO Log Sheet (from `change-order-log.csv` headers) | PM | Sheet in `03-construction/logs/` |
+| Create Decision Log Sheet (from `decision-log-schema.md`) | PM | Sheet in `03-construction/logs/` |
+| Create Submittal Register Sheet (from `submittal-register-schema.md`) | PM + Procurement | Sheet in `04-procurement/submittal-register/` |
+| Create Lead-Time Tracker Sheet (from `lead-time-tracker-schema.md`) | Procurement | Sheet in `04-procurement/lead-time-tracker/` |
+| Apply conditional formatting per SOP Google Sheets appendices | PM | Aging highlights, risk flags, SLA formulas active |
+| Set folder permissions per Drive structure permission table | PM | Confirmed |
+| Backfill existing RFIs, COs, and submittals into Sheets | PM | Logs populated with current project data |
+
+**Step 3: Slack setup (per `slack-workspace-setup.md`)**
+
+| Task | Owner | Deliverable |
+|---|---|---|
+| Create project channel `#proj-[name]` | Kuan | Channel live, team invited |
+| Create field channel `#proj-[name]-field` | Kuan | Channel live, field staff invited |
+| Create function channels (if not yet created) | Kuan | `#construction-ops`, `#procurement`, `#design-review`, `#decisions`, `#warranty` |
+| Create system channels | Kuan | `#foundry-bot-log`, `#daily-summaries` |
+| Pin Drive project folder link in project channel | PM | Pinned |
+| Pin all log Sheet links in project channel | PM | Pinned |
+| Configure `@foundry-ai` bot | Kuan | Bot installed, commands registered |
+| Register slash commands: `/rfi`, `/co`, `/decision`, `/submittal`, `/warranty`, `/daily` | Kuan | Commands active in draft mode |
+
+**Step 4: Team briefing**
+
+| Task | Owner | Deliverable |
+|---|---|---|
+| Brief PM and Super (30 min): channel structure, commands, draft→log flow | Kuan | Completed |
+| Brief Procurement lead (15 min): submittal and lead-time commands | Kuan | Completed |
+| Brief Design lead (15 min): how RFIs and submittals arrive, how to respond | Kuan | Completed |
+| Share this pilot plan with all participants | Kuan | Distributed |
 
 ### Week 1 — Baseline
 
