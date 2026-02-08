@@ -470,23 +470,26 @@ The dashboard reads from:
 | CompanyCam API | Photo IDs for deep links | **No** |
 | `#foundry-bot-log` | Audit trail, event timestamps, classifications | **No** |
 
-The dashboard is a **read-only consumer**. It creates no data, modifies no data, and has no write path to any system.
+**Current phase (Phase 2):** The dashboard is a read-only consumer. It creates no data, modifies no data, and has no write path to any system.
+
+**Phase 3 addition:** The dashboard writes interaction events (acknowledgments, risk acceptances, status confirmations) to an internal interaction log and to `#foundry-bot-log`. It does NOT write to any EPC system of record.
 
 ---
 
 ## What Is NOT on This Dashboard
 
-| Excluded | Why |
-|---|---|
-| Approve / Acknowledge / Resolve / Dismiss | Read-only authority. No state changes. |
-| Edit or override any field | No write-back to any system. |
-| Notification preferences | No configuration surface in v1. |
-| Historical charts or trend graphs | Weekly report covers trends. "What's Repeating" covers patterns. |
-| Draft message preview | Drafts live in Slack threads. Deep link goes there. |
-| Bidding/outreach pipeline | Not in scope for v1. Tracked in Slack. |
-| Probation monitoring data | Separate Kuan-only process. |
-| User or role management | Admin function, not dashboard scope. |
-| Workflow enforcement | Dashboard is visibility, not control. |
+| Excluded | Why | Phase |
+|---|---|---|
+| Approve / Resolve / Close | Source system is where work is completed | All current phases |
+| Edit source data fields | Source system is the system of record | All current phases |
+| Acknowledge (non-blocking items) | Acknowledgment is only meaningful for blocking items | Phase 3 scoping |
+| Notification preferences | No configuration surface in v1 | May revisit v2+ |
+| Historical charts or trend graphs | Weekly report covers trends; "What's Repeating" covers patterns | May revisit v2+ |
+| Draft message preview | Drafts live in Slack threads — deep link goes there | Intentional |
+| Bidding/outreach pipeline | Not in scope for v1 — tracked in Slack | May revisit v2+ |
+| Probation monitoring data | Separate Kuan-only process | Intentional |
+| User or role management | Admin function, not dashboard scope | Intentional |
+| Workflow enforcement / gating | Dashboard is visibility and awareness, not control | Phase 4 (preview only) |
 
 ---
 
@@ -529,9 +532,11 @@ The dashboard is a **read-only consumer**. It creates no data, modifies no data,
 
 ---
 
-## Post-Probation Upgrade Path (No Rework Required)
+## Phase Upgrade Path (No Rework Required)
 
-If Phase 2 is confirmed on Feb 15, the following additions layer onto this exact layout:
+### Phase 2 Confirmation (Post-Probation)
+
+If Phase 2 is confirmed on Feb 15, the following additions layer onto the existing layout:
 
 | Addition | Where It Goes | Layout Change |
 |---|---|---|
@@ -541,7 +546,231 @@ If Phase 2 is confirmed on Feb 15, the following additions layer onto this exact
 | Notification badge (Level 2 sent) | Right side of item card | Small badge — no layout shift |
 | Banner text change | Top bar | `Phase 2 Active` replaces probation label |
 
-No view restructuring, no column changes, no section reordering, no role changes. Buttons add to the detail panel; badges add to cards. Nothing moves.
+No view restructuring, no column changes, no section reordering, no role changes.
+
+---
+
+## Phase 3 — Limited Interaction (NOT ACTIVE)
+
+**STATUS: NOT ACTIVE. Phase 3 activates only after Phase 2 is confirmed. Kuan must explicitly approve. 7-day probation follows activation.**
+
+**Design Principle (Non-Negotiable):**
+
+> Phase 3 interactions confirm awareness and ownership — they do not replace work.
+
+### Global Phase 3 Rules
+
+1. No auto-approval, auto-resolution, or blocking of work.
+2. All state changes are **explicit, logged, and reversible**.
+3. Interaction is **additive, not required** — deep links remain the primary path.
+4. One interaction button per role. Button appears only when applicable.
+5. Every button includes a tooltip: *"This does not resolve the item. Work must be completed in the source system."*
+
+### Banner
+
+```
+┌──────────────────────────────────────────────────────────────────┐
+│  Limited Interaction Enabled — Phase 3                           │
+│  [user name] · [role] · Last updated: [timestamp]                │
+└──────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+### Interaction 1: PM / Superintendent — Required Acknowledgment
+
+**Button:** `Acknowledge — Working on This`
+
+**Appears on:** Open Tasks in the OVERDUE or DUE TODAY sections where the item is flagged as blocking (blocks a schedule task, blocks another Open Task, or blocks a downstream workflow).
+
+**Behavior:**
+
+| Action | What Happens |
+|---|---|
+| User taps `Acknowledge — Working on This` | Records: user name, timestamp, item ID |
+| Open Task status | **Does NOT change.** Item remains in its current urgency section. |
+| Visual indicator | Small `Acknowledged` badge appears on the card (gray, not green) |
+| Audit log | Entry written to `#foundry-bot-log`: `ACK | RFI-044 | Jordan M. | 2026-02-18 09:14` |
+
+**Escalation on non-acknowledgment:**
+
+| Condition | Action |
+|---|---|
+| Blocking item not acknowledged within **X days** (configurable, default: 2 business days) | Auto-escalate: Level 2 (Auto-Notify) posts notice to project channel and tags the owner's manager per RACI |
+| Escalation notice | Informational only — does not change item status, does not block work |
+
+**Not allowed:**
+
+- Resolve or close the item
+- Dismiss or hide the item
+- Edit any fields
+- Change the SLA deadline
+- Change the blocking flag
+- Acknowledge non-blocking items (button does not appear)
+
+**Rollback:** Tap `Undo Acknowledgment` within 60 minutes. After 60 minutes, acknowledgment is permanent (but meaningless — it doesn't change status).
+
+**Purpose:** Confirm human awareness. Reduce the "I didn't see it" failure mode. Acknowledgment is a signal, not a resolution.
+
+---
+
+### Interaction 2: Principal / Owner's Rep — Risk Acceptance / Defer Decision
+
+**Button:** `Accept Risk / Defer`
+
+**Appears on:** Open Tasks in the "What's Repeating" view where the item has a cost impact, schedule impact, or is a pending decision past its decision window.
+
+**Behavior:**
+
+| Action | What Happens |
+|---|---|
+| User taps `Accept Risk / Defer` | Modal opens with reason selection and optional comment |
+| Reason selection (required) | Dropdown: `Awaiting more information` / `Acceptable risk at this stage` / `Deferred to next decision cycle` / `Covered by contingency` |
+| Optional comment | Free text, max 280 characters |
+| On submit | Records: user name, timestamp, item ID, reason, comment |
+| Open Task status | **Does NOT change.** Item remains visible. |
+| Visual indicator | `Risk Accepted` badge on the card (amber) with the selected reason as tooltip |
+| Open Task visibility | Item moves from its current position to a **Risk Accepted** sub-section at the bottom of the view (visible, not hidden) |
+| Audit log | Entry written to `#foundry-bot-log`: `RISK-ACCEPT | DEC-006 | Sam W. | Reason: Deferred to next cycle | 2026-02-18 14:30` |
+
+**Not allowed:**
+
+- Edit the Open Task data (subject, cost, owner, SLA)
+- Close or resolve the item
+- Override system categorization or risk flags
+- Suppress future alerts for this item
+- Accept risk on items without cost/schedule impact (button does not appear)
+
+**Rollback:** Tap `Remove Risk Acceptance` at any time. Item returns to its original position. Removal is also logged.
+
+**Purpose:** Make conscious risk ownership explicit. Replace silent delays with documented decisions. The system knows someone saw the risk and chose to defer — this is data, not dismissal.
+
+---
+
+### Interaction 3: Procurement / Ops — Status Confirmation
+
+**Button:** `Confirmed — In Progress`
+
+**Appears on:** Open Tasks in the "Procurement & Delivery" view for Lead Time and Submittal categories that are currently in OVERDUE or DUE TODAY status.
+
+**Behavior:**
+
+| Action | What Happens |
+|---|---|
+| User taps `Confirmed — In Progress` | Records: user name, timestamp, item ID |
+| Open Task status | **Does NOT change.** SLA clock is not affected. |
+| Visual indicator | `In Progress` badge on the card (blue) |
+| Dashboard behavior | Item remains in its urgency section (OVERDUE stays overdue). Badge signals to other viewers that someone is actively working it. |
+| Audit log | Entry written to `#foundry-bot-log`: `CONFIRM-IP | LT-005 | Alex P. | 2026-02-18 10:45` |
+
+**Not allowed:**
+
+- Mark complete or resolved
+- Modify lead times, delivery dates, or float calculations
+- Change the vendor or PO reference
+- Bypass the source system (Smartsheet, submittal register)
+- Confirm items that are not in OVERDUE or DUE TODAY (button does not appear)
+
+**Rollback:** Tap `Remove Confirmation` at any time. Badge removed, logged.
+
+**Purpose:** Reduce noise from items that are already being actively worked. Improve signal quality for the rest of the team without hiding risk. An item can be overdue AND in progress — both facts are visible simultaneously.
+
+---
+
+### Phase 3 Interaction Summary
+
+| Role | Button | Appears When | Changes Status? | Changes Visibility? | Logged? | Reversible? |
+|---|---|---|---|---|---|---|
+| PM / Super | `Acknowledge — Working on This` | Blocking items in Overdue/Due Today | No | Badge only | Yes | Yes (60 min) |
+| Principal / Owner's Rep | `Accept Risk / Defer` | Items with cost/schedule impact | No | Moves to Risk Accepted sub-section | Yes | Yes (any time) |
+| Procurement / Ops | `Confirmed — In Progress` | Overdue/Due Today lead times & submittals | No | Badge only | Yes | Yes (any time) |
+
+### Explicitly NOT Allowed for Any Role (Phase 3)
+
+| Prohibited Action | Why |
+|---|---|
+| Resolve / Close an Open Task | Work must be completed in the source system |
+| Edit source data (subject, cost, dates, owner) | Source system is the system of record |
+| Modify thresholds, SLAs, or rules | Governance lives in the playbook, not the dashboard |
+| Suppress or mute future alerts | Every item must remain visible until resolved at source |
+| Override system categorization | Classification is an Open Task function, not a user function |
+| Any action without an audit log entry | All interactions are logged to `#foundry-bot-log` |
+
+### Phase 3 Card Layout (Updated)
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ ■ RFI  ·  RFI-044  ·  5d overdue  ·  BLOCKING    red      │
+│   Waterproofing detail at planter                           │
+│   Owner: Taylor R.  ·  Project: SandBox                     │
+│   [Smartsheet]  [Slack]  [Email]                            │
+│                                                             │
+│   [Acknowledge — Working on This]                           │
+│   ⓘ This does not resolve the item. Work must be completed  │
+│     in the source system.                                   │
+└─────────────────────────────────────────────────────────────┘
+```
+
+After acknowledgment:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ ■ RFI  ·  RFI-044  ·  5d overdue  ·  BLOCKING    red      │
+│   Waterproofing detail at planter          [Acknowledged]   │
+│   Owner: Taylor R.  ·  Project: SandBox                     │
+│   [Smartsheet]  [Slack]  [Email]                            │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Phase 3 Data Flow
+
+```
+User taps interaction button
+  │
+  ├─ Dashboard writes to: Open Task interaction log (internal)
+  ├─ Dashboard writes to: #foundry-bot-log (audit)
+  │
+  ├─ Dashboard reads back: badge state, sub-section placement
+  │
+  └─ Dashboard does NOT write to:
+       • Drive Sheets
+       • Smartsheet
+       • Slack (except bot-log)
+       • Email
+       • Fieldwire
+       • Adaptive Build
+       • Any source EPC system
+```
+
+The interaction log is dashboard-internal. It does not propagate to any system of record.
+
+### Phase 3 Activation Rules
+
+Phase 3 is not activated unless:
+
+1. Phase 2 is confirmed (probation passed, no revocations)
+2. Dashboard v1 is deployed and stable for 7+ days
+3. Kuan explicitly approves Phase 3
+4. Phase 3 is documented in CLAUDE.md with an activation date
+5. A 7-day probation period follows activation
+
+---
+
+## Phase 4 — Status & Resolution (NOT ACTIVE — Preview Only)
+
+**STATUS: NOT ACTIVE. Not designed. Exists only as a directional placeholder.**
+
+Phase 4 would introduce:
+
+| Capability | Description |
+|---|---|
+| Status change | Users could change Open Task status (e.g., In Progress → Pending → Resolved) |
+| Resolution confirmation | Users could mark an Open Task as resolved from the dashboard |
+| Workflow gating | Dashboard could block downstream steps until an Open Task is resolved |
+
+**Phase 4 is explicitly excluded from Phase 3.** No status change, no resolution, no gating logic exists in the Phase 3 interaction layer.
+
+Phase 4 design will begin only after Phase 3 is confirmed and Kuan approves planning.
 
 ---
 

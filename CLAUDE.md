@@ -89,6 +89,8 @@ One active project. Two authority levels active.
 | Level 2: Auto-Notify | **ACTIVE** | 2026-02-08 | 2026-02-15 |
 | Level 3: Auto-Forward Invoice | NOT ACTIVE | — | — |
 | Level 4: GHL Draft-to-Send | NOT ACTIVE | — | — |
+| Phase 3: Limited Dashboard Interaction | NOT ACTIVE | — | — |
+| Phase 4: Status & Resolution | NOT ACTIVE | — | — |
 
 - Open Tasks generate daily review packets and write approved log entries to Drive Sheets
 - Open Tasks post internal Slack notifications (SLA breaches, new items, deliveries)
@@ -121,7 +123,7 @@ All detailed specifications live in `drafts/platform-design/`:
 |---|---|
 | `watcher-system.md` | Function-level watchers, email intake, invoice gate, daily packets, bidding/outreach |
 | `integration-architecture.md` | System layers, data flows, full application inventory, human gates |
-| `dashboard-human-simple-v1.md` | Human-Simple Open Task Dashboard — single read-only surface (v1, active) |
+| `dashboard-human-simple-v1.md` | Human-Simple Open Task Dashboard — role-based interactive views, Phase 3 interaction spec, Phase 4 preview |
 | `dashboards-by-role.md` | Role-based dashboards — superseded by Human-Simple for v1, retained for v2+ reference |
 | `slack-command-flows.md` | Slash command UI specs and routing |
 | `slack-workspace-setup.md` | Channel architecture, bot config, notifications |

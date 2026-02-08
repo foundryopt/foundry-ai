@@ -242,9 +242,9 @@ If enabled, Open Tasks could execute approved outreach via GHL after PM review.
 
 **Human approves every send. Open Task executes and tracks.**
 
-### Activation Rules
+### Activation Rules (Phase 2)
 
-No authority level is activated unless:
+No Phase 2 authority level is activated unless:
 
 1. The 14-day shadow is complete
 2. Success criteria are met
@@ -253,6 +253,64 @@ No authority level is activated unless:
 5. A 7-day probation period follows activation, during which the authority can be revoked immediately
 
 **Level 1 (Auto-Log) and Level 2 (Auto-Notify) activated 2026-02-08 by Kuan. All 5 conditions met. Probation ends 2026-02-15. Level 3 and Level 4 remain NOT ACTIVE.**
+
+---
+
+## Phase 3 — Limited Dashboard Interaction (NOT ACTIVE)
+
+**STATUS: NOT ACTIVE. Phase 3 activates only after Phase 2 is confirmed (probation passed). Full spec in `dashboard-human-simple-v1.md`.**
+
+Phase 3 adds role-specific, low-risk interaction buttons to the dashboard. Interactions confirm awareness and ownership — they do not replace work.
+
+### Phase 3 Interactions
+
+| Role | Interaction | Button | Changes Status? | Changes Visibility? |
+|---|---|---|---|---|
+| PM / Superintendent | Required Acknowledgment | `Acknowledge — Working on This` | No | Badge only |
+| Principal / Owner's Rep | Risk Acceptance / Defer | `Accept Risk / Defer` | No | Moves to Risk Accepted sub-section |
+| Procurement / Ops | Status Confirmation | `Confirmed — In Progress` | No | Badge only |
+
+### Phase 3 Global Rules
+
+1. No auto-approval, auto-resolution, or blocking of work.
+2. All interactions are **explicit, logged, and reversible**.
+3. Interaction is **additive, not required** — deep links remain primary.
+4. One interaction button per role. Button appears only when applicable.
+5. Dashboard interactions write to `#foundry-bot-log` only — **no write to any EPC system of record**.
+6. Non-acknowledgment of blocking items auto-escalates via Level 2 (Auto-Notify) after X business days (configurable, default: 2).
+
+### Phase 3 Prohibited Actions (All Roles)
+
+- Resolve / Close an Open Task
+- Edit source data
+- Modify thresholds, SLAs, or rules
+- Suppress future alerts
+- Override system categorization
+- Any action without an audit log entry
+
+### Phase 3 Activation Rules
+
+Phase 3 is not activated unless:
+
+1. Phase 2 is confirmed (probation passed, no revocations)
+2. Dashboard v1 is deployed and stable for 7+ days
+3. Kuan explicitly approves Phase 3
+4. Phase 3 is documented in CLAUDE.md with an activation date
+5. A 7-day probation period follows activation, during which interactions can be disabled immediately
+
+---
+
+## Phase 4 — Status & Resolution (NOT ACTIVE — Preview Only)
+
+**STATUS: NOT ACTIVE. Not designed. Exists only as a directional placeholder.**
+
+| Capability | Description |
+|---|---|
+| Status change | Users could change Open Task status from the dashboard |
+| Resolution confirmation | Users could mark an Open Task as resolved |
+| Workflow gating | Dashboard could block downstream steps until resolution |
+
+**Phase 4 is explicitly excluded from Phase 3. No design work begins until Phase 3 is confirmed and Kuan approves planning.**
 
 ---
 
