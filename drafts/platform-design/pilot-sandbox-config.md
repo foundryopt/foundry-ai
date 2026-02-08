@@ -11,6 +11,8 @@ last-reviewed: 2026-02-08
 **Name:** SandBox
 **Project code:** SANDBOX
 **Pilot duration:** 4 weeks (per `pilot-plan.md`)
+**Command surface:** Slack (single — not Google Chat)
+**All functions use:** Email + Slack for intake
 
 ---
 
@@ -101,18 +103,24 @@ Foundry Projects/
     │   ├── punch-list/
     │   └── final-lien-waivers/
     │
-    └── 08-property-management/
-        ├── onboarding-checklist/
-        ├── warranty-claims/
-        │   └── SANDBOX_warranty-claim-log  (Google Sheet)
-        ├── lease-up-tracking/
-        └── maintenance/
+    ├── 08-property-management/
+    │   ├── onboarding-checklist/
+    │   ├── warranty-claims/
+    │   │   └── SANDBOX_warranty-claim-log  (Google Sheet)
+    │   ├── lease-up-tracking/
+    │   └── maintenance/
+    │
+    └── 09-fund-investors/
+        ├── investor-updates/
+        ├── draw-requests/
+        ├── distributions/
+        └── reporting/
 ```
 
 ### Setup Checklist (Drive)
 
 - [ ] Create `Foundry Projects/SandBox/` folder
-- [ ] Create all subfolders per structure above
+- [ ] Create all subfolders per structure above (including `09-fund-investors/`)
 - [ ] Create `SANDBOX_rfi-log` Sheet from `construction/templates/rfi-log.csv` headers
 - [ ] Create `SANDBOX_co-log` Sheet from `construction/templates/change-order-log.csv` headers
 - [ ] Create `SANDBOX_decision-log` Sheet from `construction/templates/decision-log-schema.md`

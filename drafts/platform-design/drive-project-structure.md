@@ -60,11 +60,17 @@ Foundry Projects/
     │   ├── events/
     │   └── feedback/
     │
-    └── 08-property-management/    # Post-handoff
-        ├── onboarding-checklist/
-        ├── warranty-claims/
-        ├── lease-up-tracking/
-        └── maintenance/
+    ├── 08-property-management/    # Post-handoff
+    │   ├── onboarding-checklist/
+    │   ├── warranty-claims/
+    │   ├── lease-up-tracking/
+    │   └── maintenance/
+    │
+    └── 09-fund-investors/          # If project has investor reporting
+        ├── investor-updates/
+        ├── draw-requests/
+        ├── distributions/
+        └── reporting/
 ```
 
 ## Log Files (Google Sheets)
@@ -99,6 +105,7 @@ These live in their respective `logs/` or tracker folders. Created from the CSV 
 | 06-closeout | Edit | Edit | Edit | View |
 | 07-showroom | View | View | Edit | — |
 | 08-property-management | View | — | Edit | — |
+| 09-fund-investors | — | — | Edit | — |
 
 ## Setup Checklist (Per Project)
 

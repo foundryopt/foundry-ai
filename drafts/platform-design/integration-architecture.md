@@ -70,15 +70,33 @@ Map how Slack (interface), Google Drive (system of record), AI (triage/drafting)
 ┌─────────────────────────────────────────────────────┐
 │          DOWNSTREAM TOOLS (AI Does Not Write)        │
 │                                                     │
-│  Adaptive Build ── invoices (after PM gate only)    │
-│  Fieldwire ────── field tasks, drawings             │
-│  OpenSpace ────── 360 walkthroughs                  │
-│  CompanyCam ───── site photos                       │
-│  Smartsheet ───── budgets, schedules (temp SOR)     │
+│  FIELD                                              │
+│  CompanyCam ───── site photos (SOR: photography)    │
+│  OpenSpace ────── 360 walkthroughs (SOR: spatial)   │
+│                                                     │
+│  DESIGN                                             │
+│  Revit ────────── BIM / construction docs (no AI)   │
+│  SketchUp ─────── concept modeling (no AI)          │
+│  Canva ────────── marketing collateral (no AI)      │
+│                                                     │
+│  CONSTRUCTION / CM                                  │
+│  Fieldwire ────── field tasks, drawings, RFIs       │
+│  Smartsheet ───── budgets, schedules, Gantt, logs   │
+│  Adaptive Build ─ job costing, cost codes,          │
+│                   invoice/expense matching (WIP)     │
 │  QBO ──────────── accounting (no AI access)         │
-│  Connecteam ───── workforce (no AI access)          │
-│  GHL ──────────── CRM, marketing, investor comms    │
-│  GitHub ─────────  SOPs, schemas, CLAUDE.md         │
+│  Connecteam ───── team, time, ops (no AI access)    │
+│                                                     │
+│  CRM / OUTREACH                                     │
+│  GHL (primary) ── CRM, marketing, SMS follow-up    │
+│  GHL (second) ─── warranty, bidding outreach        │
+│                                                     │
+│  VOICE                                              │
+│  UniVoice ─────── standalone calls/voicemail        │
+│                   (log outputs → Drive + watchers)   │
+│                                                     │
+│  GOVERNANCE                                         │
+│  GitHub ────────── SOPs, schemas, CLAUDE.md         │
 └─────────────────────────────────────────────────────┘
 ```
 
@@ -190,6 +208,28 @@ Invoice arrives (email to info@shb.studio or shb-studio@adaptive.build)
 
 **No invoice reaches Adaptive Build without PM validation.**
 
+### Bidding / Outreach (Human-Gated)
+
+```
+Bidding stage: trade bids missing or partial
+  → PM identifies gaps in bid coverage
+  → AI recommends candidates:
+      • In-network subs from GHL contact database
+      • Out-of-network candidates from research
+  → AI drafts for each candidate:
+      • Bid invitation email
+      • SMS follow-up message
+      • Bid checklist (scope, deadline, terms)
+      • Follow-up cadence (day 3, day 7, deadline-1)
+  → PM reviews candidate list and all drafts
+  → PM approves: AI executes sends via GHL
+  → AI tracks responses in Slack (who opened, who replied, who declined)
+  → AI escalates to management as bid deadline approaches
+  → All activity logged to #foundry-bot-log
+```
+
+**AI does not send any outreach without PM approval. GHL is the execution tool — AI drafts, human triggers.**
+
 ### Investor Update
 
 ```
@@ -216,7 +256,11 @@ During the pilot, AI reads from these sources to generate drafts and summaries:
 | Slack (messages) | Slack Events API | Commands, thread replies, channel messages (for context in classifications) |
 | GitHub (SOPs) | Direct file read | SOP rules, SLA tables, RACI matrices, schema definitions |
 
-AI does **not** read from: QuickBooks, Connecteam, Fieldwire, OpenSpace, CompanyCam, or GHL.
+AI **reads from GHL** (read-only) for: contact/pipeline data, in-network sub lists, bidding outreach tracking.
+
+AI does **not** read from: QuickBooks, Connecteam, Fieldwire, OpenSpace, CompanyCam, Revit, SketchUp, or Canva.
+
+UniVoice outputs (call logs, voicemails) are logged to Drive and surfaced in watcher summaries. AI does not make or receive calls.
 
 AI does **not** reply to, forward, or send email. Email is read-only intake.
 

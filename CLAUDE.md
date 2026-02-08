@@ -2,35 +2,17 @@
 
 ## 1. Source of Truth
 
-This GitHub repository is the single source of operational truth for:
+| Domain | Location |
+|---|---|
+| SOPs, schemas, RACI, SLAs, control rules | This GitHub repository |
+| Project memory, documents, log Sheets | Google Drive (canonical backup for ALL functions) |
+| Daily operations, intake, approvals | Slack (single command surface) + Email (intake) |
 
-- SOPs
-- RACI matrices
-- SLAs
-- Control rules
+GitHub stores governance only — not daily operations.
+Drive is the canonical project memory and backup for all functions.
+Do not invent workflows, roles, or timelines outside what is defined here. Flag gaps instead of assuming.
 
-Do not invent workflows, roles, approvals, or timelines outside what is defined here.
-If something is missing or ambiguous, flag it instead of assuming.
-
-## 2. Current Scope
-
-The following domains are defined and authoritative:
-
-- **Construction** (RFIs, Change Orders, Pre-Task Readiness, Pay Apps)
-- **Procurement** (Submittals, Lead Times, Receiving QC)
-- **Development Concierge**
-- **Sales / Showroom** (Foundry Rooms) — events, leasing, feedback loop
-- **Property Management**
-- **Warranty Administration**
-
-**Rules:**
-
-- SOPs with `status: active` are enforceable.
-- Schemas and templates with `status: draft` define structure only, not execution logic.
-
-## 3. Entity Mapping (Authoritative)
-
-Use the following mapping consistently across all documents:
+## 2. Entity Mapping (Authoritative)
 
 | Role | Entity |
 |---|---|
@@ -42,159 +24,93 @@ Use the following mapping consistently across all documents:
 
 Do not introduce alternate mappings.
 
-## 4. Application Inventory (Authoritative)
+## 3. Project Scope
 
-The following tools are currently in use. Do not consolidate, replace, or add tools without explicit instruction.
+A "Project" includes the full lifecycle: Development, Design, Construction/CA, Procurement, Marketing, Sales/Showroom, Fund/Investors, Property Management, Warranty, Executive/Decisions.
 
-### Field
+All functions use Email and Slack for intake.
 
-| Tool | Function | System of Record? | AI Access |
-|---|---|---|---|
-| CompanyCam | Site photos, daily visual record | Yes — site photography | Read only. AI may reference photos in summaries. May not upload, edit, or delete. |
-| OpenSpace | 360 walkthroughs, progress verification | Yes — spatial progress capture | Read only. AI may reference captures in reports. May not trigger captures. |
-| Fieldwire | Field tasks, drawings, RFIs | Yes — field task management | Read only. AI may draft task descriptions. May not create, assign, or close tasks. Human publishes. |
-
-### Design
-
-| Tool | Function | System of Record? | AI Access |
-|---|---|---|---|
-| Revit | BIM / construction documents | Yes — design documents | None. AI does not interact with Revit files. |
-| SketchUp | Concept modeling | No — working tool | None. |
-| Canva | Marketing / design collateral | No — working tool | None. |
-| Google Drive | Design file storage | Yes — design file archive | Read only. AI may search and reference files. May not upload, move, or delete. |
-
-### Construction Admin / CM
-
-| Tool | Function | System of Record? | AI Access |
-|---|---|---|---|
-| Smartsheet | Budgets, schedules, logs | Yes — budget and schedule data | Read only. AI may surface data in summaries and aging reports. May not edit cells, rows, or formulas. Human updates. |
-| Adaptive Build | WIP (in progress) | Pending — not yet authoritative | None until role is defined. |
-| QuickBooks Online | Accounting | Yes — financial record | None. AI does not interact with accounting data. |
-| Connecteam | Workforce / time tracking | Yes — labor records | None. AI does not interact with workforce data. |
-| Univoice | Standalone invoice handling | Interface only — routes to QBO | None. |
-
-### Procurement
-
-| Tool | Function | System of Record? | AI Access |
-|---|---|---|---|
-| Smartsheet | Procurement tracking | Yes — procurement logs | Read only. AI may surface lead-time flags. May not edit. Human updates. |
-| Adaptive Build | Procurement workflows | Pending — not yet authoritative | None until role is defined. |
-| Google Drive | Vendor docs, POs | Yes — procurement file archive | Read only. AI may search and reference. May not upload, move, or delete. |
-
-### Communication
-
-| Tool | Function | System of Record? | AI Access |
-|---|---|---|---|
-| Google Chat | Current project communication | No — interface only | None. Being replaced by Slack for new workflows. |
-| Slack | Fund + future consolidation target | No — command + triage layer | Draft only. AI may draft messages, surface items, respond to slash commands. All drafts require human review before posting. Slack is not a system of record. |
-| SMS / Phone | Urgent escalation | No — escalation channel | None. AI does not send SMS or make calls. |
-
-### Marketing / Sales / Warranty
-
-| Tool | Function | System of Record? | AI Access |
-|---|---|---|---|
-| GoHighLevel (primary) | CRM, marketing, SMS follow-up | Yes — CRM and marketing | Read only. AI may reference contact and pipeline data in summaries. May not send messages, update contacts, or trigger automations. |
-| GoHighLevel (second instance) | Warranty + bidding + bath | Yes — warranty CRM and bidding | Read only. AI may draft warranty claim entries. May not send messages or update records. Human publishes. |
-
-### Fund
-
-| Tool | Function | System of Record? | AI Access |
-|---|---|---|---|
-| GoHighLevel | Investor communications | Yes — investor contact management | Read only. AI may draft investor updates. May not send. Human sends. |
-| Slack | Fund coordination | No — interface only | Draft only. Same rules as Communication/Slack above. |
-| Google Drive | Investor materials (Foundry Fund folder only) | Yes — investor document archive | Read only. AI may search and reference. May not upload, move, or delete. |
-
-### Governance
-
-| Tool | Function | System of Record? | AI Access |
-|---|---|---|---|
-| GitHub | SOPs, schemas, CLAUDE.md | Yes — operational governance | Read + Draft. AI may draft SOPs, schemas, and docs. All changes require human review and commit approval. |
-| Google Drive | Operational memory | Yes — operational file archive | Read only. AI may search and reference. May not upload, move, or delete. |
-
-### Tool Role Summary
-
-| Classification | Rule |
-|---|---|
-| **System of Record** | Source of truth for its domain. Data lives here. AI reads only. |
-| **Interface** | Interaction layer. Data passes through but is not stored. AI may draft. |
-| **Working Tool** | Used by specialists. AI has no access. |
-| **Pending** | Role not yet defined. AI has no access until explicitly authorized. |
-
-### What Triggers Human Review
-
-- Any AI-generated draft before it is published, sent, or committed
-- Any SLA breach or escalation notice before it is sent
-- Any log entry before it is written to a system of record
-- Any slash-command output before it is posted to a channel
-
-### What Must Not Be Automated
-
-- Financial transactions (QBO, pay apps, invoices)
-- Contract execution or change order approval
-- Workforce / time tracking entries
-- File deletion or movement in any system of record
-- SMS, phone calls, or any external-facing communication
-- CRM automations or marketing sends
-
-## 5. AI Role & Boundaries (Hard Constraints)
+## 4. AI Boundaries (Non-Negotiable)
 
 **AI may:**
 
-- Draft SOPs, logs, checklists, and summaries
-- Classify incoming requests (RFI / CO / Warranty / Decision / Task)
-- Route items per RACI
-- Track SLA timers and surface aging
-- Prepare reminders and escalation notices
-- Generate review-ready outputs for humans
+- Monitor intake (email, Slack, Drive, logs)
+- Classify, detect missing info, flag SLA / budget / schedule drift
+- Draft responses, log entries, escalations, follow-ups
+- Recommend next steps (including bidding outreach lists)
+- Generate daily review packets and role-based summaries
 
 **AI may NOT:**
 
-- Approve, authorize, execute, or close work
-- Bypass decision gates
-- Replace human sign-off
-- Act as a system of record
+- Approve, publish, send, or execute without explicit human confirmation
+- Write to any system of record (Drive Sheets, Smartsheet, Adaptive Build, QBO)
+- Reply to or forward email
+- Send SMS, make calls, or send external-facing messages
+- Trigger CRM automations or marketing sends
+- Bypass decision gates or replace human sign-off
 
-All outputs must be reviewable by a human before publication or execution.
+All AI output is a draft. Humans decide.
 
-## 6. Interface Philosophy
+## 5. Interface Strategy
 
-### Slack (Preferred Human Interface)
+| Layer | Tool | Role |
+|---|---|---|
+| Command surface | **Slack** (single — not Google Chat) | Slash commands, approvals, daily briefs, watcher output |
+| Intake | **Email** (all functions) | First-class input. AI reads, classifies, drafts review prompts. |
+| System of record | **Google Drive** | Documents, attachments, log Sheets, final records |
+| Dashboards | Read-only, mobile-first | Fed by watcher summaries — not raw tool screens |
+| Governance | **GitHub** | SOPs, schemas, CLAUDE.md only |
 
-Slack is the primary interaction layer for:
+## 6. Human Gates (Non-Negotiable)
 
-- Intake
-- Triage
-- Command-based actions (`/rfi`, `/co`, `/warranty`, `/decision`)
-- Visibility and escalation
+Every workflow has explicit points where AI stops and a human acts:
 
-**Slack is not a system of record.**
+- **Draft gate** — AI produces draft, human reviews and approves
+- **Log gate** — AI formats entry, human pastes into Drive Sheet
+- **Route gate** — AI suggests routing per RACI, human confirms
+- **Invoice gate** — AI extracts and checks, human confirms before Adaptive Build
+- **Escalation gate** — AI drafts escalation, human reviews and sends
+- **Approval gate** — AI summarizes for decision maker, human decides
+- **Send gate** — AI drafts external message, human sends via GHL/email
+- **Close gate** — AI suggests closure, human verifies and updates Sheet
 
-### Logs & Records
+## 7. Current Phase: Pilot Execution — SandBox
 
-Logs and records:
+One active project. No automatic sending, approving, or posting.
 
-- Follow schemas defined in this repository
-- Are maintained manually (CSV, Sheets, or equivalent)
-- Must remain tool-agnostic
+- Watchers generate daily review packets
+- Slack is the interaction surface
+- Google Drive is the system of record
+- Downstream tools (Adaptive Build, Smartsheet, GHL, etc.) are unchanged
+- Email is read-only intake — AI does not reply or forward
 
-Slack may reference a log entry but does not replace it.
-
-## 7. Design Principles
-
-All systems must:
+## 8. Design Principles
 
 - Work with a small team
-- Be manual-first
-- Require minimal data entry
-- Allow AI assistance without forcing adoption
-- Avoid over-automation or tool lock-in
+- Manual-first, AI-assisted
+- Mobile-friendly, minimal data entry
+- No tool lock-in or over-automation
+- Calm, clarity, and control — not speed
 
-Automation may be flagged as "automation-ready", but never assumed or implemented unless explicitly requested.
-
-## 8. Change Control
-
-When proposing updates:
+## 9. Change Control
 
 - Preserve existing structure unless clearly broken
-- Avoid adding tools or integrations
+- Do not add tools or integrations without instruction
+- Do not create new documents unless they enable pilot execution
 - Prioritize clarity, accountability, and reviewability
+
+## 10. Detailed Specs (Reference)
+
+All detailed specifications live in `drafts/platform-design/`:
+
+| Document | Contents |
+|---|---|
+| `watcher-system.md` | Function-level watchers, email intake, invoice gate, daily packets, bidding/outreach |
+| `integration-architecture.md` | System layers, data flows, full application inventory, human gates |
+| `dashboards-by-role.md` | Role-based dashboards (pilot: PM, Executive, Procurement) |
+| `slack-command-flows.md` | Slash command UI specs and routing |
+| `slack-workspace-setup.md` | Channel architecture, bot config, notifications |
+| `drive-project-structure.md` | Drive folder template, log Sheets, permissions |
+| `pilot-plan.md` | 4-week pilot plan |
+| `pilot-sandbox-config.md` | SandBox project: email, Drive, Slack, watchers, dashboards |
+| `pilot-sandbox-day1-simulation.md` | Day 1 watcher output simulation |

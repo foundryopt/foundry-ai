@@ -192,6 +192,50 @@ DRAFT MESSAGES (not sent — requires approval)
 
 ---
 
+## Bidding / Outreach Support (Human-Gated)
+
+During bidding stage, the Procurement Watcher (or Construction Watcher, depending on scope) gains additional capabilities:
+
+### What AI Can Do
+
+1. **Recommend candidates** — search GHL for in-network subs by trade, then research out-of-network candidates if coverage is thin
+2. **Draft bid packages** — bid invitation email, SMS follow-up, bid checklist (scope, deadline, terms)
+3. **Draft follow-up cadence** — day 3 reminder, day 7 reminder, deadline-minus-1 escalation
+4. **Track responses** — after PM-approved sends via GHL, monitor who opened, replied, declined
+5. **Escalate** — as bid deadline approaches, surface coverage gaps to PM and management
+
+### What AI Cannot Do
+
+- Send any outreach without PM approval
+- Add contacts to GHL without PM approval
+- Modify bid terms or scope
+- Accept or reject bids
+
+### Flow
+
+```
+PM identifies missing trade coverage
+  → AI searches GHL for in-network subs matching trade
+  → AI researches out-of-network candidates (if needed)
+  → AI presents candidate list with: name, trade, contact, past work, status
+  → PM selects candidates
+  → AI drafts bid email + SMS + checklist for each
+  → PM reviews all drafts
+  → PM approves → AI executes via GHL
+  → AI tracks responses, posts updates to Slack
+  → AI drafts follow-ups per cadence
+  → PM approves each follow-up before send
+  → As deadline approaches: AI escalates gaps to management
+```
+
+### Delivery
+
+- Candidate list and drafts posted to `#proj-[name]` or `#procurement`
+- Response tracking posted to same channel
+- Escalations posted to `#construction-ops`
+
+---
+
 ## Watcher Constraints (Hard Rules)
 
 1. Watchers **observe and draft**. They do not act.
