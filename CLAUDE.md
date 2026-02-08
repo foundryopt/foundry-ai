@@ -121,7 +121,8 @@ All detailed specifications live in `drafts/platform-design/`:
 |---|---|
 | `watcher-system.md` | Function-level watchers, email intake, invoice gate, daily packets, bidding/outreach |
 | `integration-architecture.md` | System layers, data flows, full application inventory, human gates |
-| `dashboards-by-role.md` | Role-based dashboards (pilot: PM, Executive, Procurement) |
+| `dashboard-human-simple-v1.md` | Human-Simple Open Task Dashboard — single read-only surface (v1, active) |
+| `dashboards-by-role.md` | Role-based dashboards — superseded by Human-Simple for v1, retained for v2+ reference |
 | `slack-command-flows.md` | Slash command UI specs and routing |
 | `slack-workspace-setup.md` | Channel architecture, bot config, notifications |
 | `drive-project-structure.md` | Drive folder template, log Sheets, permissions |

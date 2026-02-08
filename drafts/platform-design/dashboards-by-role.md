@@ -6,6 +6,10 @@ last-reviewed: 2026-02-08
 
 # Role-Based Dashboards — Design Specification
 
+## Status
+
+**Superseded for v1 by `dashboard-human-simple-v1.md`.** The Human-Simple dashboard replaces all 7 role-based views with a single read-only surface during Phase 2. Role-based dashboards may return as filtered views in v2+. This document is retained as a reference for future role-specific features.
+
 ## Principles
 
 - Mobile-first
