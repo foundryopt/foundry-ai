@@ -40,16 +40,21 @@ All functions use Email and Slack for intake.
 - Recommend next steps (including bidding outreach lists)
 - Generate daily review packets and role-based summaries
 
+**AI may (with human approval — Phase 2 authority):**
+
+- Write approved log entries to Drive Sheets after human clicks "Approve & Log" (Level 1: Auto-Log)
+- Post internal Slack notifications for SLA breaches, new item classifications, and delivery confirmations (Level 2: Auto-Notify)
+
 **AI may NOT:**
 
-- Approve, publish, send, or execute without explicit human confirmation
-- Write to any system of record (Drive Sheets, Smartsheet, Adaptive Build, QBO)
+- Approve, publish, or execute without explicit human confirmation
+- Write to Smartsheet, Adaptive Build, QBO, or any SOR other than Drive Sheets via Auto-Log
 - Reply to or forward email
-- Send SMS, make calls, or send external-facing messages
+- Send SMS, make calls, or send external-facing messages (including Slack DMs to external guests)
 - Trigger CRM automations or marketing sends
 - Bypass decision gates or replace human sign-off
 
-All AI output is a draft. Humans decide.
+All AI output that is not covered by an active authority level is a draft. Humans decide.
 
 ## 5. Interface Strategy
 
@@ -66,7 +71,7 @@ All AI output is a draft. Humans decide.
 Every workflow has explicit points where AI stops and a human acts:
 
 - **Draft gate** — AI produces draft, human reviews and approves
-- **Log gate** — AI formats entry, human pastes into Drive Sheet
+- **Log gate** — AI formats entry, human clicks "Approve & Log," Open Task writes to Drive Sheet (Level 1 active)
 - **Route gate** — AI suggests routing per RACI, human confirms
 - **Invoice gate** — AI extracts and checks, human confirms before Adaptive Build
 - **Escalation gate** — AI drafts escalation, human reviews and sends
@@ -74,15 +79,24 @@ Every workflow has explicit points where AI stops and a human acts:
 - **Send gate** — AI drafts external message, human sends via GHL/email
 - **Close gate** — AI suggests closure, human verifies and updates Sheet
 
-## 7. Current Phase: Pilot Execution — SandBox
+## 7. Current Phase: Phase 2 — SandBox
 
-One active project. No automatic sending, approving, or posting.
+One active project. Two authority levels active.
 
-- Watchers generate daily review packets
+| Authority | Status | Activated | Probation Ends |
+|---|---|---|---|
+| Level 1: Auto-Log | **ACTIVE** | 2026-02-08 | 2026-02-15 |
+| Level 2: Auto-Notify | **ACTIVE** | 2026-02-08 | 2026-02-15 |
+| Level 3: Auto-Forward Invoice | NOT ACTIVE | — | — |
+| Level 4: GHL Draft-to-Send | NOT ACTIVE | — | — |
+
+- Open Tasks generate daily review packets and write approved log entries to Drive Sheets
+- Open Tasks post internal Slack notifications (SLA breaches, new items, deliveries)
 - Slack is the interaction surface
 - Google Drive is the system of record
 - Downstream tools (Adaptive Build, Smartsheet, GHL, etc.) are unchanged
 - Email is read-only intake — AI does not reply or forward
+- Either authority can be revoked immediately during probation
 
 ## 8. Design Principles
 

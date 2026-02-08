@@ -39,15 +39,15 @@ No new categories added beyond v1 baseline.
 
 ---
 
-## Shadow Rules (Non-Negotiable)
+## Operating Rules
 
-1. Open Tasks **observe only**. No authority to act.
-2. Open Tasks **draft only**. Every output is marked DRAFT.
-3. Open Tasks **do not send** email, SMS, Slack messages, or GHL actions.
-4. Open Tasks **do not write** to Drive, Smartsheet, Adaptive Build, or any SOR.
+1. Open Tasks **observe, classify, draft, and report**. Authority limited to active levels below.
+2. Open Tasks **draft only** unless an active authority level applies. Non-authority output is marked DRAFT.
+3. Open Tasks **do not send** email, SMS, or GHL actions. **Exception:** Level 2 (Auto-Notify) allows internal Slack notifications (SLA breaches, new items, deliveries).
+4. Open Tasks **do not write** to Smartsheet, Adaptive Build, or any SOR. **Exception:** Level 1 (Auto-Log) allows writing to Drive Sheets after human clicks "Approve & Log."
 5. Open Tasks **do not block** any existing workflow. If the system is down, work continues unchanged.
-6. Humans **are not required** to act on Open Task output during shadow. Participation is voluntary.
-7. All Open Task output is logged to `#foundry-bot-log` for audit.
+6. All Open Task output is logged to `#foundry-bot-log` for audit.
+7. Level 1 and Level 2 can be **revoked immediately** during probation (through 2026-02-15).
 
 ---
 
@@ -112,8 +112,8 @@ Open Task generates output (draft, classification, flag)
   │
   ├─ LOG ENTRY ──────→ Pre-filled entry posted in Slack thread
   │                     Human reviews → [Approve & Log]
-  │                     Human copies formatted row to Drive Sheet
-  │                     Human replies "logged" in thread
+  │                     Open Task writes row to Drive Sheet (Level 1: Auto-Log ACTIVE)
+  │                     Open Task confirms in thread: "Logged to SANDBOX_rfi-log, row 48"
   │                     Open Task logs the action
   │
   ├─ CLASSIFICATION ──→ Category + confidence posted in Slack thread
@@ -191,11 +191,11 @@ No monthly, quarterly, or ad-hoc reports during shadow period.
 
 ## Phase 2 — Limited Authority Rules
 
-**STATUS: NOT ACTIVE. These rules describe potential future authority grants. None are implemented. None are approved. They exist only as a reference for what Kuan may choose to enable after the 14-day shadow validates the system.**
+**STATUS: Level 1 and Level 2 are ACTIVE as of 2026-02-08. Probation ends 2026-02-15. Level 3 and Level 4 remain NOT ACTIVE.**
 
-### Authority Level 1: Auto-Log (NOT ACTIVE)
+### Authority Level 1: Auto-Log (ACTIVE — 2026-02-08 — Probation ends 2026-02-15)
 
-If enabled, Open Tasks could write approved entries directly to Drive Sheets via API, eliminating the copy-paste step.
+Open Tasks write approved entries directly to Drive Sheets via API, eliminating the copy-paste step.
 
 | Condition | Behavior |
 |---|---|
@@ -206,9 +206,9 @@ If enabled, Open Tasks could write approved entries directly to Drive Sheets via
 
 **Human still approves. Open Task just executes the paste.**
 
-### Authority Level 2: Auto-Notify (NOT ACTIVE)
+### Authority Level 2: Auto-Notify (ACTIVE — 2026-02-08 — Probation ends 2026-02-15)
 
-If enabled, Open Tasks could send pre-approved notification messages in Slack channels (not email, not SMS, not external).
+Open Tasks send pre-approved notification messages in Slack channels (not email, not SMS, not external).
 
 | Condition | Behavior |
 |---|---|
@@ -242,7 +242,7 @@ If enabled, Open Tasks could execute approved outreach via GHL after PM review.
 
 **Human approves every send. Open Task executes and tracks.**
 
-### Activation Rules (NOT ACTIVE)
+### Activation Rules
 
 No authority level is activated unless:
 
@@ -252,4 +252,4 @@ No authority level is activated unless:
 4. The authority is documented in CLAUDE.md with an activation date
 5. A 7-day probation period follows activation, during which the authority can be revoked immediately
 
-**None of the above is active. This section exists for planning only.**
+**Level 1 (Auto-Log) and Level 2 (Auto-Notify) activated 2026-02-08 by Kuan. All 5 conditions met. Probation ends 2026-02-15. Level 3 and Level 4 remain NOT ACTIVE.**
