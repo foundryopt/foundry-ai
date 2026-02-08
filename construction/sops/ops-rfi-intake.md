@@ -44,17 +44,17 @@ All active construction projects across all entities. Applies to project manager
 
 ## RACI
 
-| Activity | Builiq Inc. (GC/CM) | SHB Studio (Design) | SHB Inc. (Owner's Rep) | SHB Group (Principal) |
-|---|---|---|---|---|
-| Submit RFI from field | **R** | I | I | — |
-| Log and classify RFI | **R** | I | I | — |
-| Route to responsible party | **R** | **A** | C | — |
-| Provide technical response | C | **R** | I | — |
-| Review response completeness | **R** | **A** | C | — |
-| Approve "proceed at risk" | I | C | **R** | **A** |
-| Distribute resolution | **R** | I | I | — |
-| Escalate overdue RFI | **R** | I | **A** | I |
-| Close RFI | **R** | I | **A** | — |
+| Activity | SHB Inc. (GC/CM) | SHB Studio (Design) | SHB Group (Owner's Rep) | SHB Group (Principal) | Builiq Inc. (Procurement) |
+|---|---|---|---|---|---|
+| Submit RFI from field | **R** | I | I | — | — |
+| Log and classify RFI | **R** | I | I | — | — |
+| Route to responsible party | **R** | **A** | C | — | — |
+| Provide technical response | C | **R** | I | — | C |
+| Review response completeness | **R** | **A** | C | — | — |
+| Approve "proceed at risk" | I | C | **R** | **A** | — |
+| Distribute resolution | **R** | I | I | — | I |
+| Escalate overdue RFI | **R** | I | **A** | I | — |
+| Close RFI | **R** | I | **A** | — | — |
 
 **R** = Responsible, **A** = Accountable, **C** = Consulted, **I** = Informed
 
