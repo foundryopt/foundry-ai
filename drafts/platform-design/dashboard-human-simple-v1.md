@@ -7,49 +7,82 @@ parallel-to: Phase 2 Probation (ends 2026-02-15)
 
 # Human-Simple Open Task Dashboard — v1
 
-**Read-Only — Informational — During Phase 2 Probation**
+**Interactive View — Read-Only Authority (Phase 2 Probation)**
 
 ---
 
 ## Design Principle
 
-One surface. One question answered: **"What needs attention today?"**
+One inbox. Three questions, based on role:
 
-No buttons that change state. No approve, acknowledge, resolve, or dismiss. Every item links directly to the source system where the human acts. The dashboard is a visibility layer over existing Open Task data — it creates nothing, modifies nothing, enforces nothing.
+- **PM / Superintendent:** "What needs attention today?"
+- **Principal / Owner's Rep:** "What keeps repeating?"
+- **Procurement / Ops:** "What's blocking purchasing and delivery?"
+
+The dashboard is interactive for navigation — filter, sort, search, drill down. But no interaction changes state. No approve, acknowledge, resolve, dismiss, edit, or override. Every item deep-links to the exact location in the source EPC system where the human acts.
+
+**Hard rule:** If a precise deep link cannot be generated for an Open Task, that item is not surfaced on the dashboard. Every visible item is one click from action.
 
 After probation (Feb 15): if Phase 2 is confirmed, action buttons layer on top of this structure with zero rework. The read-only layout IS the production layout.
 
 ---
 
-## Pages
+## Authentication & Roles
 
-| Page | Purpose | Default? |
-|---|---|---|
-| **What Needs Attention Today** | Primary view. All Open Tasks ranked by urgency. | Yes — landing page |
-| **Invoice Gate** | Invoice pipeline only. Separate because invoices have their own lifecycle and gate checks. | No — secondary tab |
+### Login
 
-Two pages only. No settings, no profile, no configuration, no preferences.
+Login required. SSO (Google Workspace) preferred. No anonymous access. No shared accounts.
+
+### Role Assignments
+
+| Role | Entity | Default View | Scope |
+|---|---|---|---|
+| PM | SHB Inc. | What Needs Attention Today | Assigned projects only |
+| Superintendent | SHB Inc. | What Needs Attention Today | Assigned projects only |
+| Principal | SHB Group | What's Repeating | All projects |
+| Owner's Rep | SHB Group | What's Repeating | All projects |
+| Procurement | Builiq Inc. | Procurement & Delivery | All projects (domain-filtered) |
+| Ops | SHB Inc. / Builiq Inc. | Procurement & Delivery | All projects (domain-filtered) |
+
+Role is set at account creation. All roles can navigate to all views via tabs. Default view is where they land after login.
 
 ---
 
-## Page 1: What Needs Attention Today
+## Views
 
-### Banner
-
-Persistent top bar, always visible:
+Three views, accessible as tabs on a single surface. No separate pages, no navigation menu, no sidebar.
 
 ```
-┌──────────────────────────────────────────────────────────────────┐
-│  ⚠ READ-ONLY — Informational — During Phase 2 Probation        │
-│  SandBox  ·  Last updated: [timestamp]  ·  Source: Open Tasks   │
-└──────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────┐
+│  Interactive View — Read-Only Authority (Phase 2 Probation)        │
+│  [user name] · [role] · Last updated: [timestamp]                  │
+├────────────────────┬───────────────────┬────────────────────────────┤
+│  Attention Today   │  What's Repeating │  Procurement & Delivery   │
+│  (active tab)      │                   │                           │
+└────────────────────┴───────────────────┴────────────────────────────┘
 ```
 
-After probation: banner changes to `Phase 2 Active` (no other layout changes).
+---
+
+## View 1: What Needs Attention Today
+
+**Default for:** PM, Superintendent
+
+**Scope:** Open Tasks for the logged-in user's assigned projects only. PM sees their projects. Super sees their projects. No cross-project noise.
+
+### Toolbar
+
+```
+┌────────────────────────────────────────────────────────────────┐
+│ [Search: item ID, subject, owner, vendor...]                   │
+│ Filter: [Category ▾] [Owner ▾] [SLA Status ▾] [Date Range ▾] │
+│ Sort: [Urgency ▾]  (default: Overdue → Due Today → New)       │
+└────────────────────────────────────────────────────────────────┘
+```
+
+All filters are additive (AND logic). Active filters shown as dismissible chips. "Clear all" resets to default.
 
 ### Counts Bar
-
-Four counts, always visible below the banner:
 
 ```
 ┌──────────┬──────────┬──────────┬──────────┐
@@ -59,164 +92,385 @@ Four counts, always visible below the banner:
 └──────────┴──────────┴──────────┴──────────┘
 ```
 
-Tapping a count scrolls to that section. No filtering — all sections remain visible.
+Counts reflect current filters. Tapping a count filters to that urgency level.
 
-### Sections (in order, top to bottom)
+### Item List
 
-#### Section 1: OVERDUE
+Single list, grouped by urgency. Each item is a card.
 
-Items past SLA. Sorted by days overdue, descending (worst first).
+#### Card Layout
 
-| Column | Source | Example |
+```
+┌─────────────────────────────────────────────────────────────┐
+│ ■ RFI  ·  RFI-044  ·  5d overdue                      red  │
+│   Waterproofing detail at planter                           │
+│   Owner: Taylor R.  ·  Project: SandBox                     │
+│   [Slack]  [Smartsheet]  [Email]                            │
+└─────────────────────────────────────────────────────────────┘
+```
+
+| Field | Source | Display |
 |---|---|---|
-| Category | Open Task classification | `RFI` |
-| Item ID | Log Sheet `item_number` | `RFI-044` |
-| Subject | Log Sheet `subject` or email subject | `Waterproofing detail at planter` |
-| Owner | RACI — who must act next | `Taylor R.` |
-| Days Overdue | Today minus SLA deadline | `5d overdue` |
-| Links | Deep links (see Deep Link table) | `[Slack] [Sheet] [Email]` |
+| Category | Open Task classification | Tag/chip: `RFI` `CO` `Invoice` `Decision` `Submittal` `Lead Time` `Warranty` `Pay App` `Pre-Task` `Expense` |
+| Item ID | Log system item number | Bold monospace: **`RFI-044`** |
+| Subject | Log system subject or email subject | Regular weight, single line, truncated at 60 chars mobile / full desktop |
+| Owner | RACI — who must act next | Regular weight |
+| Project | Project name | Regular weight (only shown if user has multiple projects) |
+| Urgency | SLA calculation | `5d overdue` (red) / `Due today` (yellow) / `3d remaining` (blue) / `12d remaining` (gray) |
+| Deep Links | Source system URLs | Text labels, one per source (see Deep Links section) |
 
-Red left-border on every row.
+Left-border color: red (overdue), yellow (due today), blue (new), gray (watching).
 
-#### Section 2: DUE TODAY
+#### Urgency Groups
 
-Items with SLA deadline = today. Sorted by category.
+| Group | Criteria | Sort Within Group | Collapsed? |
+|---|---|---|---|
+| OVERDUE | Past SLA deadline | Days overdue descending (worst first) | No |
+| DUE TODAY | SLA deadline = today | Category | No |
+| NEW (24h) | Created in last 24 hours, not overdue | Creation time descending (newest first) | No |
+| WATCHING | Open, within SLA, not new | SLA deadline ascending (soonest first) | Yes (tap to expand) |
 
-Same columns as OVERDUE. Replace "Days Overdue" with:
+### Drill-Down (Detail Panel)
 
-| Column | Source | Example |
+Tapping a card opens a detail panel (slide-over on mobile, side panel on desktop). The list remains visible behind it.
+
+#### Detail Panel Contents
+
+| Section | Fields | Source |
 |---|---|---|
-| Due | SLA deadline | `Due today` |
+| **Header** | Item ID, category, subject, urgency badge | Open Task data |
+| **Assignment** | Owner, project, entity, created by | RACI + log data |
+| **Timeline** | Created → Classified → Routed → SLA set → Updates → Current status | Open Task event log |
+| **SLA** | Deadline, days remaining/overdue, SOP reference | SLA rules + calculation |
+| **Details** | All fields from the source log (varies by category — see Field Tables below) | Log Sheet row |
+| **Related Items** | Other Open Tasks referencing the same PO, CO, RFI, or vendor | Cross-reference by ID |
+| **Deep Links** | All available links, full labels | Source system URLs |
 
-Yellow left-border on every row.
+#### Field Tables by Category
 
-#### Section 3: NEW (Last 24h)
+**RFI Detail:**
 
-Items classified in the last 24 hours. Not yet overdue. Sorted by creation time, newest first.
+| Field | Source |
+|---|---|
+| RFI number, subject, priority | `SANDBOX_rfi-log` |
+| Initiated by, routed to, response due | `SANDBOX_rfi-log` |
+| Drawing/spec reference | `SANDBOX_rfi-log` |
+| Response summary (if received) | `SANDBOX_rfi-log` |
+| Cost impact, schedule impact | `SANDBOX_rfi-log` |
 
-Same columns as OVERDUE. Replace "Days Overdue" with:
+**Change Order Detail:**
 
-| Column | Source | Example |
-|---|---|---|
-| SLA | Days until SLA deadline | `6d remaining` |
+| Field | Source |
+|---|---|
+| PCO/CO number, description, status | `SANDBOX_co-log` |
+| Vendor, trade | `SANDBOX_co-log` |
+| Preliminary cost, approved amount | `SANDBOX_co-log` |
+| Threshold triggered (yes/no) | `SANDBOX_co-log` vs CO approval threshold |
+| Contract sum before/after | `SANDBOX_co-log` |
 
-Blue left-border on every row.
+**Decision Detail:**
 
-#### Section 4: WATCHING (collapsed by default)
+| Field | Source |
+|---|---|
+| Decision ID, description, category | `SANDBOX_decision-log` |
+| Decision maker, approval authority | `SANDBOX_decision-log` |
+| Cost impact, schedule impact | `SANDBOX_decision-log` |
+| Options presented | `SANDBOX_decision-log` |
+| Decision window, deadline | `SANDBOX_decision-log` |
 
-All other open items. Within SLA, no immediate action needed. User taps to expand.
+**Submittal Detail:**
 
-Same columns. Replace "Days Overdue" with:
+| Field | Source |
+|---|---|
+| Submittal number, description, spec section | `SANDBOX_submittal-register` |
+| Submitted by, reviewer | `SANDBOX_submittal-register` |
+| Review due, review status | `SANDBOX_submittal-register` |
+| Resubmit count | `SANDBOX_submittal-register` |
 
-| Column | Source | Example |
-|---|---|---|
-| SLA | Days until SLA deadline | `12d remaining` |
+**Lead Time Detail:**
 
-Gray left-border. No badge.
+| Field | Source |
+|---|---|
+| Item, PO number, vendor | `SANDBOX_lead-time-tracker` |
+| Order date, projected delivery | `SANDBOX_lead-time-tracker` |
+| Float days, risk flag | `SANDBOX_lead-time-tracker` |
+| Schedule task dependent on delivery | `SANDBOX_lead-time-tracker` |
+
+**Invoice Detail:**
+
+| Field | Source |
+|---|---|
+| Invoice number, vendor, amount | AI extraction + `05-financial/` |
+| Job number, cost code | AI extraction or PM-confirmed |
+| Gate status, flags | Invoice gate |
+| Budget status | Smartsheet budget data |
+
+**Warranty Claim Detail:**
+
+| Field | Source |
+|---|---|
+| Claim ID, defect description, priority | `SANDBOX_warranty-claim-log` |
+| Unit/location, category | `SANDBOX_warranty-claim-log` |
+| Contractor assigned, response due | `SANDBOX_warranty-claim-log` |
+| Repair status, verification date | `SANDBOX_warranty-claim-log` |
+
+**Pay App / Expense Report / Pre-Task:** Follows same pattern — all fields from their respective log Sheets.
 
 ### Empty States
 
-| Section | Empty State Text |
+| State | Text |
 |---|---|
-| Overdue | `No overdue items.` |
-| Due Today | `Nothing due today.` |
-| New | `No new items in the last 24 hours.` |
-| Watching | `No items in monitoring.` |
-
-All four sections: `All clear. No open tasks.` (shown only when every section is empty.)
+| No overdue | `No overdue items.` |
+| No due today | `Nothing due today.` |
+| No new items | `No new items in the last 24 hours.` |
+| No watching items | `No items in monitoring.` |
+| Fully empty | `All clear. No open tasks for your projects.` |
+| No search results | `No items match "[query]". Try a different search.` |
+| No filter results | `No items match the current filters.` [Clear all] |
 
 ---
 
-## Page 2: Invoice Gate
+## View 2: What's Repeating
 
-### Banner
+**Default for:** Principal, Owner's Rep
 
-Same persistent banner as Page 1.
+**Scope:** All projects. Cross-project patterns and systemic issues.
 
-### Purpose
+**Purpose:** The Principal and Owner's Rep don't work item-by-item. They need to see what keeps happening — the patterns that indicate systemic problems, bottlenecks, or risks that span projects or persist over time.
 
-Shows every invoice currently in the gate pipeline. Invoices have a distinct lifecycle (arrive → extract → check → review → approve/reject → forward) that does not fit cleanly into the urgency-ranked list on Page 1.
+### Toolbar
 
-Invoices also appear on Page 1 as Open Tasks (category = Invoice). Page 2 adds the gate-specific fields.
+```
+┌────────────────────────────────────────────────────────────────┐
+│ Time window: [Last 7 days ▾]  [Last 14 days]  [Last 30 days] │
+│ Filter: [Project ▾] [Category ▾]                              │
+└────────────────────────────────────────────────────────────────┘
+```
 
-### Layout
+Default: Last 14 days, all projects, all categories.
 
-Single list. Sorted by arrival date, oldest first (longest-waiting at top).
+### Section 1: Repeat SLA Breaches
 
-| Column | Source | Example |
+Items or categories that breach SLA more than once in the time window.
+
+| Column | Description | Example |
 |---|---|---|
-| Invoice # | AI extraction from PDF/email | `CM-2267` |
-| Vendor | AI extraction | `Coastal Mechanical` |
-| Amount | AI extraction | `$8,400.00` |
-| Arrived | Email receive timestamp | `Feb 7, 8:22 AM` |
-| Gate Status | Current pipeline position | `Flagged` |
-| Flags | Which checks failed (if any) | `Missing job #` `No CO backing` |
-| Links | Deep links | `[Slack] [Email] [Drive]` |
+| Category | Open Task type | `RFI` |
+| Breach Count | Number of distinct breaches in window | `6` |
+| Top Owner | Owner with the most breaches in this category | `Taylor R. (4 of 6)` |
+| Avg Days Overdue | Average days past SLA at resolution (or current) | `4.2d` |
+| Projects | Which projects are affected | `SandBox` |
+| Trend | Improving or worsening vs previous window | `Worsening (+2)` |
 
-### Gate Status Values
+Sorted by breach count descending. Tapping a row drills down to the specific Open Tasks.
 
-| Status | Meaning | Row Style |
+### Section 2: Owner Load
+
+Who has the most open items, and who is consistently overdue.
+
+| Column | Description | Example |
 |---|---|---|
-| Pending Review | Extracted, awaiting PM review | Yellow left-border |
-| Flagged | One or more gate checks failed | Red left-border |
-| Cleared | All checks passed, awaiting PM confirm | Green left-border |
+| Owner | Person responsible | `Taylor R.` |
+| Open Items | Total open across all categories | `7` |
+| Overdue Items | Currently past SLA | `4` |
+| Overdue Rate | Overdue / Open | `57%` |
+| Categories | Which categories their items span | `RFI (3), Submittal (2), Decision (2)` |
+| Projects | Which projects | `SandBox` |
 
-### Flag Tags
+Sorted by overdue count descending. Tapping a row drills down to that owner's Open Tasks.
 
-Shown as tags/chips on the row. Multiple flags possible per invoice.
+### Section 3: Invoice Gate Patterns
 
-| Flag | Gate Check |
+Recurring flags from the invoice gate.
+
+| Column | Description | Example |
+|---|---|---|
+| Flag Type | Which gate check keeps failing | `Missing job #` |
+| Occurrences | Count in time window | `4` |
+| Vendors | Which vendors triggered this flag | `Coastal Mechanical (2), ABC Electric (1), Delta Plumbing (1)` |
+| Total Exposure | Sum of flagged invoice amounts | `$34,200` |
+
+Sorted by occurrences descending. Tapping drills down to the specific invoices.
+
+### Section 4: Cost Exposure Summary
+
+Aggregate financial risk across all projects.
+
+| Metric | Value | Source |
+|---|---|---|
+| Open PCO exposure (total) | `$108,600` | CO logs, sum of open preliminary costs |
+| PCOs executed in window | `$18,400` | CO logs |
+| Pending decisions with cost impact | `$13,500` | Decision logs |
+| Invoice flags (total exposure) | `$34,200` | Invoice gate |
+
+No drill-down — these are aggregate numbers. Deep links go to the relevant log Sheets.
+
+### Section 5: Cross-Project Comparison
+
+Available when multiple projects are active. Not relevant during single-project pilot.
+
+| Column | Description |
 |---|---|
-| `Missing job #` | Job number not found in email or PDF |
-| `Missing cost code` | Cost code not found |
-| `Over budget` | Invoice amount + existing costs exceed budget line |
-| `No CO backing` | Work appears change-related but no executed CO found |
-| `Possible duplicate` | Matching vendor + amount + date in last 90 days |
+| Project | Project name |
+| Open Tasks | Total count |
+| Overdue | Count past SLA |
+| Breach Rate | Overdue / Total |
+| Top Category | Category with most open items |
+| Top Issue | Most urgent single item |
+
+Sorted by overdue count descending. Tapping drills down to that project's items (switches to View 1, filtered to project).
 
 ### Empty State
 
-`No invoices in the gate pipeline.`
+`No repeating patterns detected in the selected time window.`
+
+---
+
+## View 3: Procurement & Delivery
+
+**Default for:** Procurement, Ops
+
+**Scope:** All projects. Filtered to domain-relevant categories: Lead Time, Submittal, Invoice (vendor-side), Change Order (vendor-side), Pre-Task Readiness (material-dependent).
+
+### Toolbar
+
+```
+┌────────────────────────────────────────────────────────────────┐
+│ [Search: PO, vendor, submittal #, item...]                     │
+│ Filter: [Project ▾] [Category ▾] [Vendor ▾] [Risk Level ▾]   │
+│ Sort: [Risk ▾]  (default: Critical → At-Risk → On-Track)      │
+└────────────────────────────────────────────────────────────────┘
+```
+
+### Section 1: Lead-Time Risks
+
+Open lead-time items, sorted by risk.
+
+| Column | Source | Example |
+|---|---|---|
+| Item | Lead-time tracker description | `Structural steel — Level 3` |
+| PO # | Lead-time tracker | `PO-1247` |
+| Vendor | Lead-time tracker | `Metro Steel` |
+| Projected Delivery | Lead-time tracker | `Mar 12` |
+| Float | Lead-time tracker (days) | `-8d` |
+| Risk | Lead-time tracker flag | `Critical` (red) / `At-Risk` (yellow) / `On-Track` (green) |
+| Dependent Task | Schedule task blocked by this delivery | `Level 3 framing` |
+| Links | Deep links | `[Smartsheet] [Slack] [Email]` |
+
+Red border = critical (negative float). Yellow = at-risk (< 14 days float). Green = on-track.
+
+### Section 2: Submittal Pipeline
+
+Open submittals by status.
+
+| Column | Source | Example |
+|---|---|---|
+| Submittal # | Submittal register | `SUB-013` |
+| Description | Submittal register | `Cabinet shop drawings` |
+| Spec Section | Submittal register | `06 41 16` |
+| Status | Submittal register | `Under Review` |
+| Reviewer | Submittal register | `Taylor R.` |
+| Days in Status | Today minus status change date | `8d` |
+| Review Due | Submittal register | `Feb 5 (3d overdue)` |
+| Links | Deep links | `[Smartsheet] [Slack] [Drive]` |
+
+Status chips: `Pending Submission` (gray), `Under Review` (yellow), `Revise-Resubmit` (red), `Approved` (green).
+
+### Section 3: Vendor Invoice Status
+
+Invoices in the gate pipeline, filtered to show vendor/PO context relevant to procurement.
+
+Same layout as the Invoice Gate detail in View 1, with the addition of:
+
+| Column | Source | Example |
+|---|---|---|
+| PO Reference | AI extraction or manual | `PO-1247` |
+| Related Lead-Time Item | Cross-reference by PO/vendor | `LT-005` |
+
+### Section 4: Delivery Schedule (Next 14 Days)
+
+Timeline of expected deliveries.
+
+| Column | Source | Example |
+|---|---|---|
+| Date | Lead-time tracker projected delivery | `Feb 12` |
+| Item | Lead-time tracker | `Structural steel — Level 3` |
+| Vendor | Lead-time tracker | `Metro Steel` |
+| PO # | Lead-time tracker | `PO-1247` |
+| QC Required | Receiving checklist | `Yes` |
+| Links | Deep links | `[Smartsheet] [Slack]` |
+
+Sorted by date ascending (nearest delivery first).
+
+### Empty States
+
+| Section | Text |
+|---|---|
+| Lead-Time Risks | `No lead-time items at risk.` |
+| Submittal Pipeline | `No open submittals.` |
+| Vendor Invoices | `No invoices in the gate pipeline.` |
+| Delivery Schedule | `No deliveries expected in the next 14 days.` |
 
 ---
 
 ## Deep Links
 
-Every Open Task row includes one-click links to the exact location in the source system. Links open in a new tab/window. No intermediate screens.
+Every Open Task includes one-click links to the **exact** location in the source EPC system. Not the project page. Not the sheet. The exact row, task, message, or record.
+
+**If a precise deep link cannot be generated, the Open Task is not surfaced on the dashboard.**
 
 | Link Label | Target | URL Pattern | When Shown |
 |---|---|---|---|
-| **Slack** | The Slack thread where this item was discussed or the draft was posted | `https://{workspace}.slack.com/archives/{channel_id}/p{message_ts}` | Always (every item has a Slack thread) |
-| **Sheet** | The exact row in the Drive log Sheet | `https://docs.google.com/spreadsheets/d/{sheet_id}/edit#gid=0&range=A{row}` | When the item exists in a log Sheet |
-| **Email** | The source email that created this Open Task | `https://mail.google.com/mail/u/0/#inbox/{message_id}` | When the item originated from email |
-| **Doc** | The source document in Drive (attachment, submittal, drawing) | `https://drive.google.com/file/d/{file_id}` | When a document is attached |
-| **Fieldwire** | The Fieldwire task (for field-originated items) | `https://app.fieldwire.com/#!/projects/{project_id}/tasks/{task_id}` | When the item was created from Fieldwire |
+| **Smartsheet** | The exact row in Smartsheet | `https://app.smartsheet.com/sheets/{sheet_id}?rowId={row_id}` | When the item is tracked in Smartsheet (schedule, budget) |
+| **Slack** | The exact Slack thread | `https://{workspace}.slack.com/archives/{channel_id}/p{message_ts}` | When the item has a Slack thread |
+| **Sheet** | The exact row in a Drive log Sheet | `https://docs.google.com/spreadsheets/d/{sheet_id}/edit#gid=0&range=A{row}` | When the item exists in a Drive log Sheet |
+| **Email** | The exact source email | `https://mail.google.com/mail/u/0/#inbox/{message_id}` | When the item originated from email |
+| **Doc** | The exact document in Drive | `https://drive.google.com/file/d/{file_id}` | When a document is attached |
+| **Fieldwire** | The exact Fieldwire task | `https://app.fieldwire.com/#!/projects/{project_id}/tasks/{task_id}` | When the item was created from Fieldwire |
+| **Adaptive** | The exact record in Adaptive Build | `https://{instance}.adaptivebuild.com/.../{record_id}` | When the item maps to an Adaptive Build record |
+| **CompanyCam** | The exact photo or album | `https://app.companycam.com/projects/{project_id}/photos/{photo_id}` | When photo documentation is attached |
 
 ### Link Display
 
-Links shown as text labels, not icons. Mobile-tap-friendly.
+Links shown as text labels in a row beneath the item card. Tap-friendly (minimum 44px target).
 
 ```
-RFI-044  ·  Waterproofing detail at planter  ·  Taylor R.  ·  5d overdue
-[Slack]  [Sheet]  [Email]
+┌─────────────────────────────────────────────────────────────┐
+│ ■ RFI  ·  RFI-044  ·  5d overdue                      red  │
+│   Waterproofing detail at planter                           │
+│   Owner: Taylor R.  ·  Project: SandBox                     │
+│   [Smartsheet]  [Slack]  [Email]                            │
+└─────────────────────────────────────────────────────────────┘
 ```
 
-Not all links appear on every row. Only show links to sources that exist for that item.
+### Link Resolution
+
+The system must resolve deep links at render time:
+
+1. Query the source system for the current URL (row IDs can shift in Smartsheet).
+2. If the URL resolves to a valid target → show the link.
+3. If the URL cannot be resolved → **do not show the Open Task on the dashboard.**
+4. Log unresolvable items to `#foundry-bot-log` with reason (row deleted, sheet moved, ID mismatch).
 
 ---
 
-## Data Source
+## Data Sources
 
 The dashboard reads from:
 
 | Source | What It Provides | Write-Back? |
 |---|---|---|
-| Open Task daily report data | Items, categories, SLA status, owners | **No** |
-| `#foundry-bot-log` | Audit trail, timestamps, classifications | **No** |
-| Drive log Sheets (6) | Item details, row numbers for deep links | **No** |
-| Slack message timestamps | Deep link targets | **No** |
-| Email message IDs | Deep link targets | **No** |
+| Open Task index | Items, categories, SLA status, owners, project assignment | **No** |
+| Drive log Sheets (6) | Item detail fields, row references for deep links | **No** |
+| Smartsheet | Schedule data, budget data, row IDs for deep links | **No** |
+| Slack API | Thread timestamps for deep links | **No** |
+| Email metadata | Message IDs for deep links | **No** |
+| Fieldwire API | Task IDs for deep links | **No** |
+| Adaptive Build | Record IDs for deep links | **No** |
+| CompanyCam API | Photo IDs for deep links | **No** |
+| `#foundry-bot-log` | Audit trail, event timestamps, classifications | **No** |
 
-The dashboard is a **read-only consumer** of existing data. It creates no data, modifies no data, and has no write path to any system.
+The dashboard is a **read-only consumer**. It creates no data, modifies no data, and has no write path to any system.
 
 ---
 
@@ -224,14 +478,15 @@ The dashboard is a **read-only consumer** of existing data. It creates no data, 
 
 | Excluded | Why |
 |---|---|
-| Approve / Acknowledge / Resolve / Dismiss buttons | Read-only during probation. No state changes. |
-| Role-based filtering | One view for everyone. Reduces thinking vs. 7 role dashboards. |
+| Approve / Acknowledge / Resolve / Dismiss | Read-only authority. No state changes. |
+| Edit or override any field | No write-back to any system. |
 | Notification preferences | No configuration surface in v1. |
-| Historical charts or trends | Weekly report covers trends. Dashboard = today only. |
+| Historical charts or trend graphs | Weekly report covers trends. "What's Repeating" covers patterns. |
 | Draft message preview | Drafts live in Slack threads. Deep link goes there. |
-| Bidding/outreach pipeline | Not in scope for v1 dashboard. Tracked in Slack. |
-| Probation monitoring data | Probation checklist is a separate Kuan-only process. |
-| Action buttons of any kind | No interaction that changes state. |
+| Bidding/outreach pipeline | Not in scope for v1. Tracked in Slack. |
+| Probation monitoring data | Separate Kuan-only process. |
+| User or role management | Admin function, not dashboard scope. |
+| Workflow enforcement | Dashboard is visibility, not control. |
 
 ---
 
@@ -240,32 +495,37 @@ The dashboard is a **read-only consumer** of existing data. It creates no data, 
 - **Primary target:** mobile (phone browser or PWA)
 - **Layout:** single-column, stacked cards
 - **Tap targets:** minimum 44px (Apple HIG)
-- **Deep links:** open in native app if installed (Slack, Gmail, Drive), otherwise browser
+- **Deep links:** open in native app if installed (Slack, Gmail, Drive, Smartsheet, Fieldwire), otherwise browser
+- **Detail panel:** full-screen slide-over on mobile, side panel on desktop
 - **Collapsed sections:** tap section header to expand/collapse
+- **Search:** top of screen, always accessible
+- **Tabs:** fixed at top, always visible (3 tabs)
 - **No horizontal scroll.** All content fits single column.
-- **No login during probation.** Dashboard is internal-network-only, pre-authenticated.
+- **Login:** SSO via Google Workspace. Persistent session (30-day token).
 
 ---
 
-## Labeling and Visual Hierarchy
+## Visual Hierarchy
 
 ### Color System
 
 | Color | Meaning | Used For |
 |---|---|---|
-| Red | Past SLA / failed gate check | Overdue left-border, Flagged invoice border, count badge |
-| Yellow | Due today / pending review | Due Today left-border, Pending Review invoice border, count badge |
-| Blue | New / informational | New item left-border, count badge |
-| Green | Passed / cleared | Cleared invoice border |
-| Gray | Monitoring / no action needed | Watching section, Total count |
+| Red | Past SLA / failed gate check / critical risk | Overdue border, Flagged invoice, Critical lead-time, count badge |
+| Yellow | Due today / pending review / at-risk | Due Today border, Pending Review invoice, At-Risk lead-time, count badge |
+| Blue | New / informational | New item border, count badge |
+| Green | Passed / cleared / on-track / approved | Cleared invoice, On-Track lead-time, Approved submittal |
+| Gray | Monitoring / no action needed | Watching section, Total count, Pending Submission submittal |
 
 ### Typography
 
 - **Item ID:** bold, monospace (e.g., **`RFI-044`**)
 - **Subject:** regular weight, truncated at 60 characters on mobile (full on desktop)
 - **Owner:** regular weight
-- **SLA/Days:** bold, colored per urgency
-- **Links:** underlined, colored blue, standard link behavior
+- **Urgency/SLA:** bold, colored per urgency
+- **Category tag:** uppercase, colored background chip
+- **Deep links:** underlined, blue, standard link behavior
+- **Section headers:** bold, uppercase, with count badge
 
 ---
 
@@ -275,13 +535,13 @@ If Phase 2 is confirmed on Feb 15, the following additions layer onto this exact
 
 | Addition | Where It Goes | Layout Change |
 |---|---|---|
-| "Approve & Log" button on log entries | Below the deep links row on applicable items | New row element — no layout shift |
-| "Approve & Send" button on draft messages | Below the deep links row on applicable items | New row element — no layout shift |
-| Role filter toggle | Top bar, next to counts | Dropdown — no layout shift |
-| Item status indicator (Level 1 write confirmation) | Right side of item row | Badge — no layout shift |
-| Notification indicator (Level 2 sent) | Right side of item row | Badge — no layout shift |
+| "Approve & Log" button | Detail panel, below deep links | New element in panel — no card layout shift |
+| "Approve & Send" button | Detail panel, below deep links | New element in panel — no card layout shift |
+| Status badge (Level 1 write confirmed) | Right side of item card | Small badge — no layout shift |
+| Notification badge (Level 2 sent) | Right side of item card | Small badge — no layout shift |
+| Banner text change | Top bar | `Phase 2 Active` replaces probation label |
 
-No page restructuring, no column changes, no section reordering. Buttons add; nothing moves.
+No view restructuring, no column changes, no section reordering, no role changes. Buttons add to the detail panel; badges add to cards. Nothing moves.
 
 ---
 
@@ -289,8 +549,9 @@ No page restructuring, no column changes, no section reordering. Buttons add; no
 
 | Document | Relationship |
 |---|---|
-| `dashboards-by-role.md` | Predecessor. 7 role-based dashboards with action buttons. Superseded by this spec for v1. Role dashboards may return as filtered views in v2+. |
+| `dashboards-by-role.md` | Predecessor. 7 role dashboards with action buttons. Superseded for v1. Retained for v2+ feature reference. |
 | `production-shadow-playbook.md` | Phase 2 rules and probation monitoring. Dashboard does not interact with probation tracking. |
-| `open-task-report-template.md` | Weekly report. Dashboard shows today; weekly report shows the week. No overlap. |
+| `open-task-report-template.md` | Weekly report. Dashboard shows live state; weekly report shows the week. Complementary. |
 | `pilot-sandbox-config.md` | SandBox project config. Dashboard reads from the 6 log Sheets and Slack channels defined there. |
 | `watcher-system.md` | Defines watchers, daily packets, invoice gate. Dashboard visualizes watcher output. |
+| `integration-architecture.md` | Full application inventory and data flow. Dashboard deep links target the systems mapped there. |
