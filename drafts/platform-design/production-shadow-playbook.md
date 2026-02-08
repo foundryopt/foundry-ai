@@ -253,3 +253,70 @@ No authority level is activated unless:
 5. A 7-day probation period follows activation, during which the authority can be revoked immediately
 
 **Level 1 (Auto-Log) and Level 2 (Auto-Notify) activated 2026-02-08 by Kuan. All 5 conditions met. Probation ends 2026-02-15. Level 3 and Level 4 remain NOT ACTIVE.**
+
+---
+
+## Probation Monitoring — Level 1 + Level 2 (2026-02-08 through 2026-02-15)
+
+### Revocation Triggers (any one = immediate revoke)
+
+| Trigger | Applies To | How Detected |
+|---|---|---|
+| Write without human "Approve & Log" click | Level 1 | Audit `#foundry-bot-log` — every write must have a matching approval event |
+| Write to wrong Sheet or wrong row | Level 1 | Spot-check Drive Sheets daily against bot-log |
+| Duplicate row written | Level 1 | Compare row count in Sheet vs write count in bot-log |
+| Data in Sheet does not match approved entry | Level 1 | Spot-check 3 entries/day against Slack thread |
+| Notification sent to external channel or DM | Level 2 | Audit `#foundry-bot-log` — all notifications must target internal project channels |
+| Notification for non-qualifying event (not SLA breach, not new item, not delivery) | Level 2 | Review notification content in bot-log |
+| Notification tags wrong owner | Level 2 | Compare tagged user to RACI for that item |
+| Notification volume exceeds 10/day | Level 2 | Count daily notifications in bot-log |
+
+### Daily Probation Checklist (Kuan, 5 min)
+
+```
+[ ] Review #foundry-bot-log for all Level 1 writes since yesterday
+    - Count writes: ___
+    - Count matching approvals: ___
+    - Mismatches: ___
+
+[ ] Spot-check 3 Drive Sheet entries against Slack approval threads
+    - Entry 1: ☐ correct  ☐ wrong
+    - Entry 2: ☐ correct  ☐ wrong
+    - Entry 3: ☐ correct  ☐ wrong
+
+[ ] Review #foundry-bot-log for all Level 2 notifications since yesterday
+    - Count notifications: ___
+    - False notifications: ___
+    - Wrong owner tagged: ___
+
+[ ] Any team complaints about noise or incorrect notifications?
+    ☐ None  ☐ Yes → describe: _______________
+
+[ ] Revocation needed?
+    ☐ No — continue probation
+    ☐ Yes, Level 1 → reason: _______________
+    ☐ Yes, Level 2 → reason: _______________
+```
+
+### Probation Log
+
+| Date | L1 Writes | L1 Errors | L2 Notifs | L2 Errors | Notes | Reviewed |
+|---|---|---|---|---|---|---|
+| 2026-02-08 | | | | | Day 1 | [ ] Kuan |
+| 2026-02-09 | | | | | | [ ] Kuan |
+| 2026-02-10 | | | | | | [ ] Kuan |
+| 2026-02-11 | | | | | | [ ] Kuan |
+| 2026-02-12 | | | | | | [ ] Kuan |
+| 2026-02-13 | | | | | | [ ] Kuan |
+| 2026-02-14 | | | | | | [ ] Kuan |
+| 2026-02-15 | | | | | Probation ends | [ ] Kuan |
+
+### End-of-Probation Decision (2026-02-15)
+
+| Outcome | Condition | Action |
+|---|---|---|
+| **Confirm** | Zero revocation triggers fired, team feedback neutral-to-positive | Remove probation dates from CLAUDE.md, mark authorities as permanent |
+| **Extend** | Minor issues found but fixable | Extend probation 7 days, document fixes |
+| **Revoke Level 1** | Data accuracy or unauthorized write issues | Revert CLAUDE.md Section 4+6+7, revert playbook Level 1 to NOT ACTIVE |
+| **Revoke Level 2** | Noise complaints or false notification issues | Revert CLAUDE.md Section 4+7, revert playbook Level 2 to NOT ACTIVE |
+| **Revoke Both** | Systemic trust issue | Full revert to shadow-only mode |
