@@ -50,17 +50,43 @@ Role is set at account creation. All roles can navigate to all views via tabs. D
 
 ## Views
 
-Three views, accessible as tabs on a single surface. No separate pages, no navigation menu, no sidebar.
+Four views, accessible as tabs on a single surface. No separate pages, no navigation menu, no sidebar.
 
 ```
-┌─────────────────────────────────────────────────────────────────────┐
-│  Interactive View — Read-Only Authority (Phase 2 Probation)        │
-│  [user name] · [role] · Last updated: [timestamp]                  │
-├────────────────────┬───────────────────┬────────────────────────────┤
-│  Attention Today   │  What's Repeating │  Procurement & Delivery   │
-│  (active tab)      │                   │                           │
-└────────────────────┴───────────────────┴────────────────────────────┘
+┌──────────────────────────────────────────────────────────────────────────────┐
+│  Interactive View — Read-Only Authority (Phase 2 Probation)                  │
+│  [user name] · [role] · Last updated: [timestamp]                            │
+├──────────────────┬─────────────────┬─────────────────┬───────────────────────┤
+│ Attention Today  │ What's Repeating│ Procurement &   │ Cost · Time · Quality │
+│ (active tab)     │                 │ Delivery        │                       │
+└──────────────────┴─────────────────┴─────────────────┴───────────────────────┘
 ```
+
+Views 1–3 are Open Task action views (unchanged). View 4 provides visual context from Smartsheet.
+
+---
+
+## Context Strip (All Views)
+
+A thin summary ribbon appears below the banner on every view. Three numbers — one per dimension — provide at-a-glance project health without leaving the action view. Tapping any cell navigates to the full Cost · Time · Quality tab.
+
+```
+┌───────────────────────┬───────────────────────┬───────────────────────┐
+│ Budget: 78% spent     │ Schedule: On track    │ Quality: 92% current  │
+│ +$108K potential      │ +4d potential          │ 3 items pending       │
+│ (from 5 open tasks)   │ (from 3 open tasks)   │ (from 3 open tasks)   │
+└───────────────────────┴───────────────────────┴───────────────────────┘
+```
+
+| Cell | Top Line | Bottom Line | Source |
+|---|---|---|---|
+| **Budget** | Actuals as % of budget | Potential cost exposure from unresolved Open Tasks | Smartsheet budget + CO log |
+| **Schedule** | Current vs baseline status | Potential delay days from unresolved Open Tasks | Smartsheet schedule + Open Task impacts |
+| **Quality** | % of specs/drawings at current revision | Count of pending submittals/RFIs affecting documents | Smartsheet doc register + submittal register |
+
+**"Potential" values come only from unresolved Open Tasks.** They are labeled "potential" and never appear approved or committed. The strip shows the Open Task count that generates each potential value.
+
+**Read-only.** No interaction except navigation to the full tab.
 
 ---
 
@@ -413,6 +439,273 @@ Sorted by date ascending (nearest delivery first).
 
 ---
 
+## View 4: Cost · Time · Quality
+
+**Available to:** All roles (no default — accessed via tab)
+
+**Scope:** Per-project. If user has multiple projects, a project selector appears at the top. Principal/Owner's Rep see an aggregated view with per-project drill-down.
+
+**Purpose:** Provide visual context for Open Task decisions. Open Tasks tell you WHAT needs attention. Cost · Time · Quality tells you WHY it matters. All data sourced from Smartsheet as the data modeling layer.
+
+**Read-only. No edits, no approvals, no write-back.**
+
+---
+
+### Section 1: Cost (Planned / Actual / Potential)
+
+#### Macro View (default)
+
+Stacked bar chart showing three values per cost category:
+
+```
+Budget vs Actuals vs Potential
+
+Site Work        ████████████░░░░░░▓▓▓
+Structural       ████████████████░░░
+Mechanical       ██████████░░░░░░░░▓▓▓▓▓
+Electrical       ████████████████░
+Plumbing         ██████████████░░░▓
+Finishes         ████████░░░░░░░░░░▓▓
+General Cond.    ████████████████████
+
+█ = Actual   ░ = Remaining Budget   ▓ = Potential (from Open Tasks)
+```
+
+| Bar Segment | Definition | Source | Color |
+|---|---|---|---|
+| **Actual** | Costs committed and invoiced | Smartsheet budget actuals + Adaptive Build | Solid blue |
+| **Remaining Budget** | Budget minus actuals | Smartsheet budget | Light gray |
+| **Potential** | Unresolved Open Task cost exposure | CO log (`preliminary_cost` where status != `closed`) + Decision log (`cost_impact` where status = `pending`) + Invoice gate (flagged amounts) | Amber, hatched pattern |
+
+**Potential values:**
+- Come **only** from unresolved Open Tasks
+- Labeled `Potential (X open tasks)` on hover/tap
+- Never appear as approved or committed
+- Shown with hatched/striped pattern to visually distinguish from actuals
+
+**Summary row above chart:**
+
+| Metric | Value | Source |
+|---|---|---|
+| Original Budget | `$4,215,000` | Smartsheet budget baseline |
+| Current Contract Sum | `$4,233,400` | Smartsheet budget + executed COs |
+| Spent to Date | `$3,287,000` (78%) | Smartsheet actuals |
+| Open Commitments | `$412,000` | Smartsheet committed costs |
+| Potential Exposure | `$108,600` (from 5 open tasks) | Unresolved CO + Decision Open Tasks |
+
+#### Micro View (on click)
+
+Tapping a bar drills down to a per-cost-code table:
+
+| Column | Source | Example |
+|---|---|---|
+| Cost Code | Smartsheet budget | `03 30 00 — Cast-in-Place Concrete` |
+| Budget | Smartsheet budget | `$285,000` |
+| Actual | Smartsheet actuals | `$241,200` |
+| Committed | Smartsheet committed | `$32,000` |
+| Remaining | Budget - Actual - Committed | `$11,800` |
+| Potential | Unresolved Open Task cost impact mapped to this code | `$18,400 (PCO-011)` |
+| Status | Calculated | `Over` (red) / `At Risk` (yellow) / `On Track` (green) |
+| Links | Deep links to Smartsheet budget row | `[Smartsheet]` |
+
+**Potential column links to the Open Task(s)** that generate the exposure. Tapping the potential value navigates to View 1, filtered to that Open Task.
+
+---
+
+### Section 2: Time (Planned / Actual / Potential)
+
+#### Macro View (default)
+
+Horizontal milestone bars showing planned vs actual progress for major phases:
+
+```
+Phase Milestones — Planned vs Actual
+
+Foundations      ████████████████ ✓ Complete
+Structural       ████████████████ ✓ Complete
+Rough-In         █████████████░░░░ (82%, 3d behind)
+Drywall          ░░░░░░░░░░░░░░░░ (not started, on track)
+Finishes         ░░░░░░░░░░░░░░░░ (not started)
+Punch / Close    ░░░░░░░░░░░░░░░░ (not started)
+
+█ = Actual progress   ░ = Remaining
+```
+
+| Bar Segment | Definition | Source | Color |
+|---|---|---|---|
+| **Actual** | Work completed | Smartsheet schedule (% complete) | Solid green (complete) or blue (in progress) |
+| **Remaining** | Work not yet done | Smartsheet schedule | Light gray |
+| **Potential Delay** | Days of delay from unresolved Open Tasks | Open Tasks with `schedule_impact` field | Red marker at the projected end |
+
+**Potential delay indicator:**
+
+If unresolved Open Tasks have schedule impact, a red marker appears at the projected completion showing the potential slip:
+
+```
+Rough-In   █████████████░░░░│▓ (+4d potential from 3 open tasks)
+```
+
+**Summary row above chart:**
+
+| Metric | Value | Source |
+|---|---|---|
+| Baseline Completion | `Jun 15, 2026` | Smartsheet baseline schedule |
+| Projected Completion | `Jun 18, 2026` (+3d) | Smartsheet current schedule |
+| Potential Additional Delay | `+4d` (from 3 open tasks) | Unresolved RFI/CO/Lead Time Open Tasks with schedule impact |
+| Critical Path Float | `2d` | Smartsheet CPM |
+| Activities In Progress | `12` | Smartsheet schedule |
+| Activities Behind Schedule | `3` | Smartsheet schedule |
+
+#### Micro View (on click)
+
+Tapping a phase bar drills down to a Gantt-style activity list for that phase:
+
+| Column | Source | Example |
+|---|---|---|
+| Activity | Smartsheet schedule | `Interior framing — Level 2` |
+| Planned Start | Smartsheet baseline | `Feb 10` |
+| Planned Finish | Smartsheet baseline | `Feb 28` |
+| Actual Start | Smartsheet actual | `Feb 12` |
+| Projected Finish | Smartsheet current | `Mar 3 (+3d)` |
+| % Complete | Smartsheet | `45%` |
+| Float | Smartsheet CPM | `-2d` (red) / `0d` (yellow) / `5d` (green) |
+| Potential Impact | Unresolved Open Tasks affecting this activity | `RFI-044 (+2d)` |
+| Links | Deep link to Smartsheet row | `[Smartsheet]` |
+
+**Potential Impact column links to the Open Task(s).** Tapping navigates to View 1, filtered to that Open Task.
+
+**Gantt bar display:** Simple horizontal bars only. No dependency arrows, no resource leveling, no editing. This is a read-only visualization of Smartsheet schedule data.
+
+---
+
+### Section 3: Quality (Planned / Actual / Potential)
+
+#### Macro View (default)
+
+Stacked bar or pie showing document currency across three states:
+
+```
+Document Status by Type
+
+Drawings     ████████████████████░░░░▓▓
+             72 issued  |  18 pending  |  6 superseded
+
+Specifications ██████████████████████░░▓
+               48 in-use | 8 pending   | 2 under revision
+
+Submittals   ████████████████░░░░▓▓▓▓▓▓
+             34 approved | 8 under review | 14 pending
+
+QC Records   ████████████████████░░
+             28 complete | 6 pending
+```
+
+| Segment | Definition | Source | Color |
+|---|---|---|---|
+| **Current / Issued / Approved** | Documents at latest revision and approved for use | Smartsheet drawing register + submittal register | Solid green |
+| **Pending / Under Review** | Documents awaiting action | Smartsheet registers + submittal register | Yellow |
+| **Potential** | Documents affected by unresolved Open Tasks (RFIs that may change drawings, submittals in revise-resubmit, specs under revision) | Open Tasks linked to document IDs | Amber, hatched pattern |
+
+**Potential values:**
+- Come **only** from unresolved Open Tasks
+- Example: RFI-044 references Drawing A-201 → Drawing A-201 shows a `Potential revision` indicator
+- Labeled `Potential (X open tasks)` on hover/tap
+- Never appear as approved or final
+
+**Summary row above chart:**
+
+| Metric | Value | Source |
+|---|---|---|
+| Total Documents Tracked | `186` | Smartsheet registers |
+| Current / In-Use | `172` (92%) | Smartsheet |
+| Pending Action | `14` | Smartsheet |
+| Affected by Open Tasks | `8` (from 6 open tasks) | Open Task → document cross-reference |
+| Submittals Approved | `34 of 56` (61%) | Submittal register |
+| Submittals Overdue | `3` | Submittal register vs SLA |
+
+#### Micro View (on click)
+
+Tapping a bar segment drills down to a document list:
+
+**Drawings Drill-Down:**
+
+| Column | Source | Example |
+|---|---|---|
+| Drawing # | Smartsheet drawing register | `A-201` |
+| Title | Smartsheet | `Floor Plan — Level 2` |
+| Current Revision | Smartsheet | `Rev C` |
+| Status | Smartsheet | `Issued` (green) / `Superseded` (gray) / `Pending Revision` (yellow) |
+| Affected By | Unresolved Open Tasks referencing this drawing | `RFI-044` (amber badge) |
+| Issued Date | Smartsheet | `Jan 15, 2026` |
+| Links | Deep link to Smartsheet row | `[Smartsheet]` |
+
+**Submittals Drill-Down:**
+
+| Column | Source | Example |
+|---|---|---|
+| Submittal # | Submittal register | `SUB-013` |
+| Description | Submittal register | `Cabinet shop drawings` |
+| Spec Section | Submittal register | `06 41 16` |
+| Status | Submittal register | `Approved` / `Under Review` / `Revise-Resubmit` / `Pending` |
+| Review Due | Submittal register | `Feb 5` |
+| Days in Status | Calculated | `8d` |
+| Affected By | Unresolved Open Tasks | `RFI-048` |
+| Links | Deep links | `[Smartsheet] [Drive]` |
+
+**Specs Drill-Down:**
+
+| Column | Source | Example |
+|---|---|---|
+| Spec Section | Smartsheet spec register | `06 41 16 — Architectural Casework` |
+| Status | Smartsheet | `In Use` / `Under Revision` / `Pending Addendum` |
+| Current Version | Smartsheet | `Addendum 3` |
+| Affected By | Unresolved Open Tasks | `RFI-044, SUB-013` |
+| Links | Deep link to Smartsheet row | `[Smartsheet]` |
+
+---
+
+### Open Task → Cost / Time / Quality Mapping
+
+Every Open Task in Views 1–3 may link to Cost, Time, or Quality context in View 4. The mapping is:
+
+| Open Task Category | Cost Mapping | Time Mapping | Quality Mapping |
+|---|---|---|---|
+| RFI | Cost impact field → cost code | Schedule impact → activity | Drawing/spec reference → document |
+| Change Order | Preliminary cost → cost code | Schedule impact → activity | Spec sections affected |
+| Decision | Cost impact → cost code | Schedule impact → activity | — |
+| Invoice | Amount → cost code | — | — |
+| Submittal | — | Lead time → delivery → activity | Spec section → document |
+| Lead Time | — | Float → activity dependency | — |
+| Warranty | Repair cost → cost code | — | Defect → document reference |
+| Pay App | Amount → cost code | — | — |
+
+This mapping enables the **"Potential" calculations** across all three dimensions. An Open Task's potential impact appears in the dimension(s) it affects.
+
+### Chart Rules
+
+| Rule | Requirement |
+|---|---|
+| Chart type | Simple only: bar, stacked bar, horizontal bar, pie, progress bar |
+| Default view | Macro (chart) — always show summary first |
+| Drill-down | Micro (table) — on click only |
+| Interactivity | Click to drill, hover for tooltips. No drag, no zoom, no pan. |
+| "Potential" label | Always labeled. Never appears as approved or committed. Hatched/striped pattern. |
+| Open Task link | Every potential value links back to the generating Open Task(s) in Views 1–3 |
+| Edits | None. No data entry, no adjustments, no overrides. |
+| Write-back | None. All updates happen in Smartsheet. |
+| Refresh | Same as dashboard — data refreshed each morning cycle + on-demand |
+
+### Empty States
+
+| Section | Text |
+|---|---|
+| Cost | `No budget data available. Budget must be set up in Smartsheet.` |
+| Time | `No schedule data available. Schedule must be set up in Smartsheet.` |
+| Quality | `No document register data available. Registers must be set up in Smartsheet.` |
+| All three empty | `Project context data is not yet configured in Smartsheet.` |
+
+---
+
 ## Deep Links
 
 Every Open Task includes one-click links to the **exact** location in the source EPC system. Not the project page. Not the sheet. The exact row, task, message, or record.
@@ -458,17 +751,21 @@ The system must resolve deep links at render time:
 
 The dashboard reads from:
 
-| Source | What It Provides | Write-Back? |
-|---|---|---|
-| Open Task index | Items, categories, SLA status, owners, project assignment | **No** |
-| Drive log Sheets (6) | Item detail fields, row references for deep links | **No** |
-| Smartsheet | Schedule data, budget data, row IDs for deep links | **No** |
-| Slack API | Thread timestamps for deep links | **No** |
-| Email metadata | Message IDs for deep links | **No** |
-| Fieldwire API | Task IDs for deep links | **No** |
-| Adaptive Build | Record IDs for deep links | **No** |
-| CompanyCam API | Photo IDs for deep links | **No** |
-| `#foundry-bot-log` | Audit trail, event timestamps, classifications | **No** |
+| Source | What It Provides | Used By | Write-Back? |
+|---|---|---|---|
+| Open Task index | Items, categories, SLA status, owners, project assignment | Views 1–3, Context Strip | **No** |
+| Drive log Sheets (6) | Item detail fields, row references for deep links | Views 1–3 detail panels | **No** |
+| Smartsheet — Budget | Cost codes, budgets, actuals, committed costs, forecasts | View 4 Cost, Context Strip | **No** |
+| Smartsheet — Schedule | Activities, milestones, baseline/actual dates, float, % complete | View 4 Time, Context Strip | **No** |
+| Smartsheet — Drawing Register | Drawing numbers, revisions, issue dates, status | View 4 Quality | **No** |
+| Smartsheet — Spec Register | Spec sections, versions, addenda, status | View 4 Quality | **No** |
+| Smartsheet — Row IDs | Deep link targets for all Smartsheet data | Deep links, View 4 drill-down | **No** |
+| Slack API | Thread timestamps for deep links | Deep links | **No** |
+| Email metadata | Message IDs for deep links | Deep links | **No** |
+| Fieldwire API | Task IDs for deep links | Deep links | **No** |
+| Adaptive Build | Record IDs for deep links, invoice/expense data | Deep links, View 4 Cost actuals | **No** |
+| CompanyCam API | Photo IDs for deep links | Deep links | **No** |
+| `#foundry-bot-log` | Audit trail, event timestamps, classifications | Audit | **No** |
 
 **Current phase (Phase 2):** The dashboard is a read-only consumer. It creates no data, modifies no data, and has no write path to any system.
 
@@ -484,7 +781,7 @@ The dashboard reads from:
 | Edit source data fields | Source system is the system of record | All current phases |
 | Acknowledge (non-blocking items) | Acknowledgment is only meaningful for blocking items | Phase 3 scoping |
 | Notification preferences | No configuration surface in v1 | May revisit v2+ |
-| Historical charts or trend graphs | Weekly report covers trends; "What's Repeating" covers patterns | May revisit v2+ |
+| Time-series trend charts (month-over-month, quarter-over-quarter) | Cost · Time · Quality shows current state, not historical trends. Weekly report covers trends. | May revisit v2+ |
 | Draft message preview | Drafts live in Slack threads — deep link goes there | Intentional |
 | Bidding/outreach pipeline | Not in scope for v1 — tracked in Slack | May revisit v2+ |
 | Probation monitoring data | Separate Kuan-only process | Intentional |
@@ -502,7 +799,9 @@ The dashboard reads from:
 - **Detail panel:** full-screen slide-over on mobile, side panel on desktop
 - **Collapsed sections:** tap section header to expand/collapse
 - **Search:** top of screen, always accessible
-- **Tabs:** fixed at top, always visible (3 tabs)
+- **Tabs:** fixed at top, always visible (4 tabs). On mobile, 4th tab may scroll horizontally if screen width < 375px.
+- **Charts:** rendered as SVG or Canvas. Tap-to-drill on mobile (no hover). Chart labels sized for mobile readability.
+- **Context Strip:** always visible below banner, compact (3 lines tall). Tappable to navigate to View 4.
 - **No horizontal scroll.** All content fits single column.
 - **Login:** SSO via Google Workspace. Persistent session (30-day token).
 
