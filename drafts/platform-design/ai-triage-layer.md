@@ -8,7 +8,19 @@ last-reviewed: 2026-02-08
 
 ## Role
 
-AI acts as a **triage and drafting layer**, not a decision-maker. Every AI output is a draft that requires human review before publication or execution.
+AI acts as **function-level watchers**, not a decision-maker or PM. Each watcher monitors a specific domain, checks against SOPs and SLAs, drafts responses, surfaces decisions, and waits for human approval. Every AI output is a draft that requires human review before publication or execution.
+
+See `watcher-system.md` for the full watcher architecture, email intake rules, invoice gate, and daily review packet format.
+
+## Watchers (Pilot)
+
+| Watcher | Domain |
+|---|---|
+| Construction | RFIs, COs, pre-task readiness |
+| Procurement | Submittals, lead times, material QC |
+| Financial | Invoices, pay apps, budget exposure |
+| Warranty | Claims, warranty expiry, contractor response |
+| Executive | Decisions, cost exposure, SLA breaches |
 
 ## Core Capabilities
 
@@ -58,18 +70,22 @@ AI drafts the following document types. All drafts are presented to the human fo
 | **Daily summary** | End of day | All logs, by role | Each role |
 | **Weekly summary** | End of week | All logs, aggregated | PM → Owner's Rep |
 
-### 4. Request Classification
+### 4. Request Classification (Email + Slack + Manual)
 
-When a request arrives (via Slack, email, or manual entry), AI classifies it:
+When a request arrives (via email, Slack, or manual entry), the relevant watcher classifies it:
 
-| Input Signal | Classification | Routed To |
-|---|---|---|
-| Question about drawings, specs, or design intent | **RFI** | PM to log and route per RFI SOP |
-| Scope, cost, or schedule deviation | **Change Order (PCO)** | PM to log per CO SOP |
-| Defect report from tenant or field | **Warranty Claim** | Property Mgmt to log per warranty SOP |
-| Approval needed from Owner's Rep or Principal | **Decision** | Concierge to log per decision tracking SOP |
-| Field task or coordination item | **Task** | Superintendent or PM per pre-task readiness SOP |
-| Material or vendor issue | **Procurement** | Builiq Inc. per submittal/lead-time SOP |
+| Input Signal | Classification | Watcher | Routed To |
+|---|---|---|---|
+| Question about drawings, specs, or design intent | **RFI** | Construction | PM to log and route per RFI SOP |
+| Scope, cost, or schedule deviation | **Change Order (PCO)** | Construction | PM to log per CO SOP |
+| Invoice or payment request | **Invoice** | Financial | PM to validate via invoice gate |
+| Pay application received | **Pay App** | Financial | PM to verify per pay-app checklist |
+| Defect report from tenant or field | **Warranty Claim** | Warranty | Property Mgmt to log per warranty SOP |
+| Approval needed from Owner's Rep or Principal | **Decision** | Executive | Concierge to log per decision tracking SOP |
+| Field task or coordination item | **Task** | Construction | Superintendent or PM per pre-task readiness SOP |
+| Material or vendor issue | **Procurement** | Procurement | Builiq Inc. per submittal/lead-time SOP |
+
+**Email-specific classification:** Watchers read email metadata (sender, subject, attachments) and classify intent. AI presents the classification with confidence level. Human confirms or reclassifies before routing. AI does not reply to or forward email.
 
 AI presents the classification with confidence level. Human confirms or reclassifies before routing.
 
@@ -84,6 +100,36 @@ When a new log entry is needed, AI pre-fills the entry from available context:
 | Decision log | `decision_number` (next sequential), `date_requested`, `project`, `category` (suggested) | `subject`, `context`, `decision_maker` |
 | Warranty claim log | `claim_number` (next sequential), `date_reported`, `project` | `unit_location`, `defect_description`, `category`, `priority` |
 
+### 6. Daily Review Packet (Mandatory)
+
+Each watcher generates a Daily Review Packet every business day by 8:00 AM. This is the primary proactive output of the watcher system.
+
+**Packet sections:**
+
+1. **New items** — items received since last report
+2. **Blocked items** — items awaiting human input (with days waiting)
+3. **Risks** — items violating SOPs, budgets, or SLAs (with SOP reference)
+4. **Recommended actions** — what the watcher suggests the human do next
+5. **Draft messages** — pre-written escalations, reminders, or notices (not sent)
+
+Delivery: Slack channel (primary), optional DM, optional email archive.
+
+If nothing new: packet says "No new items. [N] items in monitoring."
+
+See `watcher-system.md` for the full packet format specification.
+
+### 7. Invoice Intake Gate
+
+The Financial Watcher enforces a validation gate on all invoices before they reach Adaptive Build.
+
+**Gate checks:** vendor, amount, job #, cost code, budget availability, executed CO status, duplicate detection.
+
+**Gate output:** PM review prompt with extracted data and flags.
+
+**Rule:** No invoice reaches Adaptive Build without PM approval.
+
+See `watcher-system.md` for the full gate flow and control table.
+
 ## Constraints (Enforced)
 
 - AI never writes directly to a system of record
@@ -91,4 +137,7 @@ When a new log entry is needed, AI pre-fills the entry from available context:
 - AI never approves, closes, or authorizes
 - AI never accesses QuickBooks, Connecteam, or financial systems
 - AI never triggers CRM automations or marketing sends
+- AI never replies to, forwards, or sends email
+- AI never routes invoices to Adaptive Build without PM approval
 - All drafts are labeled "DRAFT — awaiting review" until human confirms
+- Watchers do not chain — one watcher's output does not trigger another watcher's action

@@ -22,8 +22,15 @@ Map how Slack (interface), Google Drive (system of record), AI (triage/drafting)
                        │
                        ▼
 ┌─────────────────────────────────────────────────────┐
-│               SLACK (Interface Layer)                │
+│            INTAKE LAYER (Email + Slack)              │
 │                                                     │
+│  EMAIL INBOXES                                      │
+│  project-name@shb.studio    (project comms)         │
+│  info@shb.studio            (general / invoices)    │
+│  support@shb.studio         (warranty)              │
+│  shb-studio@adaptive.build  (expenses / pay apps)   │
+│                                                     │
+│  SLACK INTERFACE                                    │
 │  Slash commands    Notifications    Summaries       │
 │  /rfi /co /decision /submittal /warranty /fund      │
 │  Draft → Review → Approve                           │
@@ -31,11 +38,18 @@ Map how Slack (interface), Google Drive (system of record), AI (triage/drafting)
                        │
                        ▼
 ┌─────────────────────────────────────────────────────┐
-│             AI TRIAGE LAYER (Assistive)              │
+│          WATCHER LAYER (Function-Level AI)           │
 │                                                     │
-│  Classify requests    Pre-fill log entries           │
-│  Draft messages       Surface SLA aging              │
-│  Generate summaries   Detect missing docs            │
+│  Construction ── RFIs, COs, pre-task readiness      │
+│  Procurement ─── submittals, lead times, QC         │
+│  Financial ───── invoices, pay apps, budget          │
+│  Warranty ────── claims, expiry, contractor          │
+│  Executive ───── decisions, exposure, SLA breaches   │
+│                                                     │
+│  Each watcher: monitors → checks SOPs → drafts      │
+│  → surfaces decisions → WAITS for human approval    │
+│                                                     │
+│  Daily Review Packet: mandatory output per watcher  │
 │                                                     │
 │  ⚠️  NEVER: approve, execute, send, or delete       │
 └──────────────────────┬──────────────────────────────┘
@@ -54,16 +68,17 @@ Map how Slack (interface), Google Drive (system of record), AI (triage/drafting)
                        │
                        ▼
 ┌─────────────────────────────────────────────────────┐
-│            EXISTING TOOLS (Unchanged)                │
+│          DOWNSTREAM TOOLS (AI Does Not Write)        │
 │                                                     │
-│  Fieldwire ──── field tasks, drawings               │
-│  OpenSpace ──── 360 walkthroughs                    │
-│  CompanyCam ─── site photos                         │
-│  Smartsheet ─── budgets, schedules (temp SOR)       │
-│  QBO ────────── accounting (no AI access)           │
-│  Connecteam ─── workforce (no AI access)            │
-│  GHL ────────── CRM, marketing, investor comms      │
-│  GitHub ─────── SOPs, schemas, CLAUDE.md            │
+│  Adaptive Build ── invoices (after PM gate only)    │
+│  Fieldwire ────── field tasks, drawings             │
+│  OpenSpace ────── 360 walkthroughs                  │
+│  CompanyCam ───── site photos                       │
+│  Smartsheet ───── budgets, schedules (temp SOR)     │
+│  QBO ──────────── accounting (no AI access)         │
+│  Connecteam ───── workforce (no AI access)          │
+│  GHL ──────────── CRM, marketing, investor comms    │
+│  GitHub ─────────  SOPs, schemas, CLAUDE.md         │
 └─────────────────────────────────────────────────────┘
 ```
 
@@ -155,6 +170,26 @@ Tenant or PM reports defect
   → PM verifies, updates Sheet: status → resolved → closed
 ```
 
+### Invoice Intake (via Email Gate)
+
+```
+Invoice arrives (email to info@shb.studio or shb-studio@adaptive.build)
+  → Financial Watcher detects invoice email
+  → AI extracts: vendor, amount, job #, cost code, PO reference
+  → AI checks: budget availability, executed CO status, duplicate detection
+  → AI posts PM review prompt in Slack:
+      "Invoice from [vendor] for $[amount]"
+      "Job #: [found / not found]"
+      "Cost code: [found / not found]"
+      "Budget: [available / over / cannot verify]"
+      "CO backing: [verified / not found / n/a]"
+  → PM reviews: confirms job #, cost code, approves
+  → Only after human approval: invoice forwarded to Adaptive Build
+  → Financial Watcher logs action to #foundry-bot-log
+```
+
+**No invoice reaches Adaptive Build without PM validation.**
+
 ### Investor Update
 
 ```
@@ -175,12 +210,15 @@ During the pilot, AI reads from these sources to generate drafts and summaries:
 
 | Source | How AI Accesses | What AI Reads |
 |---|---|---|
+| Email (inboxes) | Email API (read-only — metadata + attachments) | Sender, subject, date, attachment names, body text for classification. Inboxes: `project-name@shb.studio`, `info@shb.studio`, `support@shb.studio`, `shb-studio@adaptive.build` |
 | Google Sheets (logs) | Google Sheets API (read-only) | RFI log, CO log, decision log, submittal register, lead-time tracker, warranty claim log |
 | Google Drive (files) | Google Drive API (read-only) | File names and metadata for reference links. Does not read document contents unless explicitly configured. |
 | Slack (messages) | Slack Events API | Commands, thread replies, channel messages (for context in classifications) |
 | GitHub (SOPs) | Direct file read | SOP rules, SLA tables, RACI matrices, schema definitions |
 
 AI does **not** read from: QuickBooks, Connecteam, Fieldwire, OpenSpace, CompanyCam, or GHL.
+
+AI does **not** reply to, forward, or send email. Email is read-only intake.
 
 ---
 
@@ -195,6 +233,7 @@ Every workflow has explicit points where AI stops and a human must act:
 | **Route gate** | Suggested routing per RACI | Human confirms and tags/sends |
 | **Escalation gate** | Drafted escalation message | Human reviews and sends |
 | **Approval gate** | Summary for decision maker | Human approves or rejects |
+| **Invoice gate** | Extracted invoice data + budget/CO check | Human confirms job #, cost code, approves forwarding to Adaptive Build |
 | **Send gate** | Drafted external message | Human copies to GHL/email and sends |
 | **Close gate** | Suggested closure entry | Human verifies and updates Sheet |
 

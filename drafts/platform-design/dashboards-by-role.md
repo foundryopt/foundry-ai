@@ -13,7 +13,26 @@ last-reviewed: 2026-02-08
 - Action buttons trigger drafts, not final actions
 - Inbox-style, not spreadsheet-style
 - No complex navigation trees
-- Pulls from: logs (RFI, CO, decision, warranty), Google Drive (documents), Slack events
+- Fed by **watcher summaries**, not raw tool data
+- Pulls from: watcher daily review packets, logs (RFI, CO, decision, warranty), Google Drive (documents), Slack events
+
+---
+
+## Pilot Scope
+
+For the single-project pilot, only **three dashboards** are active:
+
+| Dashboard | Status | Rationale |
+|---|---|---|
+| **PM Dashboard** | Active (pilot) | Highest volume of daily actions. Tests invoice gate, aging, and intake. |
+| **Executive Dashboard** | Active (pilot) | Tests decision routing, cost exposure visibility, and SLA breach surfacing. |
+| **Procurement Dashboard** | Active (pilot) | Tests lead-time risk, submittal pipeline, and material delivery tracking. |
+| Superintendent | Deferred | Super uses Slack and pre-task checklists directly. Dashboard adds less value at pilot scale. |
+| Design | Deferred | Design response tracked via PM dashboard and Slack. |
+| Fund / Investor | Deferred | Fund reporting is lower frequency. Test `/fund` command only. |
+| Property Mgmt / Warranty | Deferred | Warranty tracked via Slack `#warranty` channel and watcher packets. |
+
+Deferred dashboards can be activated after the pilot if validated.
 
 ---
 
@@ -30,6 +49,7 @@ The PM sees everything that needs action across their project(s).
 | Open RFIs by priority | RFI log | Red badge if any item past `response_due` |
 | Open PCOs / COs | CO log | Yellow badge if any item past SLA window |
 | Pre-task readiness items due this week | Construction schedule + checklist | Red badge if checklist incomplete < 3 days before task |
+| Invoices pending approval (invoice gate) | Financial Watcher | Red if missing job # or cost code. Yellow if over budget. Count badge. |
 | Pay apps awaiting verification | Pay-app intake | Badge shows count |
 | Lead-time risk flags | Lead-time tracker | Red = critical (negative float), Yellow = at-risk (< 14 days) |
 
