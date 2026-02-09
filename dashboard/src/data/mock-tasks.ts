@@ -32,6 +32,7 @@ export const TASKS: OpenTask[] = [
     relatedTaskIds: ['SUB-011'],
     scheduleImpactDays: 2,
     qualityAffected: ['Drawing-A201', 'Drawing-M102'],
+    costCodeRef: '09-30',
   },
   {
     id: 'RFI-044',
@@ -64,6 +65,7 @@ export const TASKS: OpenTask[] = [
     costImpact: 12000,
     scheduleImpactDays: 3,
     qualityAffected: ['Drawing-M301'],
+    costCodeRef: '23-00',
   },
   {
     id: 'RFI-048',
@@ -90,6 +92,10 @@ export const TASKS: OpenTask[] = [
       impactedAreas: ['Roof Terrace', 'Planter Walls'],
     },
     qualityAffected: ['Drawing-A501'],
+    costCodeRef: '07-00',
+    attachments: [
+      { type: 'drawing', label: 'Waterproofing detail sketch', url: '#doc-waterproof-sketch-048' },
+    ],
   },
 
   // ── Change Orders ──
@@ -121,6 +127,11 @@ export const TASKS: OpenTask[] = [
     },
     costImpact: 34200,
     scheduleImpactDays: 1,
+    costCodeRef: '26-00',
+    attachments: [
+      { type: 'contract', label: 'PCO-009 cost estimate', url: '#doc-pco-009-estimate' },
+      { type: 'drawing', label: 'Panel relocation plan', url: '#dwg-panel-reloc' },
+    ],
   },
   {
     id: 'PCO-011',
@@ -150,6 +161,7 @@ export const TASKS: OpenTask[] = [
     relatedTaskIds: ['RFI-044'],
     costImpact: 18400,
     scheduleImpactDays: 2,
+    costCodeRef: '23-00',
   },
 
   // ── Invoices ──
@@ -179,6 +191,11 @@ export const TASKS: OpenTask[] = [
       matchStatus: 'partial',
     },
     costImpact: 47800,
+    costCodeRef: '26-00',
+    attachments: [
+      { type: 'contract', label: 'Invoice INV-8834.pdf', url: '#pdf-inv-8834' },
+      { type: 'spec', label: 'SOV backup — Electrical', url: '#doc-sov-elec' },
+    ],
   },
   {
     id: 'INV-CM-2267',
@@ -205,6 +222,10 @@ export const TASKS: OpenTask[] = [
       matchStatus: 'unmatched',
     },
     costImpact: 22100,
+    costCodeRef: '23-00',
+    attachments: [
+      { type: 'contract', label: 'Invoice INV-CM-2267.pdf', url: '#pdf-inv-cm-2267' },
+    ],
   },
 
   // ── Decisions ──
@@ -236,6 +257,11 @@ export const TASKS: OpenTask[] = [
     relatedTaskIds: ['LT-005'],
     costImpact: -15000,
     scheduleImpactDays: 4,
+    costCodeRef: '09-30',
+    attachments: [
+      { type: 'spec', label: 'Material comparison matrix', url: '#doc-material-comparison' },
+      { type: 'photo', label: 'Finish samples gallery', url: '#photo-finish-samples' },
+    ],
   },
   {
     id: 'DEC-006',
@@ -261,6 +287,10 @@ export const TASKS: OpenTask[] = [
       stakeholders: ['Sam W.', 'Rachel K.'],
     },
     costImpact: 8000,
+    costCodeRef: '09-00',
+    attachments: [
+      { type: 'drawing', label: 'Railing design sketches', url: '#doc-railing-sketch' },
+    ],
   },
 
   // ── Submittals ──
@@ -292,6 +322,11 @@ export const TASKS: OpenTask[] = [
     relatedTaskIds: ['LT-012'],
     scheduleImpactDays: 3,
     qualityAffected: ['Submittal-014'],
+    costCodeRef: '14-00',
+    attachments: [
+      { type: 'spec', label: 'Cab finish spec 14 20 00', url: '#doc-cab-spec' },
+      { type: 'photo', label: 'Sample photos — Rev 1', url: '#photo-cab-samples' },
+    ],
   },
   {
     id: 'SUB-013',
@@ -318,6 +353,11 @@ export const TASKS: OpenTask[] = [
       reviewers: ['Taylor R.', 'SHB Studio'],
     },
     qualityAffected: ['Submittal-016'],
+    costCodeRef: '06-00',
+    attachments: [
+      { type: 'drawing', label: 'Millwork shop drawings.pdf', url: '#pdf-millwork-shop-dwg' },
+      { type: 'spec', label: 'Spec 06 40 00 — Woodwork', url: '#doc-spec-0640' },
+    ],
   },
 
   // ── Lead Times ──
@@ -349,6 +389,11 @@ export const TASKS: OpenTask[] = [
     relatedTaskIds: ['DEC-005'],
     costImpact: 0,
     scheduleImpactDays: 8,
+    costCodeRef: '09-30',
+    attachments: [
+      { type: 'spec', label: 'Stone spec — Italian marble', url: '#doc-marble-spec' },
+      { type: 'contract', label: 'PO — Mediterranean Stone', url: '#doc-po-med-stone' },
+    ],
   },
   {
     id: 'LT-008',
@@ -375,6 +420,10 @@ export const TASKS: OpenTask[] = [
       riskLevel: 'at-risk',
     },
     scheduleImpactDays: 0,
+    costCodeRef: '26-00',
+    attachments: [
+      { type: 'spec', label: 'Fixture cut sheets — pendants', url: '#doc-pendant-cutsheet' },
+    ],
   },
   {
     id: 'LT-012',
@@ -402,6 +451,10 @@ export const TASKS: OpenTask[] = [
     },
     relatedTaskIds: ['SUB-011'],
     scheduleImpactDays: 0,
+    costCodeRef: '14-00',
+    attachments: [
+      { type: 'spec', label: 'Laminate finish samples', url: '#doc-laminate-samples' },
+    ],
   },
 
   // ── Warranty ──

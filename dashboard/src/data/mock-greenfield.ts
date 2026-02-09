@@ -31,6 +31,10 @@ export const GF_TASKS: OpenTask[] = [
     },
     scheduleImpactDays: 2,
     qualityAffected: ['Drawing-GF-A101'],
+    costCodeRef: '08-00',
+    attachments: [
+      { type: 'drawing', label: 'Storefront detail A-301', url: '#dwg-gf-storefront-301' },
+    ],
   },
 
   // ── Invoice ──
@@ -59,6 +63,11 @@ export const GF_TASKS: OpenTask[] = [
       matchStatus: 'partial',
     },
     costImpact: 68500,
+    costCodeRef: '31-00',
+    attachments: [
+      { type: 'contract', label: 'Invoice GF-INV-001.pdf', url: '#pdf-gf-inv-001' },
+      { type: 'photo', label: 'Grading progress photos', url: '#photo-gf-grading' },
+    ],
   },
 
   // ── Submittal ──
@@ -87,6 +96,11 @@ export const GF_TASKS: OpenTask[] = [
       reviewers: ['Chris L.', 'SHB Studio'],
     },
     qualityAffected: ['Submittal-GF-001'],
+    costCodeRef: '05-00',
+    attachments: [
+      { type: 'drawing', label: 'Steel shop drawings.pdf', url: '#pdf-gf-steel-shop' },
+      { type: 'spec', label: 'Spec 05 12 00 — Steel', url: '#doc-gf-spec-0512' },
+    ],
   },
 
   // ── Lead Time ──
@@ -116,6 +130,10 @@ export const GF_TASKS: OpenTask[] = [
     },
     relatedTaskIds: ['GF-SUB-001'],
     scheduleImpactDays: 0,
+    costCodeRef: '05-00',
+    attachments: [
+      { type: 'contract', label: 'PO — Ironworks Fabrication', url: '#doc-gf-po-ironworks' },
+    ],
   },
 
   // ── Decision ──
@@ -143,6 +161,10 @@ export const GF_TASKS: OpenTask[] = [
       stakeholders: ['Dana W.', 'Sam W.'],
     },
     costImpact: 45000,
+    costCodeRef: '32-00',
+    attachments: [
+      { type: 'spec', label: 'Parking material comparison', url: '#doc-gf-parking-compare' },
+    ],
   },
 
   // ── CO ──
@@ -172,6 +194,11 @@ export const GF_TASKS: OpenTask[] = [
     },
     costImpact: 28000,
     scheduleImpactDays: 3,
+    costCodeRef: '31-00',
+    attachments: [
+      { type: 'contract', label: 'PCO-001 cost estimate.pdf', url: '#pdf-gf-pco-001' },
+      { type: 'spec', label: 'Geotech report — NW quadrant', url: '#doc-gf-geotech' },
+    ],
   },
 ];
 

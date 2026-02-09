@@ -18,7 +18,8 @@ export type Role =
   | 'Principal'
   | "Owner's Rep"
   | 'Procurement'
-  | 'Ops';
+  | 'Ops'
+  | 'Designer';
 
 export interface User {
   name: string;
@@ -82,6 +83,8 @@ export interface OpenTask {
   costImpact?: number;
   scheduleImpactDays?: number;
   qualityAffected?: string[];
+  attachments?: Attachment[];
+  costCodeRef?: string;
 }
 
 // ── Category-Specific Detail (Discriminated Union) ──

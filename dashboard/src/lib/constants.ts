@@ -57,6 +57,7 @@ export const ROLE_DEFAULT_VIEW: Record<Role, ViewTab> = {
   "Owner's Rep": 1,
   Procurement: 2,
   Ops: 2,
+  Designer: 0,
 };
 
 /* ── Role → Entity ── */
@@ -68,6 +69,7 @@ export const ROLE_ENTITY: Record<Role, string> = {
   "Owner's Rep": 'SHB Group',
   Procurement: 'Builiq Inc.',
   Ops: 'Builiq Inc.',
+  Designer: 'SHB Studio',
 };
 
 /* ── Role Descriptions (for login page) ── */
@@ -79,6 +81,7 @@ export const ROLE_DESCRIPTIONS: Record<Role, string> = {
   "Owner's Rep": "Owner's Representative — oversight, approval authority, milestone tracking",
   Procurement: 'Procurement — vendor coordination, lead times, submittals',
   Ops: 'Operations — invoice processing, expense tracking, compliance',
+  Designer: 'Designer — design reviews, submittals, RFI responses, quality coordination',
 };
 
 /* ── Chart Colors ── */
