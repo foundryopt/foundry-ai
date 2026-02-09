@@ -302,7 +302,7 @@ Phase 3 is not activated unless:
 
 ## Phase 4 — Status & Resolution (NOT ACTIVE — Preview Only)
 
-**STATUS: NOT ACTIVE. Not designed. Exists only as a directional placeholder.**
+**STATUS: NOT ACTIVE. Not designed. Exists only as a directional placeholder. Phase 4 cannot activate until Phase F produces a "Proceed" recommendation.**
 
 | Capability | Description |
 |---|---|
@@ -310,7 +310,44 @@ Phase 3 is not activated unless:
 | Resolution confirmation | Users could mark an Open Task as resolved |
 | Workflow gating | Dashboard could block downstream steps until resolution |
 
-**Phase 4 is explicitly excluded from Phase 3. No design work begins until Phase 3 is confirmed and Kuan approves planning.**
+**Phase 4 is explicitly excluded from Phase 3. No design work begins until Phase 3 is confirmed, Phase F passes, and Kuan approves planning.**
+
+---
+
+## Phase F — Live Human Pilot (NOT ACTIVE)
+
+**STATUS: NOT ACTIVE. Full spec in `phase-f-live-human-pilot.md`.**
+
+Phase F validates dashboard instrumentation with real humans and real data. It determines **whether KPI visibility should ever exist**. No metrics, scores, or rankings are shown to any user during Phase F.
+
+| Parameter | Value |
+|---|---|
+| Pilot users | 2–3 (PM + Super/Procurement + optional Principal/Owner's Rep) |
+| Data sources | Smartsheet (read-only), Slack (metadata only), Dashboard (view events) |
+| Duration | 7 calendar days minimum |
+| Collects | Event counts, error frequencies, ordering patterns, ambiguity cases |
+| Does NOT collect | Response times, rankings, scores, KPIs |
+
+### Phase F Prerequisites
+
+1. Phase 2 probation confirmed (Level 1 + Level 2 active, no revocations)
+2. Dashboard v1 deployed and stable
+3. Dashboard instrumentation (Phase E) complete and tested against mock data
+4. Kuan explicitly approves Phase F activation
+5. Pilot user consent obtained per protocol in `phase-f-live-human-pilot.md`
+
+### Phase F Exit Criteria
+
+All must be true to proceed:
+1. Error rate <1% by day 7
+2. No pilot user discomfort
+3. "What counts as a response" is explainable in plain English
+4. >80% of tracked tasks have clean or minor-gap timelines
+5. Top ambiguity patterns have identified fixes
+
+### Phase F → Phase G
+
+Phase F produces one of three recommendations: **Proceed**, **Adjust Definitions**, or **Pause KPI Concept**. Phase G (KPI visibility design) is only initiated on a "Proceed" recommendation.
 
 ---
 

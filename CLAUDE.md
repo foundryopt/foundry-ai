@@ -91,6 +91,7 @@ One active project. Two authority levels active.
 | Level 4: GHL Draft-to-Send | NOT ACTIVE | — | — |
 | Phase 3: Limited Dashboard Interaction | NOT ACTIVE | — | — |
 | Phase 4: Status & Resolution | NOT ACTIVE | — | — |
+| Phase F: Live Human Pilot | NOT ACTIVE | — | — |
 
 - Open Tasks generate daily review packets and write approved log entries to Drive Sheets
 - Open Tasks post internal Slack notifications (SLA breaches, new items, deliveries)
@@ -124,6 +125,7 @@ All detailed specifications live in `drafts/platform-design/`:
 | `watcher-system.md` | Function-level watchers, email intake, invoice gate, daily packets, bidding/outreach |
 | `integration-architecture.md` | System layers, data flows, full application inventory, human gates |
 | `dashboard-human-simple-v1.md` | Human-Simple Open Task Dashboard — role-based views, Cost/Time/Quality visuals (Smartsheet), Phase 3 interactions, Phase 4 preview |
+| `phase-f-live-human-pilot.md` | Phase F — live human pilot for instrumentation validation, consent protocol, exit criteria, KPI gating |
 | `dashboards-by-role.md` | Role-based dashboards — superseded by Human-Simple for v1, retained for v2+ reference |
 | `slack-command-flows.md` | Slash command UI specs and routing |
 | `slack-workspace-setup.md` | Channel architecture, bot config, notifications |
