@@ -92,7 +92,3 @@ export const CHART_COLORS = {
   behind: '#EF4444',
 };
 
-/* ── Project Metadata ── */
-
-export const PROJECT_NAME = 'SandBox — Mixed-Use Development';
-export const PHASE_LABEL = 'Phase 2 — Probation';

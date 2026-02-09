@@ -1,6 +1,6 @@
 'use client';
 
-import type { RepeatBreach, OwnerLoad } from '@/lib/types';
+import type { RepeatBreach, OwnerLoad, InvoicePattern } from '@/lib/types';
 import { DataTable } from '@/components/tables/DataTable';
 import { CategoryTag } from '@/components/ui/CategoryTag';
 import { Badge } from '@/components/ui/Badge';
@@ -9,7 +9,7 @@ import { URGENCY_COLORS } from '@/lib/constants';
 interface WhatsRepeatingProps {
   repeatBreaches: RepeatBreach[];
   ownerLoads: OwnerLoad[];
-  invoicePatterns: { vendor: string; invoiceCount: number; issueCount: number; commonIssue: string; avgResolutionDays: number }[];
+  invoicePatterns: InvoicePattern[];
 }
 
 export function WhatsRepeating({ repeatBreaches, ownerLoads, invoicePatterns }: WhatsRepeatingProps) {

@@ -4,6 +4,7 @@ export const TASKS: OpenTask[] = [
   // ── RFIs ──
   {
     id: 'RFI-047',
+    projectId: 'sandbox-001',
     category: 'RFI',
     subject: 'Tile layout vs reflected ceiling conflict',
     owner: 'Taylor R.',
@@ -34,6 +35,7 @@ export const TASKS: OpenTask[] = [
   },
   {
     id: 'RFI-044',
+    projectId: 'sandbox-001',
     category: 'RFI',
     subject: 'Mechanical chase routing conflict Level 3',
     owner: 'Taylor R.',
@@ -65,6 +67,7 @@ export const TASKS: OpenTask[] = [
   },
   {
     id: 'RFI-048',
+    projectId: 'sandbox-001',
     category: 'RFI',
     subject: 'Waterproofing detail at planter wall',
     owner: 'Taylor R.',
@@ -92,6 +95,7 @@ export const TASKS: OpenTask[] = [
   // ── Change Orders ──
   {
     id: 'PCO-009',
+    projectId: 'sandbox-001',
     category: 'CO',
     subject: 'Electrical panel relocation Level 2',
     owner: 'Jordan M.',
@@ -120,6 +124,7 @@ export const TASKS: OpenTask[] = [
   },
   {
     id: 'PCO-011',
+    projectId: 'sandbox-001',
     category: 'CO',
     subject: 'Mechanical reroute Level 3',
     owner: 'Jordan M.',
@@ -150,6 +155,7 @@ export const TASKS: OpenTask[] = [
   // ── Invoices ──
   {
     id: 'INV-8834',
+    projectId: 'sandbox-001',
     category: 'Invoice',
     subject: 'Electrical rough-in billing',
     owner: 'Jordan M.',
@@ -176,6 +182,7 @@ export const TASKS: OpenTask[] = [
   },
   {
     id: 'INV-CM-2267',
+    projectId: 'sandbox-001',
     category: 'Invoice',
     subject: 'Crown Mechanical CO work (missing job #)',
     owner: 'Jordan M.',
@@ -203,6 +210,7 @@ export const TASKS: OpenTask[] = [
   // ── Decisions ──
   {
     id: 'DEC-005',
+    projectId: 'sandbox-001',
     category: 'Decision',
     subject: 'Lobby finish material substitution',
     owner: 'Rachel K.',
@@ -231,6 +239,7 @@ export const TASKS: OpenTask[] = [
   },
   {
     id: 'DEC-006',
+    projectId: 'sandbox-001',
     category: 'Decision',
     subject: 'Roof terrace railing design change',
     owner: 'Sam W.',
@@ -257,6 +266,7 @@ export const TASKS: OpenTask[] = [
   // ── Submittals ──
   {
     id: 'SUB-011',
+    projectId: 'sandbox-001',
     category: 'Submittal',
     subject: 'Elevator cab finish samples',
     owner: 'Taylor R.',
@@ -285,6 +295,7 @@ export const TASKS: OpenTask[] = [
   },
   {
     id: 'SUB-013',
+    projectId: 'sandbox-001',
     category: 'Submittal',
     subject: 'Custom millwork shop drawings',
     owner: 'Taylor R.',
@@ -312,6 +323,7 @@ export const TASKS: OpenTask[] = [
   // ── Lead Times ──
   {
     id: 'LT-005',
+    projectId: 'sandbox-001',
     category: 'Lead Time',
     subject: 'Lobby stone cladding (CRITICAL -8d)',
     owner: 'Alex P.',
@@ -340,6 +352,7 @@ export const TASKS: OpenTask[] = [
   },
   {
     id: 'LT-008',
+    projectId: 'sandbox-001',
     category: 'Lead Time',
     subject: 'Lobby pendant fixtures (AT-RISK 4d)',
     owner: 'Alex P.',
@@ -365,6 +378,7 @@ export const TASKS: OpenTask[] = [
   },
   {
     id: 'LT-012',
+    projectId: 'sandbox-001',
     category: 'Lead Time',
     subject: 'Elevator cab panels (18d float)',
     owner: 'Alex P.',
@@ -393,6 +407,7 @@ export const TASKS: OpenTask[] = [
   // ── Warranty ──
   {
     id: 'WC-001',
+    projectId: 'sandbox-001',
     category: 'Warranty',
     subject: 'Unit 204 HVAC noise complaint',
     owner: 'Jordan M.',
@@ -418,6 +433,7 @@ export const TASKS: OpenTask[] = [
   },
   {
     id: 'WC-003',
+    projectId: 'sandbox-001',
     category: 'Warranty',
     subject: 'Unit 308 water stain (possible leak)',
     owner: 'Jordan M.',
@@ -443,6 +459,7 @@ export const TASKS: OpenTask[] = [
   // ── Pay App ──
   {
     id: 'PA-005',
+    projectId: 'sandbox-001',
     category: 'Pay App',
     subject: 'GC progress billing #5',
     owner: 'Jordan M.',
@@ -470,6 +487,7 @@ export const TASKS: OpenTask[] = [
   // ── Pre-Task ──
   {
     id: 'PT-014',
+    projectId: 'sandbox-001',
     category: 'Pre-Task',
     subject: 'Concrete pour readiness (Wed)',
     owner: 'Mike S.',

@@ -1,7 +1,8 @@
-import type { RepeatBreach, OwnerLoad } from '@/lib/types';
+import type { RepeatBreach, OwnerLoad, InvoicePattern } from '@/lib/types';
 
 export const REPEAT_BREACHES: RepeatBreach[] = [
   {
+    projectId: 'sandbox-001',
     category: 'RFI',
     owner: 'Taylor R.',
     count: 3,
@@ -9,6 +10,7 @@ export const REPEAT_BREACHES: RepeatBreach[] = [
     pattern: 'Architectural/MEP RFIs consistently late — design coordination gap',
   },
   {
+    projectId: 'sandbox-001',
     category: 'Submittal',
     owner: 'Taylor R.',
     count: 2,
@@ -16,6 +18,7 @@ export const REPEAT_BREACHES: RepeatBreach[] = [
     pattern: 'Submittal reviews delayed — vendor late submissions + review queue',
   },
   {
+    projectId: 'sandbox-001',
     category: 'Invoice',
     owner: 'Jordan M.',
     count: 2,
@@ -23,6 +26,7 @@ export const REPEAT_BREACHES: RepeatBreach[] = [
     pattern: 'Invoices arriving without proper backup documentation',
   },
   {
+    projectId: 'sandbox-001',
     category: 'Decision',
     owner: 'Rachel K.',
     count: 1,
@@ -33,6 +37,7 @@ export const REPEAT_BREACHES: RepeatBreach[] = [
 
 export const OWNER_LOADS: OwnerLoad[] = [
   {
+    projectId: 'sandbox-001',
     owner: 'Jordan M.',
     role: 'PM',
     total: 6,
@@ -42,6 +47,7 @@ export const OWNER_LOADS: OwnerLoad[] = [
     watching: 2,
   },
   {
+    projectId: 'sandbox-001',
     owner: 'Taylor R.',
     role: 'Ops',
     total: 5,
@@ -51,6 +57,7 @@ export const OWNER_LOADS: OwnerLoad[] = [
     watching: 0,
   },
   {
+    projectId: 'sandbox-001',
     owner: 'Alex P.',
     role: 'Procurement',
     total: 3,
@@ -60,6 +67,7 @@ export const OWNER_LOADS: OwnerLoad[] = [
     watching: 2,
   },
   {
+    projectId: 'sandbox-001',
     owner: 'Mike S.',
     role: 'Super',
     total: 1,
@@ -69,6 +77,7 @@ export const OWNER_LOADS: OwnerLoad[] = [
     watching: 0,
   },
   {
+    projectId: 'sandbox-001',
     owner: 'Rachel K.',
     role: "Owner's Rep",
     total: 1,
@@ -78,6 +87,7 @@ export const OWNER_LOADS: OwnerLoad[] = [
     watching: 0,
   },
   {
+    projectId: 'sandbox-001',
     owner: 'Sam W.',
     role: 'Principal',
     total: 1,
@@ -88,8 +98,9 @@ export const OWNER_LOADS: OwnerLoad[] = [
   },
 ];
 
-export const INVOICE_PATTERNS = [
+export const INVOICE_PATTERNS: InvoicePattern[] = [
   {
+    projectId: 'sandbox-001',
     vendor: 'Spark Electric',
     invoiceCount: 5,
     issueCount: 2,
@@ -97,6 +108,7 @@ export const INVOICE_PATTERNS = [
     avgResolutionDays: 3,
   },
   {
+    projectId: 'sandbox-001',
     vendor: 'Crown Mechanical',
     invoiceCount: 4,
     issueCount: 2,
@@ -104,6 +116,7 @@ export const INVOICE_PATTERNS = [
     avgResolutionDays: 5,
   },
   {
+    projectId: 'sandbox-001',
     vendor: 'ABC Concrete',
     invoiceCount: 8,
     issueCount: 0,

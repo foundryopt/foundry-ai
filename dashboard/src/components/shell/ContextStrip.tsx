@@ -1,20 +1,26 @@
 'use client';
 
-import { BUDGET, SCHEDULE, QUALITY } from '@/data';
+import type { BudgetSummary, ScheduleSummary, QualitySummary } from '@/lib/types';
 import { formatCurrency, formatPercent } from '@/lib/utils';
 
-export function ContextStrip() {
+interface ContextStripProps {
+  budget: BudgetSummary;
+  schedule: ScheduleSummary;
+  quality: QualitySummary;
+}
+
+export function ContextStrip({ budget, schedule, quality }: ContextStripProps) {
   const scheduleLabel =
-    SCHEDULE.overallStatus === 'on-track'
+    schedule.overallStatus === 'on-track'
       ? 'On Track'
-      : SCHEDULE.overallStatus === 'at-risk'
+      : schedule.overallStatus === 'at-risk'
         ? 'At Risk'
         : 'Behind';
 
   const scheduleColor =
-    SCHEDULE.overallStatus === 'on-track'
+    schedule.overallStatus === 'on-track'
       ? 'text-green-600'
-      : SCHEDULE.overallStatus === 'at-risk'
+      : schedule.overallStatus === 'at-risk'
         ? 'text-yellow-600'
         : 'text-red-600';
 
@@ -25,12 +31,12 @@ export function ContextStrip() {
         <div className="flex items-center gap-2 shrink-0">
           <span className="text-gray-400 uppercase tracking-wider font-medium">Budget</span>
           <span className="font-semibold text-gray-700">
-            {formatPercent(BUDGET.percentSpent)} spent
+            {formatPercent(budget.percentSpent)} spent
           </span>
-          <span className="text-gray-400">of {formatCurrency(BUDGET.currentBudget)}</span>
-          {BUDGET.totalPotential > 0 && (
+          <span className="text-gray-400">of {formatCurrency(budget.currentBudget)}</span>
+          {budget.totalPotential > 0 && (
             <span className="text-amber-600 font-medium">
-              +{formatCurrency(BUDGET.totalPotential)} potential
+              +{formatCurrency(budget.totalPotential)} potential
             </span>
           )}
         </div>
@@ -41,9 +47,9 @@ export function ContextStrip() {
         <div className="flex items-center gap-2 shrink-0">
           <span className="text-gray-400 uppercase tracking-wider font-medium">Schedule</span>
           <span className={`font-semibold ${scheduleColor}`}>{scheduleLabel}</span>
-          {SCHEDULE.phases.some((p) => p.daysVariance < 0) && (
+          {schedule.phases.some((p) => p.daysVariance < 0) && (
             <span className="text-gray-400">
-              {Math.abs(Math.min(...SCHEDULE.phases.map((p) => p.daysVariance)))}d behind
+              {Math.abs(Math.min(...schedule.phases.map((p) => p.daysVariance)))}d behind
             </span>
           )}
         </div>
@@ -54,11 +60,11 @@ export function ContextStrip() {
         <div className="flex items-center gap-2 shrink-0">
           <span className="text-gray-400 uppercase tracking-wider font-medium">Quality</span>
           <span className="font-semibold text-gray-700">
-            {formatPercent(QUALITY.percentCurrent)} current
+            {formatPercent(quality.percentCurrent)} current
           </span>
-          {QUALITY.affectedByOpenTasks > 0 && (
+          {quality.affectedByOpenTasks > 0 && (
             <span className="text-amber-600 font-medium">
-              {QUALITY.affectedByOpenTasks} affected by Open Tasks
+              {quality.affectedByOpenTasks} affected by Open Tasks
             </span>
           )}
         </div>

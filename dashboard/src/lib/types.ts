@@ -2,6 +2,14 @@
    Foundry AI — Open Task Dashboard Types
    ────────────────────────────────────────────── */
 
+// ── Project ──
+
+export interface Project {
+  id: string;
+  name: string;
+  phaseLabel: string;
+}
+
 // ── Roles & Auth ──
 
 export type Role =
@@ -58,6 +66,7 @@ export interface DeepLink {
 
 export interface OpenTask {
   id: string;
+  projectId: string;
   category: TaskCategory;
   subject: string;
   owner: string;
@@ -282,6 +291,7 @@ export interface QualitySummary {
 // ── Pattern Data (View 2) ──
 
 export interface RepeatBreach {
+  projectId: string;
   category: TaskCategory;
   owner: string;
   count: number;
@@ -290,6 +300,7 @@ export interface RepeatBreach {
 }
 
 export interface OwnerLoad {
+  projectId: string;
   owner: string;
   role: Role;
   total: number;
@@ -297,6 +308,15 @@ export interface OwnerLoad {
   dueToday: number;
   newItems: number;
   watching: number;
+}
+
+export interface InvoicePattern {
+  projectId: string;
+  vendor: string;
+  invoiceCount: number;
+  issueCount: number;
+  commonIssue: string;
+  avgResolutionDays: number;
 }
 
 // ── View Tabs ──
