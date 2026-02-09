@@ -211,6 +211,10 @@ export const GF_BUDGET: BudgetSummary = {
           co: 28000,
           pco: 0,
           actual: 228000,
+          attachments: [
+            { type: 'contract', label: 'Grading subcontract', url: '#doc-gf-grading-contract' },
+            { type: 'photo', label: 'NW quadrant soil export', url: '#photo-gf-soil' },
+          ],
         },
         {
           id: 'GF-31-02',
@@ -259,6 +263,10 @@ export const GF_BUDGET: BudgetSummary = {
           co: 0,
           pco: 0,
           actual: 76500,
+          attachments: [
+            { type: 'drawing', label: 'Steel framing plan S-100', url: '#dwg-gf-s100' },
+            { type: 'spec', label: 'Structural steel spec 05 12 00', url: '#doc-gf-steel-spec' },
+          ],
         },
         {
           id: 'GF-05-02',
@@ -403,6 +411,9 @@ export const GF_BUDGET: BudgetSummary = {
           co: 0,
           pco: 0,
           actual: 0,
+          attachments: [
+            { type: 'drawing', label: 'Storefront elevation A-301', url: '#dwg-gf-a301' },
+          ],
         },
         {
           id: 'GF-08-02',

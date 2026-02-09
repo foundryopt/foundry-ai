@@ -1,4 +1,4 @@
-import type { BudgetSummary } from '@/lib/types';
+import type { BudgetSummary, Attachment } from '@/lib/types';
 
 export const BUDGET: BudgetSummary = {
   originalBudget: 4215000,
@@ -19,6 +19,10 @@ export const BUDGET: BudgetSummary = {
       linkedTaskIds: [],
       projectId: 'sandbox-001',
       projectName: 'SandBox — Mixed-Use Development',
+      attachments: [
+        { type: 'contract', label: 'Concrete subcontract', url: '#doc-concrete-contract' },
+        { type: 'spec', label: 'ACI 318 mix design', url: '#doc-concrete-spec' },
+      ],
       lineItems: [
         {
           id: 'SB-03-01',
@@ -36,6 +40,9 @@ export const BUDGET: BudgetSummary = {
           co: 0,
           pco: 0,
           actual: 370000,
+          attachments: [
+            { type: 'drawing', label: 'Foundation plan S-101', url: '#dwg-s101' },
+          ],
         },
         {
           id: 'SB-03-02',
@@ -53,6 +60,10 @@ export const BUDGET: BudgetSummary = {
           co: 0,
           pco: 0,
           actual: 140000,
+          attachments: [
+            { type: 'drawing', label: 'PT slab layout S-201', url: '#dwg-s201' },
+            { type: 'photo', label: 'L3 slab pour — Jan 15', url: '#photo-slab-l3' },
+          ],
         },
       ],
     },
@@ -197,6 +208,9 @@ export const BUDGET: BudgetSummary = {
           co: 0,
           pco: 0,
           actual: 100000,
+          attachments: [
+            { type: 'spec', label: 'Tile selection schedule', url: '#doc-tile-spec' },
+          ],
         },
         {
           id: 'SB-093-02',
@@ -245,6 +259,10 @@ export const BUDGET: BudgetSummary = {
           co: 0,
           pco: 0,
           actual: 312000,
+          attachments: [
+            { type: 'contract', label: 'Elevator purchase agreement', url: '#doc-elev-contract' },
+            { type: 'spec', label: 'Cab finish spec', url: '#doc-elev-spec' },
+          ],
         },
         {
           id: 'SB-14-02',
@@ -276,6 +294,10 @@ export const BUDGET: BudgetSummary = {
       linkedTaskIds: ['RFI-044', 'PCO-011', 'INV-CM-2267', 'WC-001'],
       projectId: 'sandbox-001',
       projectName: 'SandBox — Mixed-Use Development',
+      attachments: [
+        { type: 'contract', label: 'HVAC subcontract', url: '#doc-hvac-contract' },
+        { type: 'spec', label: 'Mechanical spec 23 00 00', url: '#doc-hvac-spec' },
+      ],
       lineItems: [
         {
           id: 'SB-23-01',
@@ -293,6 +315,10 @@ export const BUDGET: BudgetSummary = {
           co: 18400,
           pco: 0,
           actual: 338400,
+          attachments: [
+            { type: 'drawing', label: 'Duct layout M-301', url: '#dwg-m301' },
+            { type: 'photo', label: 'L3 duct install progress', url: '#photo-duct-l3' },
+          ],
         },
         {
           id: 'SB-23-02',
@@ -341,6 +367,9 @@ export const BUDGET: BudgetSummary = {
       linkedTaskIds: ['PCO-009', 'INV-8834'],
       projectId: 'sandbox-001',
       projectName: 'SandBox — Mixed-Use Development',
+      attachments: [
+        { type: 'contract', label: 'Electrical subcontract', url: '#doc-elec-contract' },
+      ],
       lineItems: [
         {
           id: 'SB-26-01',
@@ -358,6 +387,9 @@ export const BUDGET: BudgetSummary = {
           co: 34200,
           pco: 0,
           actual: 304200,
+          attachments: [
+            { type: 'drawing', label: 'Electrical plan E-201', url: '#dwg-e201' },
+          ],
         },
         {
           id: 'SB-26-02',

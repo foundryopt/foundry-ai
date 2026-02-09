@@ -213,6 +213,48 @@ export interface TeamMember {
   openTaskCount: number;
 }
 
+// ── Attachments ──
+
+export type AttachmentType = 'contract' | 'spec' | 'drawing' | 'photo';
+
+export interface Attachment {
+  type: AttachmentType;
+  label: string;
+  url: string;
+}
+
+// ── Comments ──
+
+export type CommentSource = 'dashboard' | 'slack';
+
+export interface BudgetComment {
+  id: string;
+  lineItemId: string;
+  author: string;
+  timestamp: string;
+  text: string;
+  source: CommentSource;
+}
+
+// ── Bid Leveling ──
+
+export type BidStatus = 'completed' | 'in-progress' | 'upcoming';
+
+export interface VendorBid {
+  scopeItem: string;
+  costCode: string;
+  vendors: { name: string; price: number; recommended?: boolean }[];
+  delta: number;
+  notes: string;
+}
+
+export interface BidMilestone {
+  id: string;
+  bidPackage: string;
+  costCode: string;
+  milestones: { label: string; date: string; status: BidStatus }[];
+}
+
 // ── Budget / Cost ──
 
 export type CostType = 'M' | 'L' | 'M&L' | 'E';
@@ -234,6 +276,7 @@ export interface BudgetLineItem {
   co: number;
   pco: number;
   actual: number;
+  attachments?: Attachment[];
 }
 
 export interface BudgetCategory {
@@ -248,6 +291,7 @@ export interface BudgetCategory {
   lineItems?: BudgetLineItem[];
   projectId?: string;
   projectName?: string;
+  attachments?: Attachment[];
 }
 
 export interface BudgetSummary {
@@ -343,6 +387,93 @@ export interface InvoicePattern {
   avgResolutionDays: number;
 }
 
+// ── Critical Path ──
+
+export type MilestonePhase =
+  | 'Entitlement'
+  | 'Precon'
+  | 'Superstructure'
+  | 'Rough-ins'
+  | 'Finishes'
+  | 'Closeout';
+
+export interface Trade {
+  costCode: string;
+  name: string;
+  role: string;
+}
+
+export interface MilestoneActivity {
+  id: string;
+  milestonePhase: MilestonePhase;
+  costCode: string;
+  trade: string;
+  description: string;
+  owner: string;
+  role: Role;
+  startDate: string;
+  endDate: string;
+  percentComplete: number;
+  status: 'completed' | 'in-progress' | 'upcoming' | 'at-risk';
+  linkedTaskIds: string[];
+}
+
+export interface CriticalPathData {
+  milestones: {
+    phase: MilestonePhase;
+    startDate: string;
+    endDate: string;
+    percentComplete: number;
+    status: 'completed' | 'in-progress' | 'upcoming' | 'at-risk';
+  }[];
+  activities: MilestoneActivity[];
+}
+
+// ── Timesheet / Hours Tracking ──
+
+export type TimesheetRole = 'PM' | 'Super' | 'Designer' | 'Procurement' | 'General Labor' | 'Ops';
+
+export type CORecipient = 'Owner' | 'Sub' | 'Homebuyer' | 'Internal';
+
+export interface RoleHours {
+  role: TimesheetRole;
+  budgeted: number;
+  spent: number;
+  remaining: number;
+  coHours: number;
+  pcoHours: number;
+}
+
+export interface TimesheetCostCode {
+  costCode: string;
+  description: string;
+  jobName: string;
+  roleBreakdown: RoleHours[];
+  totalBudgeted: number;
+  totalSpent: number;
+  totalRemaining: number;
+  totalCO: number;
+  totalPCO: number;
+  percentUsed: number;
+  overspend: boolean;
+  coRecommendation?: {
+    recipient: CORecipient;
+    reason: string;
+    estimatedHours: number;
+  };
+}
+
+export interface TimesheetSummary {
+  totalBudgetedHours: number;
+  totalSpentHours: number;
+  totalRemainingHours: number;
+  totalCOHours: number;
+  totalPCOHours: number;
+  percentUsed: number;
+  overspendCount: number;
+  costCodes: TimesheetCostCode[];
+}
+
 // ── View Tabs ──
 
 export type ViewTab = 0 | 1 | 2 | 3 | 4;
@@ -351,7 +482,7 @@ export const VIEW_LABELS: Record<ViewTab, string> = {
   0: 'Attention Today',
   1: "What's Repeating",
   2: 'Procurement & Delivery',
-  3: 'Cost · Time · Quality',
+  3: 'Critical Path',
   4: 'Budget Detail',
 };
 
