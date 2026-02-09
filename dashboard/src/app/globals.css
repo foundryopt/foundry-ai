@@ -1,0 +1,40 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-overdue: #ef4444;
+  --color-due-today: #eab308;
+  --color-new: #3b82f6;
+  --color-on-track: #22c55e;
+  --color-watching: #6b7280;
+  --color-potential: #f59e0b;
+  --color-actual: #3b82f6;
+  --color-remaining: #e5e7eb;
+}
+
+body {
+  @apply bg-gray-50 text-gray-900 antialiased;
+}
+
+/* Scrollbar styling for detail panel */
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+}
+.scrollbar-thin::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  @apply bg-gray-300 rounded-full;
+}
+
+/* Hatched pattern for "Potential" bars in charts */
+.pattern-potential {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    transparent,
+    transparent 4px,
+    rgba(245, 158, 11, 0.3) 4px,
+    rgba(245, 158, 11, 0.3) 8px
+  );
+}
