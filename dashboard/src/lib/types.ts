@@ -496,4 +496,15 @@ export interface FilterState {
   categories: TaskCategory[];
   owners: string[];
   urgencies: Urgency[];
+  costCodes: string[];
+  projects: string[];
+}
+
+// ── Calendar Scheduling ──
+
+export interface ScheduledSlot {
+  taskId: string;
+  date: string; // ISO date
+  hour: number; // 0-23
+  projectId: string;
 }

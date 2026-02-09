@@ -7,7 +7,7 @@ export function applyFilters(tasks: OpenTask[], filters: FilterState): OpenTask[
     // Search
     if (filters.search) {
       const q = filters.search.toLowerCase();
-      const searchable = `${task.id} ${task.subject} ${task.owner} ${task.category}`.toLowerCase();
+      const searchable = `${task.id} ${task.subject} ${task.owner} ${task.category} ${task.costCodeRef ?? ''}`.toLowerCase();
       if (!searchable.includes(q)) return false;
     }
 
@@ -23,6 +23,16 @@ export function applyFilters(tasks: OpenTask[], filters: FilterState): OpenTask[
 
     // Urgency filter
     if (filters.urgencies.length > 0 && !filters.urgencies.includes(task.urgency)) {
+      return false;
+    }
+
+    // Cost code filter
+    if (filters.costCodes.length > 0) {
+      if (!task.costCodeRef || !filters.costCodes.includes(task.costCodeRef)) return false;
+    }
+
+    // Project filter
+    if (filters.projects.length > 0 && !filters.projects.includes(task.projectId)) {
       return false;
     }
 
@@ -56,10 +66,12 @@ export function groupByUrgency(tasks: OpenTask[]): Record<Urgency, OpenTask[]> {
 export function getFilterOptions(tasks: OpenTask[]) {
   const categories = [...new Set(tasks.map((t) => t.category))].sort();
   const owners = [...new Set(tasks.map((t) => t.owner))].sort();
-  return { categories, owners, urgencies: [...URGENCY_ORDER] };
+  const costCodes = [...new Set(tasks.map((t) => t.costCodeRef).filter(Boolean) as string[])].sort();
+  const projects = [...new Set(tasks.map((t) => t.projectId))].sort();
+  return { categories, owners, urgencies: [...URGENCY_ORDER], costCodes, projects };
 }
 
 /** Default empty filter state */
 export function emptyFilters(): FilterState {
-  return { search: '', categories: [], owners: [], urgencies: [] };
+  return { search: '', categories: [], owners: [], urgencies: [], costCodes: [], projects: [] };
 }

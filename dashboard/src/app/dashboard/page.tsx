@@ -5,7 +5,7 @@ import { TabBar } from '@/components/shell/TabBar';
 import { ContextStrip } from '@/components/shell/ContextStrip';
 import { useActiveView } from '@/hooks/useActiveView';
 import { useProject } from '@/hooks/useProject';
-import { getProjectData } from '@/data';
+import { getProjectData, PROJECTS } from '@/data';
 import { AttentionToday } from '@/components/views/AttentionToday';
 import { WhatsRepeating } from '@/components/views/WhatsRepeating';
 import { ProcurementDelivery } from '@/components/views/ProcurementDelivery';
@@ -23,7 +23,7 @@ export default function DashboardPage() {
       <TabBar active={view} onChange={setView} />
       <ContextStrip budget={data.budget} schedule={data.schedule} quality={data.quality} />
 
-      {view === 0 && <AttentionToday tasks={data.tasks} />}
+      {view === 0 && <AttentionToday tasks={data.tasks} projects={PROJECTS} />}
       {view === 1 && (
         <WhatsRepeating
           repeatBreaches={data.repeatBreaches}

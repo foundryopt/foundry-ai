@@ -7,9 +7,13 @@ import { FilterChip } from './FilterChip';
 interface FilterBarProps {
   filters: FilterState;
   owners: string[];
+  costCodes: string[];
+  projects: { id: string; name: string }[];
   onToggleCategory: (c: TaskCategory) => void;
   onToggleOwner: (o: string) => void;
   onToggleUrgency: (u: Urgency) => void;
+  onToggleCostCode: (c: string) => void;
+  onToggleProject: (p: string) => void;
   onClear: () => void;
   hasActive: boolean;
 }
@@ -17,14 +21,35 @@ interface FilterBarProps {
 export function FilterBar({
   filters,
   owners,
+  costCodes,
+  projects,
   onToggleCategory,
   onToggleOwner,
   onToggleUrgency,
+  onToggleCostCode,
+  onToggleProject,
   onClear,
   hasActive,
 }: FilterBarProps) {
   return (
     <div className="space-y-2">
+      {/* Project chips */}
+      {projects.length > 1 && (
+        <div className="flex flex-wrap gap-1.5">
+          <span className="text-[10px] uppercase tracking-wider text-gray-400 self-center mr-1">
+            Project
+          </span>
+          {projects.map((p) => (
+            <FilterChip
+              key={p.id}
+              label={p.name.split('—')[0].trim()}
+              active={filters.projects.includes(p.id)}
+              onClick={() => onToggleProject(p.id)}
+            />
+          ))}
+        </div>
+      )}
+
       {/* Category chips */}
       <div className="flex flex-wrap gap-1.5">
         <span className="text-[10px] uppercase tracking-wider text-gray-400 self-center mr-1">
@@ -69,6 +94,23 @@ export function FilterBar({
           />
         ))}
       </div>
+
+      {/* Cost code chips */}
+      {costCodes.length > 0 && (
+        <div className="flex flex-wrap gap-1.5">
+          <span className="text-[10px] uppercase tracking-wider text-gray-400 self-center mr-1">
+            Cost Code
+          </span>
+          {costCodes.map((cc) => (
+            <FilterChip
+              key={cc}
+              label={cc}
+              active={filters.costCodes.includes(cc)}
+              onClick={() => onToggleCostCode(cc)}
+            />
+          ))}
+        </div>
+      )}
 
       {hasActive && (
         <button

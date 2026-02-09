@@ -38,6 +38,24 @@ export function useFilters() {
     }));
   }, []);
 
+  const toggleCostCode = useCallback((costCode: string) => {
+    setFilters((prev) => ({
+      ...prev,
+      costCodes: prev.costCodes.includes(costCode)
+        ? prev.costCodes.filter((c) => c !== costCode)
+        : [...prev.costCodes, costCode],
+    }));
+  }, []);
+
+  const toggleProject = useCallback((projectId: string) => {
+    setFilters((prev) => ({
+      ...prev,
+      projects: prev.projects.includes(projectId)
+        ? prev.projects.filter((p) => p !== projectId)
+        : [...prev.projects, projectId],
+    }));
+  }, []);
+
   const clearFilters = useCallback(() => {
     setFilters(emptyFilters());
   }, []);
@@ -46,7 +64,9 @@ export function useFilters() {
     filters.search !== '' ||
     filters.categories.length > 0 ||
     filters.owners.length > 0 ||
-    filters.urgencies.length > 0;
+    filters.urgencies.length > 0 ||
+    filters.costCodes.length > 0 ||
+    filters.projects.length > 0;
 
   return {
     filters,
@@ -54,6 +74,8 @@ export function useFilters() {
     toggleCategory,
     toggleOwner,
     toggleUrgency,
+    toggleCostCode,
+    toggleProject,
     clearFilters,
     hasActiveFilters,
   };
