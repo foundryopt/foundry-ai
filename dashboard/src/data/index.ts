@@ -1,4 +1,4 @@
-import type { OpenTask, BudgetSummary, ScheduleSummary, QualitySummary, RepeatBreach, OwnerLoad, InvoicePattern, CriticalPathData, TimesheetSummary } from '@/lib/types';
+import type { OpenTask, BudgetSummary, ScheduleSummary, QualitySummary, RepeatBreach, OwnerLoad, InvoicePattern, CriticalPathData, TimesheetSummary, QAQCData } from '@/lib/types';
 import { aggregateBudgets, aggregateSchedules, aggregateQualities, mergeOwnerLoads } from '@/lib/aggregation';
 import { ALL_PROJECTS_ID } from './mock-projects';
 
@@ -13,6 +13,7 @@ import { SEED_COMMENTS } from './mock-comments';
 import { VENDOR_BIDS, BID_MILESTONES } from './mock-bid-leveling';
 import { CRITICAL_PATH, GF_CRITICAL_PATH } from './mock-critical-path';
 import { TIMESHEET, GF_TIMESHEET } from './mock-timesheet';
+import { QAQC_DATA, GF_QAQC_DATA } from './mock-qaqc';
 
 export { TEAM };
 export { PROJECTS, ALL_PROJECTS_ID } from './mock-projects';
@@ -26,6 +27,7 @@ export interface ProjectData {
   quality: QualitySummary;
   criticalPath: CriticalPathData;
   timesheet: TimesheetSummary;
+  qaqc: QAQCData;
   repeatBreaches: RepeatBreach[];
   ownerLoads: OwnerLoad[];
   invoicePatterns: InvoicePattern[];
@@ -39,6 +41,7 @@ const PROJECT_DATA: Record<string, ProjectData> = {
     quality: QUALITY,
     criticalPath: CRITICAL_PATH,
     timesheet: TIMESHEET,
+    qaqc: QAQC_DATA,
     repeatBreaches: REPEAT_BREACHES,
     ownerLoads: OWNER_LOADS,
     invoicePatterns: INVOICE_PATTERNS,
@@ -50,6 +53,7 @@ const PROJECT_DATA: Record<string, ProjectData> = {
     quality: GF_QUALITY,
     criticalPath: GF_CRITICAL_PATH,
     timesheet: GF_TIMESHEET,
+    qaqc: GF_QAQC_DATA,
     repeatBreaches: GF_REPEAT_BREACHES,
     ownerLoads: GF_OWNER_LOADS,
     invoicePatterns: GF_INVOICE_PATTERNS,
@@ -94,6 +98,10 @@ export function getProjectData(projectId: string): ProjectData {
       activities: allData.flatMap((d) => d.criticalPath.activities),
     },
     timesheet: aggregateTimesheets(allData.map((d) => d.timesheet)),
+    qaqc: {
+      documents: allData.flatMap((d) => d.qaqc.documents),
+      checklists: allData.flatMap((d) => d.qaqc.checklists),
+    },
     repeatBreaches: allData.flatMap((d) => d.repeatBreaches),
     ownerLoads: mergeOwnerLoads(allData.flatMap((d) => d.ownerLoads)),
     invoicePatterns: allData.flatMap((d) => d.invoicePatterns),

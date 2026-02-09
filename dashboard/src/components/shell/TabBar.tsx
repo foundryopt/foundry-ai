@@ -8,7 +8,7 @@ interface TabBarProps {
   onChange: (tab: ViewTab) => void;
 }
 
-const TABS: ViewTab[] = [0, 1, 2, 3, 4];
+const TABS: ViewTab[] = [0, 1, 2, 3, 4, 5];
 
 export function TabBar({ active, onChange }: TabBarProps) {
   return (

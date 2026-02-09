@@ -11,6 +11,7 @@ import { WhatsRepeating } from '@/components/views/WhatsRepeating';
 import { ProcurementDelivery } from '@/components/views/ProcurementDelivery';
 import { CriticalPath } from '@/components/views/CriticalPath';
 import { BudgetDetail } from '@/components/views/BudgetDetail';
+import { QAQC } from '@/components/views/QAQC';
 
 export default function DashboardPage() {
   const { view, setView } = useActiveView();
@@ -37,6 +38,7 @@ export default function DashboardPage() {
         <CriticalPath criticalPath={data.criticalPath} schedule={data.schedule} />
       )}
       {view === 4 && <BudgetDetail budget={data.budget} isAllProjects={isAll} />}
+      {view === 5 && <QAQC qaqc={data.qaqc} tasks={data.tasks} isAllProjects={isAll} />}
     </>
   );
 }

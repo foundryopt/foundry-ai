@@ -477,9 +477,60 @@ export interface TimesheetSummary {
   costCodes: TimesheetCostCode[];
 }
 
+// ── QA/QC ──
+
+export type QADocType = 'Drawing' | 'Spec' | 'Install Instruction' | 'QC Report' | 'Submittal';
+
+export type QADocStatus = 'current' | 'pending-review' | 'revision-needed' | 'superseded';
+
+export interface QAQCDocument {
+  id: string;
+  projectId: string;
+  type: QADocType;
+  title: string;
+  costCode: string;
+  trade: string;
+  revision: number;
+  status: QADocStatus;
+  lastUpdated: string;
+  linkedTaskIds: string[];
+  fieldwireUrl?: string;
+  fileUrl: string;
+}
+
+export type QCCheckStatus = 'pass' | 'fail' | 'na' | 'pending';
+
+export interface QCChecklistItem {
+  id: string;
+  label: string;
+  status: QCCheckStatus;
+  inspector?: string;
+  date?: string;
+  notes?: string;
+}
+
+export interface QCChecklist {
+  id: string;
+  projectId: string;
+  costCode: string;
+  trade: string;
+  activity: string;
+  location: string;
+  items: QCChecklistItem[];
+  overallStatus: 'complete' | 'in-progress' | 'not-started';
+  linkedTaskIds: string[];
+}
+
+export type EscalationType = 'RFI' | 'CO';
+
+export interface QAQCData {
+  documents: QAQCDocument[];
+  checklists: QCChecklist[];
+}
+
 // ── View Tabs ──
 
-export type ViewTab = 0 | 1 | 2 | 3 | 4;
+export type ViewTab = 0 | 1 | 2 | 3 | 4 | 5;
 
 export const VIEW_LABELS: Record<ViewTab, string> = {
   0: 'Attention Today',
@@ -487,6 +538,7 @@ export const VIEW_LABELS: Record<ViewTab, string> = {
   2: 'Procurement & Delivery',
   3: 'Critical Path',
   4: 'Budget Detail',
+  5: 'QA/QC',
 };
 
 // ── Filter State ──
