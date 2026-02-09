@@ -1,20 +1,34 @@
 'use client';
 
+import { useMemo } from 'react';
 import clsx from 'clsx';
-import { VIEW_LABELS, type ViewTab } from '@/lib/types';
+import { VIEW_LABELS, COMMON_TABS, RESTRICTED_TABS, type ViewTab } from '@/lib/types';
+import { useAuth } from '@/hooks/useAuth';
 
 interface TabBarProps {
   active: ViewTab;
   onChange: (tab: ViewTab) => void;
 }
 
-const TABS: ViewTab[] = [0, 1, 2, 3, 4, 5];
-
 export function TabBar({ active, onChange }: TabBarProps) {
+  const { user } = useAuth();
+
+  const visibleTabs = useMemo(() => {
+    const tabs: ViewTab[] = [...COMMON_TABS];
+    if (user) {
+      for (const rt of RESTRICTED_TABS) {
+        if (rt.roles.includes(user.role)) {
+          tabs.push(rt.tab);
+        }
+      }
+    }
+    return tabs;
+  }, [user]);
+
   return (
     <nav className="bg-white border-b border-gray-200 overflow-x-auto">
       <div className="max-w-7xl mx-auto flex">
-        {TABS.map((tab) => (
+        {visibleTabs.map((tab) => (
           <button
             key={tab}
             onClick={() => onChange(tab)}

@@ -12,6 +12,11 @@ import { ProcurementDelivery } from '@/components/views/ProcurementDelivery';
 import { CriticalPath } from '@/components/views/CriticalPath';
 import { BudgetDetail } from '@/components/views/BudgetDetail';
 import { QAQC } from '@/components/views/QAQC';
+import { WarrantyTracker } from '@/components/views/WarrantyTracker';
+import { DesignSelections } from '@/components/views/DesignSelections';
+import { Development } from '@/components/views/Development';
+import { Fund } from '@/components/views/Fund';
+import { SalesShowroom } from '@/components/views/SalesShowroom';
 
 export default function DashboardPage() {
   const { view, setView } = useActiveView();
@@ -39,6 +44,18 @@ export default function DashboardPage() {
       )}
       {view === 4 && <BudgetDetail budget={data.budget} isAllProjects={isAll} />}
       {view === 5 && <QAQC qaqc={data.qaqc} tasks={data.tasks} isAllProjects={isAll} />}
+      {view === 6 && <WarrantyTracker warranties={data.warranties} isAllProjects={isAll} />}
+      {view === 7 && <DesignSelections finishes={data.finishes} isAllProjects={isAll} />}
+      {view === 8 && <Development milestones={data.devMilestones} isAllProjects={isAll} />}
+      {view === 9 && <Fund fund={data.fund} isAllProjects={isAll} />}
+      {view === 10 && (
+        <SalesShowroom
+          leasing={data.leasing}
+          events={data.events}
+          pos={data.pos}
+          memberships={data.memberships}
+        />
+      )}
     </>
   );
 }

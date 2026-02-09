@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState, useCallback } from 'react';
+import { useMemo, useState, useCallback, useEffect } from 'react';
 import clsx from 'clsx';
 import type { OpenTask, BudgetComment } from '@/lib/types';
 import type { LeadTimeDetail, SubmittalDetail, InvoiceDetail } from '@/lib/types';
@@ -225,6 +225,24 @@ function renderDetailCells(task: OpenTask) {
 
 /* ── Section Component ── */
 
+interface ProjectGroup {
+  projectId: string;
+  projectName: string;
+  costCodeGroups: CostCodeGroup[];
+}
+
+function groupByProject(tasks: OpenTask[]): ProjectGroup[] {
+  const costGroups = groupByCostCode(tasks);
+  const projectMap = new Map<string, ProjectGroup>();
+  for (const g of costGroups) {
+    if (!projectMap.has(g.projectId)) {
+      projectMap.set(g.projectId, { projectId: g.projectId, projectName: g.projectName, costCodeGroups: [] });
+    }
+    projectMap.get(g.projectId)!.costCodeGroups.push(g);
+  }
+  return Array.from(projectMap.values());
+}
+
 function ProcurementSection({
   title,
   tasks,
@@ -245,7 +263,14 @@ function ProcurementSection({
   commentedItems: Set<string>;
 }) {
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
-  const groups = useMemo(() => groupByCostCode(tasks), [tasks]);
+  const [expandedProjects, setExpandedProjects] = useState<Set<string>>(() => new Set());
+  const projectGroups = useMemo(() => groupByProject(tasks), [tasks]);
+  const multiProject = projectGroups.length > 1;
+
+  // Auto-expand all projects by default
+  useEffect(() => {
+    setExpandedProjects(new Set(projectGroups.map((p) => p.projectId)));
+  }, [projectGroups]);
 
   function toggleGroup(key: string) {
     setExpanded((prev) => {
@@ -256,8 +281,14 @@ function ProcurementSection({
     });
   }
 
-  // Expand all by default if only 1-2 groups
-  const defaultExpanded = groups.length <= 2;
+  function toggleProjectGroup(projectId: string) {
+    setExpandedProjects((prev) => {
+      const next = new Set(prev);
+      if (next.has(projectId)) next.delete(projectId);
+      else next.add(projectId);
+      return next;
+    });
+  }
 
   return (
     <section>
@@ -280,15 +311,17 @@ function ProcurementSection({
             </tr>
           </thead>
           <tbody>
-            {groups.map((group) => {
-              const key = `${group.projectId}:${group.costCode}`;
-              const isExp = expanded.has(key) || defaultExpanded;
+            {projectGroups.map((pg) => {
+              const isProjectExp = expandedProjects.has(pg.projectId);
               return (
-                <GroupRows
-                  key={key}
-                  group={group}
-                  isExpanded={isExp}
-                  onToggle={() => toggleGroup(key)}
+                <ProjectGroupRows
+                  key={pg.projectId}
+                  projectGroup={pg}
+                  showProjectHeader={multiProject}
+                  isProjectExpanded={isProjectExp}
+                  onToggleProject={() => toggleProjectGroup(pg.projectId)}
+                  expanded={expanded}
+                  onToggleGroup={toggleGroup}
                   commentOpenForItem={commentOpenForItem}
                   setCommentOpenForItem={setCommentOpenForItem}
                   comments={comments}
@@ -301,6 +334,70 @@ function ProcurementSection({
         </table>
       </div>
     </section>
+  );
+}
+
+function ProjectGroupRows({
+  projectGroup,
+  showProjectHeader,
+  isProjectExpanded,
+  onToggleProject,
+  expanded,
+  onToggleGroup,
+  commentOpenForItem,
+  setCommentOpenForItem,
+  comments,
+  onAddComment,
+  commentedItems,
+}: {
+  projectGroup: ProjectGroup;
+  showProjectHeader: boolean;
+  isProjectExpanded: boolean;
+  onToggleProject: () => void;
+  expanded: Set<string>;
+  onToggleGroup: (key: string) => void;
+  commentOpenForItem: string | null;
+  setCommentOpenForItem: (id: string | null) => void;
+  comments: BudgetComment[];
+  onAddComment: (taskId: string, text: string, sendToSlack: boolean) => void;
+  commentedItems: Set<string>;
+}) {
+  const totalTasks = projectGroup.costCodeGroups.reduce((s, g) => s + g.tasks.length, 0);
+
+  return (
+    <>
+      {showProjectHeader && (
+        <tr
+          className="bg-blue-50 border-b border-blue-200 cursor-pointer hover:bg-blue-100 select-none"
+          onClick={onToggleProject}
+        >
+          <td colSpan={20} className="px-3 py-2.5">
+            <div className="flex items-center gap-2 text-sm">
+              {isProjectExpanded ? <ChevronDown className="text-blue-500 shrink-0" /> : <ChevronRight className="text-blue-500 shrink-0" />}
+              <span className="font-bold text-blue-800">{projectGroup.projectName}</span>
+              <span className="text-[10px] text-blue-500 ml-auto">{totalTasks} item{totalTasks > 1 ? 's' : ''}</span>
+            </div>
+          </td>
+        </tr>
+      )}
+      {(isProjectExpanded || !showProjectHeader) && projectGroup.costCodeGroups.map((group) => {
+        const key = `${group.projectId}:${group.costCode}`;
+        const isExp = expanded.has(key) || projectGroup.costCodeGroups.length <= 2;
+        return (
+          <GroupRows
+            key={key}
+            group={group}
+            isExpanded={isExp}
+            onToggle={() => onToggleGroup(key)}
+            commentOpenForItem={commentOpenForItem}
+            setCommentOpenForItem={setCommentOpenForItem}
+            comments={comments}
+            onAddComment={onAddComment}
+            commentedItems={commentedItems}
+          />
+        );
+      })}
+    </>
   );
 }
 
@@ -330,12 +427,10 @@ function GroupRows({
         className="bg-gray-50 border-b border-gray-200 cursor-pointer hover:bg-gray-100 select-none"
         onClick={onToggle}
       >
-        <td colSpan={20} className="px-3 py-2">
+        <td colSpan={20} className="px-5 py-2">
           <div className="flex items-center gap-2 text-sm">
             {isExpanded ? <ChevronDown className="text-gray-400 shrink-0" /> : <ChevronRight className="text-gray-400 shrink-0" />}
             <span className="font-semibold text-gray-800">{group.costCode}</span>
-            <span className="text-gray-400">|</span>
-            <span className="text-gray-600">{group.projectName}</span>
             <span className="text-[10px] text-gray-400 ml-auto">{group.tasks.length} item{group.tasks.length > 1 ? 's' : ''}</span>
           </div>
         </td>

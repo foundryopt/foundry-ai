@@ -72,6 +72,17 @@ export function AttentionToday({ tasks, projects }: AttentionTodayProps) {
 
   const selectedTask = selectedId ? tasks.find((t) => t.id === selectedId) ?? null : null;
 
+  // ── Collapsible urgency groups ──
+  const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set());
+  const toggleGroup = useCallback((urgency: string) => {
+    setCollapsedGroups((prev) => {
+      const next = new Set(prev);
+      if (next.has(urgency)) next.delete(urgency);
+      else next.add(urgency);
+      return next;
+    });
+  }, []);
+
   // ── Slack comment state ──
   const [commentOpenFor, setCommentOpenFor] = useState<string | null>(null);
   const [comments, setComments] = useState<BudgetComment[]>([]);
@@ -191,12 +202,19 @@ export function AttentionToday({ tasks, projects }: AttentionTodayProps) {
             {URGENCY_ORDER.map((urgency) => {
               const groupTasks = grouped[urgency];
               if (groupTasks.length === 0) return null;
+              const isCollapsed = collapsedGroups.has(urgency);
               return (
                 <div key={urgency}>
-                  <div className={clsx('text-xs font-semibold uppercase tracking-wider mb-1.5', URGENCY_COLORS[urgency].text)}>
+                  <button
+                    onClick={() => toggleGroup(urgency)}
+                    className={clsx('flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider mb-1.5 w-full text-left', URGENCY_COLORS[urgency].text)}
+                  >
+                    <svg className={clsx('w-3.5 h-3.5 transition-transform shrink-0', !isCollapsed && 'rotate-90')} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
                     {urgency === 'due-today' ? 'Due Today' : urgency === 'new' ? 'New' : urgency.charAt(0).toUpperCase() + urgency.slice(1)} ({groupTasks.length})
-                  </div>
-                  <div className="space-y-1.5">
+                  </button>
+                  {!isCollapsed && <div className="space-y-1.5">
                     {groupTasks.map((task) => {
                       const isScheduled = scheduledTaskIds.has(task.id);
                       return (
@@ -285,7 +303,7 @@ export function AttentionToday({ tasks, projects }: AttentionTodayProps) {
                         </div>
                       );
                     })}
-                  </div>
+                  </div>}
                 </div>
               );
             })}

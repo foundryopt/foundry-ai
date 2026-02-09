@@ -155,6 +155,7 @@ function TimesheetTracker({ timesheet }: { timesheet: TimesheetSummary }) {
               <th className="px-3 py-2 w-20 text-right">CO Hrs</th>
               <th className="px-3 py-2 w-20 text-right">PCO Hrs</th>
               <th className="px-3 py-2 w-28 text-right">% Used</th>
+              <th className="px-3 py-2 w-28 text-right">% Work</th>
               <th className="px-3 py-2 w-16 text-center">Status</th>
             </tr>
           </thead>
@@ -179,6 +180,7 @@ function TimesheetTracker({ timesheet }: { timesheet: TimesheetSummary }) {
               <td className="px-3 py-2 text-right tabular-nums">
                 <span className={pctColor(timesheet.percentUsed)}>{timesheet.percentUsed}%</span>
               </td>
+              <td className="px-3 py-2" />
               <td className="px-3 py-2" />
             </tr>
           </tfoot>
@@ -338,6 +340,26 @@ function TimesheetRow({ item, isExpanded, onToggle }: { item: TimesheetCostCode;
             </span>
           </div>
         </td>
+        <td className="px-3 py-2 text-right">
+          {(() => {
+            const workPct = item.percentComplete;
+            const diff = item.percentUsed - workPct;
+            const isOverspent = diff > 10;
+            return (
+              <div className="flex items-center justify-end gap-2">
+                <div className="w-16 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                  <div
+                    className="h-full rounded-full bg-blue-400"
+                    style={{ width: `${Math.min(100, workPct)}%` }}
+                  />
+                </div>
+                <span className={clsx('tabular-nums text-xs font-medium', isOverspent ? 'text-red-600' : 'text-blue-600')}>
+                  {workPct}%
+                </span>
+              </div>
+            );
+          })()}
+        </td>
         <td className="px-3 py-2 text-center">
           {item.overspend ? (
             <span className="inline-block w-2.5 h-2.5 bg-red-500 rounded-full" title="Overspend" />
@@ -369,13 +391,14 @@ function TimesheetRow({ item, isExpanded, onToggle }: { item: TimesheetCostCode;
               <span className={clsx('tabular-nums text-xs', pctColor(rbPct))}>{rbPct}%</span>
             </td>
             <td className="px-3 py-1.5" />
+            <td className="px-3 py-1.5" />
           </tr>
         );
       })}
       {/* CO recommendation row */}
       {isExpanded && item.coRecommendation && (
         <tr className="border-b border-gray-200 bg-blue-50/50">
-          <td colSpan={9} className="px-3 py-2 pl-10">
+          <td colSpan={10} className="px-3 py-2 pl-10">
             <div className="flex items-start gap-2 text-xs">
               <span className="shrink-0 px-1.5 py-0.5 bg-blue-100 text-blue-700 rounded font-semibold text-[10px]">
                 CO → {item.coRecommendation.recipient}

@@ -1,4 +1,4 @@
-import type { OpenTask, BudgetSummary, ScheduleSummary, QualitySummary, RepeatBreach, OwnerLoad, InvoicePattern, CriticalPathData, TimesheetSummary, QAQCData } from '@/lib/types';
+import type { OpenTask, BudgetSummary, ScheduleSummary, QualitySummary, RepeatBreach, OwnerLoad, InvoicePattern, CriticalPathData, TimesheetSummary, QAQCData, WarrantyItem, DevMilestone, FundSummary, LeasingUnit, ShowroomEvent, POSItem, Membership, FinishSelection } from '@/lib/types';
 import { aggregateBudgets, aggregateSchedules, aggregateQualities, mergeOwnerLoads } from '@/lib/aggregation';
 import { ALL_PROJECTS_ID } from './mock-projects';
 
@@ -14,6 +14,9 @@ import { VENDOR_BIDS, BID_MILESTONES } from './mock-bid-leveling';
 import { CRITICAL_PATH, GF_CRITICAL_PATH } from './mock-critical-path';
 import { TIMESHEET, GF_TIMESHEET } from './mock-timesheet';
 import { QAQC_DATA, GF_QAQC_DATA } from './mock-qaqc';
+import { SB_WARRANTIES, GF_WARRANTIES } from './mock-warranty';
+import { SB_DEV_MILESTONES, GF_DEV_MILESTONES, SB_FUND, GF_FUND, SB_LEASING, SB_EVENTS, SB_POS, SB_MEMBERSHIPS } from './mock-business';
+import { SB_FINISHES, GF_FINISHES } from './mock-design';
 
 export { TEAM };
 export { PROJECTS, ALL_PROJECTS_ID } from './mock-projects';
@@ -31,7 +34,17 @@ export interface ProjectData {
   repeatBreaches: RepeatBreach[];
   ownerLoads: OwnerLoad[];
   invoicePatterns: InvoicePattern[];
+  warranties: WarrantyItem[];
+  devMilestones: DevMilestone[];
+  fund: FundSummary;
+  leasing: LeasingUnit[];
+  events: ShowroomEvent[];
+  pos: POSItem[];
+  memberships: Membership[];
+  finishes: FinishSelection[];
 }
+
+const EMPTY_FUND: FundSummary = { totalCommitment: 0, totalDrawn: 0, totalRemaining: 0, draws: [] };
 
 const PROJECT_DATA: Record<string, ProjectData> = {
   'sandbox-001': {
@@ -45,6 +58,14 @@ const PROJECT_DATA: Record<string, ProjectData> = {
     repeatBreaches: REPEAT_BREACHES,
     ownerLoads: OWNER_LOADS,
     invoicePatterns: INVOICE_PATTERNS,
+    warranties: SB_WARRANTIES,
+    devMilestones: SB_DEV_MILESTONES,
+    fund: SB_FUND,
+    leasing: SB_LEASING,
+    events: SB_EVENTS,
+    pos: SB_POS,
+    memberships: SB_MEMBERSHIPS,
+    finishes: SB_FINISHES,
   },
   'greenfield-002': {
     tasks: GF_TASKS,
@@ -57,6 +78,14 @@ const PROJECT_DATA: Record<string, ProjectData> = {
     repeatBreaches: GF_REPEAT_BREACHES,
     ownerLoads: GF_OWNER_LOADS,
     invoicePatterns: GF_INVOICE_PATTERNS,
+    warranties: GF_WARRANTIES,
+    devMilestones: GF_DEV_MILESTONES,
+    fund: GF_FUND,
+    leasing: [],
+    events: [],
+    pos: [],
+    memberships: [],
+    finishes: GF_FINISHES,
   },
 };
 
@@ -76,6 +105,15 @@ function aggregateTimesheets(timesheets: TimesheetSummary[]): TimesheetSummary {
     ),
     overspendCount: timesheets.reduce((s, t) => s + t.overspendCount, 0),
     costCodes: allCostCodes,
+  };
+}
+
+function aggregateFunds(funds: FundSummary[]): FundSummary {
+  return {
+    totalCommitment: funds.reduce((s, f) => s + f.totalCommitment, 0),
+    totalDrawn: funds.reduce((s, f) => s + f.totalDrawn, 0),
+    totalRemaining: funds.reduce((s, f) => s + f.totalRemaining, 0),
+    draws: funds.flatMap((f) => f.draws),
   };
 }
 
@@ -105,5 +143,13 @@ export function getProjectData(projectId: string): ProjectData {
     repeatBreaches: allData.flatMap((d) => d.repeatBreaches),
     ownerLoads: mergeOwnerLoads(allData.flatMap((d) => d.ownerLoads)),
     invoicePatterns: allData.flatMap((d) => d.invoicePatterns),
+    warranties: allData.flatMap((d) => d.warranties),
+    devMilestones: allData.flatMap((d) => d.devMilestones),
+    fund: aggregateFunds(allData.map((d) => d.fund)),
+    leasing: allData.flatMap((d) => d.leasing),
+    events: allData.flatMap((d) => d.events),
+    pos: allData.flatMap((d) => d.pos),
+    memberships: allData.flatMap((d) => d.memberships),
+    finishes: allData.flatMap((d) => d.finishes),
   };
 }

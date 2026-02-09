@@ -457,6 +457,7 @@ export interface TimesheetCostCode {
   totalRemaining: number;
   totalCO: number;
   totalPCO: number;
+  percentComplete: number; // physical % work complete
   percentUsed: number;
   overspend: boolean;
   coRecommendation?: {
@@ -528,9 +529,151 @@ export interface QAQCData {
   checklists: QCChecklist[];
 }
 
+// ── Warranty Tracker ──
+
+export type WarrantySeverity = 'urgent' | 'standard' | 'monitor';
+export type WarrantyStatus = 'open' | 'in-progress' | 'resolved' | 'closed';
+
+export interface WarrantyItem {
+  id: string;
+  projectId: string;
+  unit: string;
+  issueType: string;
+  description: string;
+  reportedDate: string;
+  severity: WarrantySeverity;
+  status: WarrantyStatus;
+  assignedTo: string;
+  trade: string;
+  costCode: string;
+  warrantyEnd: string;
+  resolution?: string;
+  resolvedDate?: string;
+  linkedTaskIds: string[];
+}
+
+// ── Development ──
+
+export type DevPhase = 'Site Acquisition' | 'Entitlement' | 'Design' | 'Permitting' | 'Pre-Construction' | 'Construction' | 'Lease-Up' | 'Stabilization';
+
+export interface DevMilestone {
+  id: string;
+  phase: DevPhase;
+  label: string;
+  targetDate: string;
+  status: 'completed' | 'in-progress' | 'upcoming' | 'at-risk';
+  owner: string;
+  notes?: string;
+}
+
+// ── Fund / Investors ──
+
+export interface FundDraw {
+  id: string;
+  drawNumber: number;
+  date: string;
+  amount: number;
+  status: 'approved' | 'pending' | 'submitted';
+  description: string;
+}
+
+export interface FundSummary {
+  totalCommitment: number;
+  totalDrawn: number;
+  totalRemaining: number;
+  draws: FundDraw[];
+}
+
+// ── Sales & Showroom ──
+
+export interface LeasingUnit {
+  id: string;
+  unit: string;
+  sqft: number;
+  status: 'available' | 'pending' | 'leased' | 'occupied';
+  tenant?: string;
+  monthlyRent?: number;
+  leaseStart?: string;
+  leaseEnd?: string;
+}
+
+export interface ShowroomEvent {
+  id: string;
+  title: string;
+  date: string;
+  time: string;
+  type: 'open-house' | 'broker-tour' | 'investor-meeting' | 'community' | 'private';
+  location: string;
+  attendees?: number;
+  notes?: string;
+}
+
+export interface POSItem {
+  id: string;
+  sku: string;
+  name: string;
+  category: string;
+  price: number;
+  stock: number;
+  sold: number;
+}
+
+export interface Membership {
+  id: string;
+  name: string;
+  tier: 'basic' | 'premium' | 'vip';
+  status: 'active' | 'pending' | 'expired';
+  startDate: string;
+  endDate: string;
+  email: string;
+}
+
+// ── Design / Finish Selections ──
+
+export type RoomType =
+  | 'Kitchen'
+  | 'Master Bath'
+  | 'Guest Bath'
+  | 'Living Room'
+  | 'Bedroom'
+  | 'Laundry'
+  | 'Exterior'
+  | 'Common Area';
+
+export type FinishCategory =
+  | 'Flooring'
+  | 'Countertop'
+  | 'Cabinetry'
+  | 'Tile'
+  | 'Paint'
+  | 'Fixtures'
+  | 'Hardware'
+  | 'Lighting'
+  | 'Appliances';
+
+export interface UpgradeOption {
+  name: string;
+  priceDelta: number;
+  spec: string;
+}
+
+export interface FinishSelection {
+  id: string;
+  projectId: string;
+  room: RoomType;
+  category: FinishCategory;
+  item: string;
+  spec: string;
+  costCode: string;
+  baseCost: number;
+  selectedUpgrade?: string;
+  upgrades: UpgradeOption[];
+  imageUrl: string;
+}
+
 // ── View Tabs ──
 
-export type ViewTab = 0 | 1 | 2 | 3 | 4 | 5;
+export type ViewTab = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10;
 
 export const VIEW_LABELS: Record<ViewTab, string> = {
   0: 'Attention Today',
@@ -539,7 +682,22 @@ export const VIEW_LABELS: Record<ViewTab, string> = {
   3: 'Critical Path',
   4: 'Budget Detail',
   5: 'QA/QC',
+  6: 'Warranty',
+  7: 'Design',
+  8: 'Development',
+  9: 'Fund',
+  10: 'Sales & Showroom',
 };
+
+/** Tabs visible to all roles */
+export const COMMON_TABS: ViewTab[] = [0, 1, 2, 3, 4, 5, 6, 7];
+
+/** Restricted tabs and which roles can see them */
+export const RESTRICTED_TABS: { tab: ViewTab; roles: Role[] }[] = [
+  { tab: 8, roles: ['Principal', "Owner's Rep"] },
+  { tab: 9, roles: ['Principal', "Owner's Rep"] },
+  { tab: 10, roles: ['Principal', "Owner's Rep", 'Ops'] },
+];
 
 // ── Filter State ──
 
