@@ -10,10 +10,11 @@ import { AttentionToday } from '@/components/views/AttentionToday';
 import { WhatsRepeating } from '@/components/views/WhatsRepeating';
 import { ProcurementDelivery } from '@/components/views/ProcurementDelivery';
 import { CostTimeQuality } from '@/components/views/CostTimeQuality';
+import { BudgetDetail } from '@/components/views/BudgetDetail';
 
 export default function DashboardPage() {
   const { view, setView } = useActiveView();
-  const { projectId } = useProject();
+  const { projectId, isAll } = useProject();
 
   const data = useMemo(() => getProjectData(projectId), [projectId]);
 
@@ -34,6 +35,7 @@ export default function DashboardPage() {
       {view === 3 && (
         <CostTimeQuality budget={data.budget} schedule={data.schedule} quality={data.quality} />
       )}
+      {view === 4 && <BudgetDetail budget={data.budget} isAllProjects={isAll} />}
     </>
   );
 }

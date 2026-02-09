@@ -215,6 +215,27 @@ export interface TeamMember {
 
 // ── Budget / Cost ──
 
+export type CostType = 'M' | 'L' | 'M&L' | 'E';
+export type UnitType = 'EA' | 'SF' | 'LF' | 'BF' | 'CY' | 'LS' | 'HR';
+
+export interface BudgetLineItem {
+  id: string;
+  costCode: string;
+  description: string;
+  costType: CostType;
+  unitPrice: number;
+  quantity: number;
+  unitType: UnitType;
+  budget: number;
+  previousPaid: number;
+  due: number;
+  percentComplete: number;
+  remaining: number;
+  co: number;
+  pco: number;
+  actual: number;
+}
+
 export interface BudgetCategory {
   costCode: string;
   label: string;
@@ -224,6 +245,9 @@ export interface BudgetCategory {
   remaining: number;
   potential: number;
   linkedTaskIds: string[];
+  lineItems?: BudgetLineItem[];
+  projectId?: string;
+  projectName?: string;
 }
 
 export interface BudgetSummary {
@@ -321,13 +345,14 @@ export interface InvoicePattern {
 
 // ── View Tabs ──
 
-export type ViewTab = 0 | 1 | 2 | 3;
+export type ViewTab = 0 | 1 | 2 | 3 | 4;
 
 export const VIEW_LABELS: Record<ViewTab, string> = {
   0: 'Attention Today',
   1: "What's Repeating",
   2: 'Procurement & Delivery',
   3: 'Cost · Time · Quality',
+  4: 'Budget Detail',
 };
 
 // ── Filter State ──
