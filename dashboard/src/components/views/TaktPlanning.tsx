@@ -106,17 +106,24 @@ const SEED_ROADBLOCKS: Roadblock[] = [
 function EditTaskModal({
   task,
   subs,
+  zones,
   onSave,
+  onDelete,
   onClose,
 }: {
   task: TaktTask;
   subs: Sub[];
+  zones: string[];
   onSave: (updated: TaktTask) => void;
+  onDelete: (id: string) => void;
   onClose: () => void;
 }) {
+  const [sub, setSub] = useState(task.sub);
+  const [zone, setZone] = useState(task.zone);
   const [status, setStatus] = useState(task.status);
   const [day, setDay] = useState(task.day);
   const [duration, setDuration] = useState(task.duration);
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
@@ -125,33 +132,49 @@ function EditTaskModal({
         <div className="space-y-3">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Sub-Contractor</label>
-            <div className="text-sm text-gray-800">
-              {subs.find((s) => s.abbrev === task.sub)?.name ?? task.sub} ({task.sub})
-            </div>
+            <select
+              value={sub}
+              onChange={(e) => setSub(e.target.value)}
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              {subs.map((s) => (
+                <option key={s.abbrev} value={s.abbrev}>{s.abbrev} — {s.name}</option>
+              ))}
+            </select>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Zone</label>
-            <div className="text-sm text-gray-800">{task.zone}</div>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Start Day</label>
-            <input
-              type="number"
-              min={1}
-              value={day}
-              onChange={(e) => setDay(Number(e.target.value))}
+            <select
+              value={zone}
+              onChange={(e) => setZone(e.target.value)}
               className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
+            >
+              {zones.map((z) => (
+                <option key={z} value={z}>{z}</option>
+              ))}
+            </select>
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Duration (days)</label>
-            <input
-              type="number"
-              min={1}
-              value={duration}
-              onChange={(e) => setDuration(Number(e.target.value))}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Start Day</label>
+              <input
+                type="number"
+                min={1}
+                value={day}
+                onChange={(e) => setDay(Number(e.target.value))}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Duration (days)</label>
+              <input
+                type="number"
+                min={1}
+                value={duration}
+                onChange={(e) => setDuration(Number(e.target.value))}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
@@ -160,6 +183,7 @@ function EditTaskModal({
               onChange={(e) => setStatus(e.target.value as TaktTask['status'])}
               className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
+              <option value="draft">Draft</option>
               <option value="planned">Planned</option>
               <option value="active">Active</option>
               <option value="done">Done</option>
@@ -167,19 +191,47 @@ function EditTaskModal({
             </select>
           </div>
         </div>
-        <div className="flex justify-end gap-2 mt-6">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 text-sm font-medium rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={() => onSave({ ...task, status, day, duration })}
-            className="px-4 py-2 text-sm font-medium rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors"
-          >
-            Save
-          </button>
+        <div className="flex items-center justify-between mt-6">
+          <div>
+            {!confirmDelete ? (
+              <button
+                onClick={() => setConfirmDelete(true)}
+                className="px-3 py-2 text-sm font-medium rounded-lg text-red-600 hover:bg-red-50 transition-colors"
+              >
+                Delete
+              </button>
+            ) : (
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-red-600">Sure?</span>
+                <button
+                  onClick={() => { onDelete(task.id); onClose(); }}
+                  className="px-3 py-1.5 text-xs font-medium rounded-lg bg-red-600 text-white hover:bg-red-700 transition-colors"
+                >
+                  Yes, delete
+                </button>
+                <button
+                  onClick={() => setConfirmDelete(false)}
+                  className="px-3 py-1.5 text-xs font-medium rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
+                >
+                  No
+                </button>
+              </div>
+            )}
+          </div>
+          <div className="flex gap-2">
+            <button
+              onClick={onClose}
+              className="px-4 py-2 text-sm font-medium rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={() => onSave({ ...task, sub, zone, status, day, duration })}
+              className="px-4 py-2 text-sm font-medium rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+            >
+              Save
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -437,6 +489,14 @@ export function TaktPlanning({ criticalPath, schedule }: TaktPlanningProps) {
     );
   };
 
+  const handleAddTask = (task: TaktTask) => {
+    setTasks((prev) => [...prev, task]);
+  };
+
+  const handleDeleteTask = (taskId: string) => {
+    setTasks((prev) => prev.filter((t) => t.id !== taskId));
+  };
+
   const handleTaskSave = (updated: TaktTask) => {
     setTasks((prev) => prev.map((t) => (t.id === updated.id ? updated : t)));
     setEditingTask(null);
@@ -522,6 +582,8 @@ export function TaktPlanning({ criticalPath, schedule }: TaktPlanningProps) {
           milestones={milestones}
           onTaskDrop={handleTaskDrop}
           onTaskClick={setEditingTask}
+          onAddTask={handleAddTask}
+          onDeleteTask={handleDeleteTask}
           onAddMilestone={() => setShowMilestoneModal(true)}
           onAddSub={handleAddSub}
         />
@@ -551,7 +613,9 @@ export function TaktPlanning({ criticalPath, schedule }: TaktPlanningProps) {
         <EditTaskModal
           task={editingTask}
           subs={subs}
+          zones={ZONES}
           onSave={handleTaskSave}
+          onDelete={handleDeleteTask}
           onClose={() => setEditingTask(null)}
         />
       )}

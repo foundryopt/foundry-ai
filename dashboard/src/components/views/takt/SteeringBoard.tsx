@@ -16,7 +16,7 @@ export interface TaktTask {
   zone: string;
   day: number;
   duration: number;
-  status: 'planned' | 'active' | 'done' | 'blocked';
+  status: 'draft' | 'planned' | 'active' | 'done' | 'blocked';
 }
 
 export interface Milestone {
@@ -34,6 +34,8 @@ interface SteeringBoardProps {
   milestones: Milestone[];
   onTaskDrop: (taskId: string, zone: string, day: number) => void;
   onTaskClick: (task: TaktTask) => void;
+  onAddTask: (task: TaktTask) => void;
+  onDeleteTask: (taskId: string) => void;
   onAddMilestone: () => void;
   onAddSub?: (sub: Sub) => void;
 }
@@ -46,6 +48,7 @@ const PRESET_COLORS = [
 ];
 
 const STATUS_COLORS: Record<TaktTask['status'], string> = {
+  draft: 'bg-gray-200 border-gray-400 text-gray-700',
   planned: 'bg-blue-200 border-blue-400 text-blue-800',
   active: 'bg-yellow-200 border-yellow-400 text-yellow-800',
   done: 'bg-green-200 border-green-400 text-green-800',
@@ -60,10 +63,42 @@ export function SteeringBoard({
   milestones,
   onTaskDrop,
   onTaskClick,
+  onAddTask,
+  onDeleteTask,
   onAddMilestone,
   onAddSub,
 }: SteeringBoardProps) {
   const dayHeaders = Array.from({ length: days }, (_, i) => i + 1);
+
+  // Add-task form state
+  const [showTaskForm, setShowTaskForm] = useState(false);
+  const [taskSub, setTaskSub] = useState(subs[0]?.abbrev ?? '');
+  const [taskZone, setTaskZone] = useState(zones[0]);
+  const [taskDay, setTaskDay] = useState(1);
+  const [taskDuration, setTaskDuration] = useState(2);
+  const [taskStatus, setTaskStatus] = useState<TaktTask['status']>('draft');
+
+  const resetTaskForm = () => {
+    setShowTaskForm(false);
+    setTaskSub(subs[0]?.abbrev ?? '');
+    setTaskZone(zones[0]);
+    setTaskDay(1);
+    setTaskDuration(2);
+    setTaskStatus('draft');
+  };
+
+  const submitNewTask = () => {
+    if (!taskSub) return;
+    onAddTask({
+      id: `t${Date.now()}`,
+      sub: taskSub,
+      zone: taskZone,
+      day: taskDay,
+      duration: taskDuration,
+      status: taskStatus,
+    });
+    resetTaskForm();
+  };
 
   // Trade-grouped sub-contractor state
   const [collapsedTrades, setCollapsedTrades] = useState<Set<string>>(new Set());
@@ -125,18 +160,107 @@ export function SteeringBoard({
       {/* Header */}
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold text-gray-900">Takt Steering Board</h3>
-        <button
-          onClick={onAddMilestone}
-          className="px-3 py-1.5 text-sm font-medium rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors"
-        >
-          + Milestone
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setShowTaskForm(!showTaskForm)}
+            className={clsx(
+              'px-3 py-1.5 text-sm font-medium rounded-lg transition-colors',
+              showTaskForm
+                ? 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                : 'bg-green-600 text-white hover:bg-green-700'
+            )}
+          >
+            {showTaskForm ? 'Cancel' : '+ Task'}
+          </button>
+          <button
+            onClick={onAddMilestone}
+            className="px-3 py-1.5 text-sm font-medium rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+          >
+            + Milestone
+          </button>
+        </div>
       </div>
+
+      {/* Add Task Form */}
+      {showTaskForm && (
+        <div className="bg-white rounded-lg shadow border border-gray-200 p-4 space-y-3">
+          <h4 className="text-sm font-semibold text-gray-900">Add Task to Board</h4>
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+            <div>
+              <label className="block text-[11px] font-medium text-gray-600 mb-0.5">Sub-Contractor</label>
+              <select
+                value={taskSub}
+                onChange={(e) => setTaskSub(e.target.value)}
+                className="w-full border border-gray-300 rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                {subs.map((s) => (
+                  <option key={s.abbrev} value={s.abbrev}>{s.abbrev} — {s.name}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-[11px] font-medium text-gray-600 mb-0.5">Zone</label>
+              <select
+                value={taskZone}
+                onChange={(e) => setTaskZone(e.target.value)}
+                className="w-full border border-gray-300 rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                {zones.map((z) => (
+                  <option key={z} value={z}>{z}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-[11px] font-medium text-gray-600 mb-0.5">Start Day</label>
+              <input
+                type="number"
+                min={1}
+                max={days}
+                value={taskDay}
+                onChange={(e) => setTaskDay(Number(e.target.value))}
+                className="w-full border border-gray-300 rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div>
+              <label className="block text-[11px] font-medium text-gray-600 mb-0.5">Duration (days)</label>
+              <input
+                type="number"
+                min={1}
+                value={taskDuration}
+                onChange={(e) => setTaskDuration(Number(e.target.value))}
+                className="w-full border border-gray-300 rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div>
+              <label className="block text-[11px] font-medium text-gray-600 mb-0.5">Status</label>
+              <select
+                value={taskStatus}
+                onChange={(e) => setTaskStatus(e.target.value as TaktTask['status'])}
+                className="w-full border border-gray-300 rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="draft">Draft</option>
+                <option value="planned">Planned</option>
+                <option value="active">Active</option>
+                <option value="done">Done</option>
+                <option value="blocked">Blocked</option>
+              </select>
+            </div>
+          </div>
+          <div className="flex justify-end">
+            <button
+              onClick={submitNewTask}
+              className="px-4 py-2 text-sm font-medium rounded-lg bg-green-600 text-white hover:bg-green-700 transition-colors"
+            >
+              Add to Board
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Legend */}
       <div className="flex flex-wrap gap-3 text-xs">
         {Object.entries(STATUS_COLORS).map(([status, cls]) => (
-          <span key={status} className={clsx('px-2 py-0.5 rounded border', cls)}>
+          <span key={status} className={clsx('px-2 py-0.5 rounded border capitalize', cls)}>
             {status}
           </span>
         ))}
