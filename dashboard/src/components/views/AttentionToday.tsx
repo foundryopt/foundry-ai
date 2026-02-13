@@ -188,7 +188,7 @@ export function AttentionToday({ tasks, projects }: AttentionTodayProps) {
         {/* Counts */}
         <CountsBar tasks={filtered} />
 
-        {/* Kanban Rows */}
+        {/* Kanban Board */}
         {filtered.length === 0 ? (
           <EmptyState
             message={
@@ -198,38 +198,46 @@ export function AttentionToday({ tasks, projects }: AttentionTodayProps) {
             }
           />
         ) : (
-          <div className="space-y-4 mt-3">
+          <div className="grid grid-cols-2 xl:grid-cols-4 gap-3 mt-3 items-start">
             {URGENCY_ORDER.map((urgency) => {
               const groupTasks = grouped[urgency];
-              if (groupTasks.length === 0) return null;
               const isExpanded = expandedRows.has(urgency);
               const visible = isExpanded ? groupTasks : groupTasks.slice(0, 5);
               const overflow = groupTasks.length - 5;
 
               return (
-                <div key={urgency}>
-                  {/* Row header */}
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className={clsx('w-1 h-4 rounded-full', URGENCY_COLORS[urgency].border.replace('border-', 'bg-'))} />
-                    <span className={clsx('text-xs font-semibold uppercase tracking-wider', URGENCY_COLORS[urgency].text)}>
-                      {URGENCY_LABELS[urgency]}
-                    </span>
-                    <span className={clsx('text-[10px] font-bold px-1.5 py-0.5 rounded-full', URGENCY_COLORS[urgency].bg, URGENCY_COLORS[urgency].text)}>
+                <div
+                  key={urgency}
+                  className="rounded-lg border border-gray-200 bg-gray-50/50 flex flex-col"
+                >
+                  {/* Column header */}
+                  <div className={clsx('px-3 py-2 border-b border-gray-200 flex items-center justify-between rounded-t-lg', URGENCY_COLORS[urgency].bg)}>
+                    <div className="flex items-center gap-2">
+                      <div className={clsx('w-2 h-2 rounded-full', URGENCY_COLORS[urgency].border.replace('border-', 'bg-'))} />
+                      <span className={clsx('text-xs font-semibold uppercase tracking-wider', URGENCY_COLORS[urgency].text)}>
+                        {URGENCY_LABELS[urgency]}
+                      </span>
+                    </div>
+                    <span className={clsx('text-[10px] font-bold min-w-[20px] text-center px-1.5 py-0.5 rounded-full', URGENCY_COLORS[urgency].bg, URGENCY_COLORS[urgency].text)}>
                       {groupTasks.length}
                     </span>
                   </div>
 
-                  {/* Horizontal card row */}
-                  <div className="flex gap-3 overflow-x-auto pb-2">
+                  {/* Card stack */}
+                  <div className="p-2 space-y-2">
+                    {groupTasks.length === 0 && (
+                      <p className="text-[10px] text-gray-400 italic text-center py-6">No tasks</p>
+                    )}
+
                     {visible.map((task) => {
                       const isScheduled = scheduledTaskIds.has(task.id);
                       return (
-                        <div key={task.id} className="shrink-0 w-56">
+                        <div key={task.id}>
                           <div
                             draggable
                             onDragStart={() => handleDragStart(task.id)}
                             className={clsx(
-                              'bg-white rounded-lg p-2.5 shadow-sm hover:shadow-md transition-shadow cursor-grab active:cursor-grabbing border border-gray-200 h-full',
+                              'bg-white rounded-lg p-2.5 shadow-sm hover:shadow-md transition-shadow cursor-grab active:cursor-grabbing border border-gray-200',
                               isScheduled && 'ring-2 ring-green-300',
                             )}
                           >
@@ -295,7 +303,7 @@ export function AttentionToday({ tasks, projects }: AttentionTodayProps) {
                           </div>
                           {/* Inline comment thread below card */}
                           {commentOpenFor === task.id && (
-                            <div className="mt-1.5 w-56">
+                            <div className="mt-1.5">
                               <CommentThread
                                 comments={comments}
                                 lineItemId={task.id}
@@ -308,30 +316,23 @@ export function AttentionToday({ tasks, projects }: AttentionTodayProps) {
                       );
                     })}
 
-                    {/* +N more button */}
+                    {/* +N more */}
                     {overflow > 0 && !isExpanded && (
                       <button
                         onClick={() => toggleRow(urgency)}
-                        className={clsx(
-                          'shrink-0 w-14 rounded-lg border-2 border-dashed flex flex-col items-center justify-center gap-1 transition-colors hover:bg-gray-50',
-                          URGENCY_COLORS[urgency].border.replace('border-', 'border-'),
-                        )}
+                        className="w-full py-2 rounded-lg border-2 border-dashed border-gray-300 text-center hover:bg-gray-100 transition-colors"
                       >
-                        <span className={clsx('text-lg font-bold', URGENCY_COLORS[urgency].text)}>+{overflow}</span>
-                        <span className="text-[9px] text-gray-400">more</span>
+                        <span className={clsx('text-xs font-semibold', URGENCY_COLORS[urgency].text)}>+{overflow} more</span>
                       </button>
                     )}
 
-                    {/* Collapse button when expanded */}
+                    {/* Show less */}
                     {isExpanded && overflow > 0 && (
                       <button
                         onClick={() => toggleRow(urgency)}
-                        className="shrink-0 w-14 rounded-lg border-2 border-dashed border-gray-300 flex flex-col items-center justify-center gap-1 transition-colors hover:bg-gray-50"
+                        className="w-full py-1.5 rounded-lg text-center text-[10px] text-gray-400 hover:text-gray-600 transition-colors"
                       >
-                        <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-                        </svg>
-                        <span className="text-[9px] text-gray-400">less</span>
+                        Show less
                       </button>
                     )}
                   </div>
