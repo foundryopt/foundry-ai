@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import clsx from 'clsx';
 
 interface Permit {
@@ -12,6 +13,20 @@ interface Permit {
   reviewer: string;
   expiresDate?: string;
 }
+
+const ZONES = ['Zone A', 'Zone B', 'Zone C', 'Zone D'] as const;
+
+const PERMIT_TYPES = [
+  'Hot Work',
+  'Excavation',
+  'Electrical',
+  'Plumbing',
+  'Confined Space',
+  'Crane',
+  'Building',
+] as const;
+
+const STATUSES = ['draft', 'submitted', 'in-review', 'approved', 'rejected', 'expired'] as const;
 
 const SEED_PERMITS: Permit[] = [
   { id: 'p1', type: 'Hot Work', description: 'Welding on Level 2 steel beams', zone: 'Zone A', submittedDate: '2026-02-10', status: 'approved', reviewer: 'Fire Marshal', expiresDate: '2026-02-17' },
@@ -34,14 +49,114 @@ const STATUS_BADGE: Record<string, string> = {
 };
 
 export function Permits() {
-  const statusCounts = SEED_PERMITS.reduce((acc, p) => {
+  const [permits, setPermits] = useState<Permit[]>(SEED_PERMITS);
+  const [showForm, setShowForm] = useState(false);
+  const [formType, setFormType] = useState<string>(PERMIT_TYPES[0]);
+  const [formDescription, setFormDescription] = useState('');
+  const [formZone, setFormZone] = useState<string>(ZONES[0]);
+  const [formReviewer, setFormReviewer] = useState('');
+  const [formExpiresDate, setFormExpiresDate] = useState('');
+
+  const addPermit = () => {
+    if (!formDescription.trim() || !formReviewer.trim()) return;
+    const permit: Permit = {
+      id: `p${Date.now()}`,
+      type: formType,
+      description: formDescription.trim(),
+      zone: formZone,
+      submittedDate: new Date().toISOString().slice(0, 10),
+      status: 'draft',
+      reviewer: formReviewer.trim(),
+      expiresDate: formExpiresDate || undefined,
+    };
+    setPermits((prev) => [permit, ...prev]);
+    setFormType(PERMIT_TYPES[0]);
+    setFormDescription('');
+    setFormZone(ZONES[0]);
+    setFormReviewer('');
+    setFormExpiresDate('');
+    setShowForm(false);
+  };
+
+  const updateStatus = (id: string, newStatus: Permit['status']) => {
+    setPermits((prev) =>
+      prev.map((p) => (p.id === id ? { ...p, status: newStatus } : p))
+    );
+  };
+
+  const statusCounts = permits.reduce((acc, p) => {
     acc[p.status] = (acc[p.status] || 0) + 1;
     return acc;
   }, {} as Record<string, number>);
 
   return (
     <div className="space-y-4">
-      <h3 className="text-lg font-semibold text-gray-900">Permit Tracker</h3>
+      <div className="flex items-center justify-between">
+        <h3 className="text-lg font-semibold text-gray-900">Permit Tracker</h3>
+        <button
+          onClick={() => setShowForm(!showForm)}
+          className="px-3 py-1.5 text-sm font-medium rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+        >
+          {showForm ? 'Cancel' : '+ Permit'}
+        </button>
+      </div>
+
+      {/* Quick add form */}
+      {showForm && (
+        <div className="bg-white rounded-lg shadow border border-gray-200 p-4 space-y-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <select
+              value={formType}
+              onChange={(e) => setFormType(e.target.value)}
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              {PERMIT_TYPES.map((t) => (
+                <option key={t} value={t}>{t}</option>
+              ))}
+            </select>
+            <select
+              value={formZone}
+              onChange={(e) => setFormZone(e.target.value)}
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              {ZONES.map((z) => (
+                <option key={z} value={z}>{z}</option>
+              ))}
+            </select>
+          </div>
+          <input
+            type="text"
+            placeholder="Description..."
+            value={formDescription}
+            onChange={(e) => setFormDescription(e.target.value)}
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <input
+              type="text"
+              placeholder="Reviewer..."
+              value={formReviewer}
+              onChange={(e) => setFormReviewer(e.target.value)}
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <input
+              type="date"
+              placeholder="Expires (optional)"
+              value={formExpiresDate}
+              onChange={(e) => setFormExpiresDate(e.target.value)}
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          <div className="flex justify-end">
+            <button
+              onClick={addPermit}
+              className="px-4 py-2 text-sm font-medium rounded-lg bg-green-600 text-white hover:bg-green-700 transition-colors"
+            >
+              Add
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Summary badges */}
       <div className="flex flex-wrap gap-2">
@@ -71,16 +186,25 @@ export function Permits() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {SEED_PERMITS.map((p) => (
+              {permits.map((p) => (
                 <tr key={p.id} className="hover:bg-gray-50">
                   <td className="px-4 py-3 font-medium text-gray-800">{p.type}</td>
                   <td className="px-4 py-3 text-gray-600 max-w-xs truncate">{p.description}</td>
                   <td className="px-4 py-3 text-gray-600">{p.zone}</td>
                   <td className="px-4 py-3 text-gray-600">{p.submittedDate}</td>
                   <td className="px-4 py-3">
-                    <span className={clsx('px-2 py-0.5 rounded text-xs font-medium capitalize', STATUS_BADGE[p.status])}>
-                      {p.status}
-                    </span>
+                    <select
+                      value={p.status}
+                      onChange={(e) => updateStatus(p.id, e.target.value as Permit['status'])}
+                      className={clsx(
+                        'text-xs font-medium capitalize border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500',
+                        STATUS_BADGE[p.status]
+                      )}
+                    >
+                      {STATUSES.map((s) => (
+                        <option key={s} value={s}>{s}</option>
+                      ))}
+                    </select>
                   </td>
                   <td className="px-4 py-3 text-gray-600">{p.reviewer}</td>
                   <td className="px-4 py-3 text-gray-500 text-xs">{p.expiresDate ?? '—'}</td>

@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import clsx from 'clsx';
 
 interface ProductionEntry {
@@ -33,18 +34,125 @@ const STATUS_BADGE: Record<string, string> = {
   blocked: 'bg-red-100 text-red-700',
 };
 
+const STATUS_OPTIONS: ProductionEntry['status'][] = ['not-started', 'in-progress', 'complete', 'blocked'];
+
 const ZONES = ['Zone A', 'Zone B', 'Zone C', 'Zone D'];
 
 export function Production() {
+  const [entries, setEntries] = useState<ProductionEntry[]>(SEED_PRODUCTION);
+  const [showForm, setShowForm] = useState(false);
+  const [formZone, setFormZone] = useState(ZONES[0]);
+  const [formTrade, setFormTrade] = useState('');
+  const [formScope, setFormScope] = useState('');
+  const [formPlanned, setFormPlanned] = useState('');
+
   const statsByZone = ZONES.map((zone) => {
-    const items = SEED_PRODUCTION.filter((p) => p.zone === zone);
+    const items = entries.filter((p) => p.zone === zone);
     const avgPct = items.length > 0 ? Math.round(items.reduce((s, p) => s + p.pctComplete, 0) / items.length) : 0;
     return { zone, total: items.length, complete: items.filter((p) => p.status === 'complete').length, avgPct };
   });
 
+  const handleAdd = () => {
+    if (!formTrade.trim() || !formScope.trim() || !formPlanned) return;
+    const newEntry: ProductionEntry = {
+      id: `pr${Date.now()}`,
+      zone: formZone,
+      trade: formTrade.trim(),
+      scope: formScope.trim(),
+      planned: formPlanned,
+      actual: '',
+      status: 'not-started',
+      pctComplete: 0,
+    };
+    setEntries((prev) => [...prev, newEntry]);
+    setFormTrade('');
+    setFormScope('');
+    setFormPlanned('');
+    setShowForm(false);
+  };
+
+  const handleStatusChange = (id: string, newStatus: ProductionEntry['status']) => {
+    setEntries((prev) =>
+      prev.map((p) => (p.id === id ? { ...p, status: newStatus } : p))
+    );
+  };
+
+  const handlePctChange = (id: string, value: number) => {
+    const clamped = Math.max(0, Math.min(100, value));
+    setEntries((prev) =>
+      prev.map((p) => (p.id === id ? { ...p, pctComplete: clamped } : p))
+    );
+  };
+
   return (
     <div className="space-y-4">
-      <h3 className="text-lg font-semibold text-gray-900">Production Tracking</h3>
+      <div className="flex items-center justify-between">
+        <h3 className="text-lg font-semibold text-gray-900">Production Tracking</h3>
+        <button
+          onClick={() => setShowForm((v) => !v)}
+          className="inline-flex items-center gap-1 rounded-lg bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors"
+        >
+          {showForm ? 'Cancel' : '+ Entry'}
+        </button>
+      </div>
+
+      {/* Inline add form */}
+      {showForm && (
+        <div className="bg-white rounded-lg shadow border border-gray-200 p-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1">Zone</label>
+              <select
+                value={formZone}
+                onChange={(e) => setFormZone(e.target.value)}
+                className="w-full text-sm border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                {ZONES.map((z) => (
+                  <option key={z} value={z}>{z}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1">Trade</label>
+              <input
+                type="text"
+                value={formTrade}
+                onChange={(e) => setFormTrade(e.target.value)}
+                placeholder="e.g. Framing"
+                className="w-full text-sm border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1">Scope</label>
+              <input
+                type="text"
+                value={formScope}
+                onChange={(e) => setFormScope(e.target.value)}
+                placeholder="e.g. Interior walls Level 2"
+                className="w-full text-sm border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1">Planned Date</label>
+              <input
+                type="date"
+                value={formPlanned}
+                onChange={(e) => setFormPlanned(e.target.value)}
+                className="w-full text-sm border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+          </div>
+          <div className="mt-3 flex justify-end">
+            <button
+              onClick={handleAdd}
+              disabled={!formTrade.trim() || !formScope.trim() || !formPlanned}
+              className="inline-flex items-center gap-1 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Add Entry
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Zone summary cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -87,30 +195,49 @@ export function Production() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {SEED_PRODUCTION.map((p) => (
+              {entries.map((p) => (
                 <tr key={p.id} className="hover:bg-gray-50">
                   <td className="px-4 py-3 font-medium text-gray-800">{p.zone}</td>
                   <td className="px-4 py-3 text-gray-700">{p.trade}</td>
                   <td className="px-4 py-3 text-gray-600 max-w-xs truncate">{p.scope}</td>
                   <td className="px-4 py-3 text-gray-600">{p.planned}</td>
-                  <td className="px-4 py-3 text-gray-600">{p.actual || '—'}</td>
+                  <td className="px-4 py-3 text-gray-600">{p.actual || '\u2014'}</td>
                   <td className="px-4 py-3">
-                    <span className={clsx('px-2 py-0.5 rounded text-xs font-medium capitalize', STATUS_BADGE[p.status])}>
-                      {p.status.replace('-', ' ')}
-                    </span>
+                    <select
+                      value={p.status}
+                      onChange={(e) => handleStatusChange(p.id, e.target.value as ProductionEntry['status'])}
+                      className={clsx(
+                        'text-xs font-medium capitalize rounded-lg px-2 py-1 border-0 cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500',
+                        STATUS_BADGE[p.status]
+                      )}
+                    >
+                      {STATUS_OPTIONS.map((s) => (
+                        <option key={s} value={s}>
+                          {s.replace('-', ' ')}
+                        </option>
+                      ))}
+                    </select>
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2">
                       <div className="w-16 h-2 bg-gray-200 rounded-full overflow-hidden">
                         <div
                           className={clsx(
-                            'h-full rounded-full',
+                            'h-full rounded-full transition-all',
                             p.pctComplete === 100 ? 'bg-green-500' : p.pctComplete > 0 ? 'bg-blue-500' : 'bg-gray-300'
                           )}
                           style={{ width: `${p.pctComplete}%` }}
                         />
                       </div>
-                      <span className="text-xs text-gray-500">{p.pctComplete}%</span>
+                      <input
+                        type="number"
+                        min={0}
+                        max={100}
+                        value={p.pctComplete}
+                        onChange={(e) => handlePctChange(p.id, parseInt(e.target.value, 10) || 0)}
+                        className="w-14 text-xs text-gray-700 border border-gray-300 rounded-lg px-2 py-1 text-center focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                      <span className="text-xs text-gray-500">%</span>
                     </div>
                   </td>
                 </tr>

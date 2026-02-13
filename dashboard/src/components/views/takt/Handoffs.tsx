@@ -24,6 +24,8 @@ const SEED_HANDOFFS: HandoffItem[] = [
   { id: 'ho6', zone: 'Zone D', fromTrade: 'Framing', toTrade: 'Plumbing', date: '2026-02-13', punchComplete: false, cleanComplete: false, photoUploaded: false, signedOff: false },
 ];
 
+const ZONES = ['Zone A', 'Zone B', 'Zone C', 'Zone D'];
+
 function CheckIcon({ checked }: { checked: boolean }) {
   return checked ? (
     <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-green-100 text-green-600">
@@ -42,6 +44,11 @@ function CheckIcon({ checked }: { checked: boolean }) {
 
 export function Handoffs() {
   const [handoffs, setHandoffs] = useState(SEED_HANDOFFS);
+  const [showForm, setShowForm] = useState(false);
+  const [formZone, setFormZone] = useState(ZONES[0]);
+  const [formFromTrade, setFormFromTrade] = useState('');
+  const [formToTrade, setFormToTrade] = useState('');
+  const [formDate, setFormDate] = useState('');
 
   const toggleCheck = (id: string, field: 'punchComplete' | 'cleanComplete' | 'photoUploaded' | 'signedOff') => {
     setHandoffs((prev) =>
@@ -54,9 +61,95 @@ export function Handoffs() {
     return Math.round((checks.filter(Boolean).length / checks.length) * 100);
   };
 
+  const handleAdd = () => {
+    if (!formFromTrade.trim() || !formToTrade.trim() || !formDate) return;
+    const newHandoff: HandoffItem = {
+      id: `ho${Date.now()}`,
+      zone: formZone,
+      fromTrade: formFromTrade.trim(),
+      toTrade: formToTrade.trim(),
+      date: formDate,
+      punchComplete: false,
+      cleanComplete: false,
+      photoUploaded: false,
+      signedOff: false,
+    };
+    setHandoffs((prev) => [...prev, newHandoff]);
+    setFormFromTrade('');
+    setFormToTrade('');
+    setFormDate('');
+    setShowForm(false);
+  };
+
   return (
     <div className="space-y-4">
-      <h3 className="text-lg font-semibold text-gray-900">Zone Handoff Checklists</h3>
+      <div className="flex items-center justify-between">
+        <h3 className="text-lg font-semibold text-gray-900">Zone Handoff Checklists</h3>
+        <button
+          onClick={() => setShowForm((v) => !v)}
+          className="inline-flex items-center gap-1 rounded-lg bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors"
+        >
+          {showForm ? 'Cancel' : '+ Handoff'}
+        </button>
+      </div>
+
+      {/* Inline add form */}
+      {showForm && (
+        <div className="bg-white rounded-lg shadow border border-gray-200 p-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1">Zone</label>
+              <select
+                value={formZone}
+                onChange={(e) => setFormZone(e.target.value)}
+                className="w-full text-sm border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                {ZONES.map((z) => (
+                  <option key={z} value={z}>{z}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1">From Trade</label>
+              <input
+                type="text"
+                value={formFromTrade}
+                onChange={(e) => setFormFromTrade(e.target.value)}
+                placeholder="e.g. Framing"
+                className="w-full text-sm border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1">To Trade</label>
+              <input
+                type="text"
+                value={formToTrade}
+                onChange={(e) => setFormToTrade(e.target.value)}
+                placeholder="e.g. Plumbing"
+                className="w-full text-sm border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1">Date</label>
+              <input
+                type="date"
+                value={formDate}
+                onChange={(e) => setFormDate(e.target.value)}
+                className="w-full text-sm border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+          </div>
+          <div className="mt-3 flex justify-end">
+            <button
+              onClick={handleAdd}
+              disabled={!formFromTrade.trim() || !formToTrade.trim() || !formDate}
+              className="inline-flex items-center gap-1 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Add Handoff
+            </button>
+          </div>
+        </div>
+      )}
 
       <div className="bg-white rounded-lg shadow border border-gray-200 overflow-hidden">
         <div className="overflow-x-auto">

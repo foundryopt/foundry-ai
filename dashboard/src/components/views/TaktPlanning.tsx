@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import clsx from 'clsx';
 import type { CriticalPathData, ScheduleSummary } from '@/lib/types';
 import { SteeringBoard, type Sub, type TaktTask, type Milestone } from './takt/SteeringBoard';
@@ -395,6 +395,41 @@ export function TaktPlanning({ criticalPath, schedule }: TaktPlanningProps) {
   const [showMilestoneModal, setShowMilestoneModal] = useState(false);
   const [showRoadblockModal, setShowRoadblockModal] = useState(false);
 
+  // Summary metrics
+  const summaryMetrics = useMemo(() => {
+    // Active Zones — zones that have at least 1 active task
+    const activeZones = new Set(
+      tasks.filter((t) => t.status === 'active').map((t) => t.zone)
+    ).size;
+
+    // Task status counts
+    const done = tasks.filter((t) => t.status === 'done').length;
+    const active = tasks.filter((t) => t.status === 'active').length;
+    const planned = tasks.filter((t) => t.status === 'planned').length;
+    const blocked = tasks.filter((t) => t.status === 'blocked').length;
+
+    // Open roadblocks
+    const openRoadblocks = roadblocks.filter((r) => r.status !== 'resolved').length;
+
+    // PPC — hard-coded to match PPCMetrics: 148/168 = 88%
+    const ppcPercent = 88;
+
+    // Active subs — unique subs that have tasks assigned
+    const activeSubs = new Set(tasks.map((t) => t.sub)).size;
+
+    return { activeZones, done, active, planned, blocked, openRoadblocks, ppcPercent, activeSubs };
+  }, [tasks, roadblocks]);
+
+  const ppcColorClass =
+    summaryMetrics.ppcPercent >= 85
+      ? 'text-green-600'
+      : summaryMetrics.ppcPercent >= 70
+        ? 'text-yellow-600'
+        : 'text-red-600';
+
+  const roadblockColorClass =
+    summaryMetrics.openRoadblocks > 0 ? 'text-red-600' : 'text-green-600';
+
   // Handlers
   const handleTaskDrop = (taskId: string, zone: string, day: number) => {
     setTasks((prev) =>
@@ -449,6 +484,32 @@ export function TaktPlanning({ criticalPath, schedule }: TaktPlanningProps) {
             {label}
           </button>
         ))}
+      </div>
+
+      {/* Summary Overview Strip */}
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+        <div className="bg-white rounded-lg shadow border border-gray-200 p-3 text-center">
+          <div className="text-2xl font-bold text-gray-900">{summaryMetrics.activeZones}</div>
+          <div className="text-xs text-gray-500 mt-0.5">Active Zones</div>
+        </div>
+        <div className="bg-white rounded-lg shadow border border-gray-200 p-3 text-center">
+          <div className="text-2xl font-bold text-gray-900">
+            {summaryMetrics.done}/{summaryMetrics.active}/{summaryMetrics.planned}/{summaryMetrics.blocked}
+          </div>
+          <div className="text-xs text-gray-500 mt-0.5">Done / Active / Planned / Blocked</div>
+        </div>
+        <div className="bg-white rounded-lg shadow border border-gray-200 p-3 text-center">
+          <div className={`text-2xl font-bold ${roadblockColorClass}`}>{summaryMetrics.openRoadblocks}</div>
+          <div className="text-xs text-gray-500 mt-0.5">Open Roadblocks</div>
+        </div>
+        <div className="bg-white rounded-lg shadow border border-gray-200 p-3 text-center">
+          <div className={`text-2xl font-bold ${ppcColorClass}`}>{summaryMetrics.ppcPercent}%</div>
+          <div className="text-xs text-gray-500 mt-0.5">PPC</div>
+        </div>
+        <div className="bg-white rounded-lg shadow border border-gray-200 p-3 text-center">
+          <div className="text-2xl font-bold text-gray-900">{summaryMetrics.activeSubs}</div>
+          <div className="text-xs text-gray-500 mt-0.5">Active Subs</div>
+        </div>
       </div>
 
       {/* Sub-tab Content */}
