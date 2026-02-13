@@ -16,3 +16,4 @@ Thumbs.db
 # Data exports (no client data in repo)
 data/exports/
 data/exports/*.csv
+.vercel

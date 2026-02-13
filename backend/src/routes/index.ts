@@ -1,0 +1,38 @@
+import { Router } from 'express';
+import { authRouter } from './auth';
+import { projectsRouter } from './projects';
+import { tasksRouter } from './tasks';
+import { budgetRouter } from './budget';
+import { scheduleRouter } from './schedule';
+import { criticalPathRouter } from './critical-path';
+import { timesheetRouter } from './timesheet';
+import { qaqcRouter } from './qaqc';
+import { warrantyRouter } from './warranty';
+import { designRouter } from './design';
+import { developmentRouter } from './development';
+import { fundRouter } from './fund';
+import { salesRouter } from './sales';
+import { patternsRouter } from './patterns';
+import { commentsRouter } from './comments';
+import { bidLevelingRouter } from './bid-leveling';
+import { chatRouter } from './chat';
+
+export const apiRouter = Router();
+
+apiRouter.use('/auth', authRouter);
+apiRouter.use('/projects', projectsRouter);
+apiRouter.use('/tasks', tasksRouter);
+apiRouter.use('/budget', budgetRouter);
+apiRouter.use('/schedule', scheduleRouter);
+apiRouter.use('/critical-path', criticalPathRouter);
+apiRouter.use('/timesheet', timesheetRouter);
+apiRouter.use('/qaqc', qaqcRouter);
+apiRouter.use('/warranty', warrantyRouter);
+apiRouter.use('/design', designRouter);
+apiRouter.use('/development', developmentRouter);
+apiRouter.use('/fund', fundRouter);
+apiRouter.use('/sales', salesRouter);
+apiRouter.use('/patterns', patternsRouter);
+apiRouter.use('/comments', commentsRouter);
+apiRouter.use('/bid-leveling', bidLevelingRouter);
+apiRouter.use('/chat', chatRouter);

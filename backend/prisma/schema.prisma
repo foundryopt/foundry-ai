@@ -1,0 +1,566 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ──────────────────────────────────────────────
+// Core Entities
+// ──────────────────────────────────────────────
+
+model Project {
+  id         String   @id
+  name       String
+  phaseLabel String   @map("phase_label")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  tasks              Task[]
+  budgetCategories   BudgetCategory[]
+  schedulePhases     SchedulePhase[]
+  qualityDocTypes    QualityByType[]
+  repeatBreaches     RepeatBreach[]
+  ownerLoads         OwnerLoad[]
+  invoicePatterns    InvoicePattern[]
+  milestones         CriticalPathMilestone[]
+  milestoneActivities MilestoneActivity[]
+  timesheetCostCodes TimesheetCostCode[]
+  qaqcDocuments      QAQCDocument[]
+  qcChecklists       QCChecklist[]
+  warranties         WarrantyItem[]
+  devMilestones      DevMilestone[]
+  fundDraws          FundDraw[]
+  leasingUnits       LeasingUnit[]
+  showroomEvents     ShowroomEvent[]
+  posItems           POSItem[]
+  memberships        Membership[]
+  finishSelections   FinishSelection[]
+  vendorBids         VendorBidScope[]
+  bidMilestones      BidMilestone[]
+
+  @@map("projects")
+}
+
+model AppUser {
+  id             String   @id @default(cuid())
+  name           String   @unique
+  role           String
+  entity         String
+  email          String   @unique
+  passwordHash   String   @map("password_hash")
+  openTaskCount  Int      @default(0) @map("open_task_count")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  comments BudgetComment[]
+
+  @@map("app_users")
+}
+
+// ──────────────────────────────────────────────
+// Tasks (OpenTask)
+// ──────────────────────────────────────────────
+
+model Task {
+  id                 String   @id
+  projectId          String   @map("project_id")
+  category           String
+  subject            String
+  owner              String
+  urgency            String
+  daysOverdue        Int?     @map("days_overdue")
+  daysUntilDue       Int?     @map("days_until_due")
+  slaDate            String   @map("sla_date")
+  createdDate        String   @map("created_date")
+  source             String
+  costImpact         Float?   @map("cost_impact")
+  scheduleImpactDays Int?     @map("schedule_impact_days")
+  costCodeRef        String?  @map("cost_code_ref")
+
+  // JSON columns for complex nested data
+  deepLinks          Json     @default("[]") @map("deep_links")
+  detail             Json     @default("{}")
+  relatedTaskIds     Json     @default("[]") @map("related_task_ids")
+  qualityAffected    Json     @default("[]") @map("quality_affected")
+  attachments        Json     @default("[]")
+
+  project Project @relation(fields: [projectId], references: [id])
+
+  @@index([projectId])
+  @@index([category])
+  @@index([owner])
+  @@index([urgency])
+  @@map("tasks")
+}
+
+// ──────────────────────────────────────────────
+// Budget
+// ──────────────────────────────────────────────
+
+model BudgetCategory {
+  id             String  @id @default(cuid())
+  projectId      String  @map("project_id")
+  costCode       String  @map("cost_code")
+  label          String
+  original       Float
+  current        Float
+  spent          Float
+  remaining      Float
+  potential      Float
+  linkedTaskIds  Json    @default("[]") @map("linked_task_ids")
+  attachments    Json    @default("[]")
+
+  project   Project          @relation(fields: [projectId], references: [id])
+  lineItems BudgetLineItem[]
+
+  @@index([projectId])
+  @@map("budget_categories")
+}
+
+model BudgetLineItem {
+  id              String  @id
+  categoryId      String  @map("category_id")
+  costCode        String  @map("cost_code")
+  description     String
+  costType        String  @map("cost_type")
+  unitPrice       Float   @map("unit_price")
+  quantity        Float
+  unitType        String  @map("unit_type")
+  budget          Float
+  previousPaid    Float   @map("previous_paid")
+  due             Float
+  percentComplete Float   @map("percent_complete")
+  remaining       Float
+  co              Float
+  pco             Float
+  actual          Float
+  attachments     Json    @default("[]")
+
+  category BudgetCategory  @relation(fields: [categoryId], references: [id])
+  comments BudgetComment[]
+
+  @@map("budget_line_items")
+}
+
+model BudgetComment {
+  id         String   @id @default(cuid())
+  lineItemId String   @map("line_item_id")
+  authorId   String   @map("author_id")
+  timestamp  DateTime @default(now())
+  text       String
+  source     String   @default("dashboard")
+
+  lineItem BudgetLineItem @relation(fields: [lineItemId], references: [id])
+  author   AppUser        @relation(fields: [authorId], references: [id])
+
+  @@index([lineItemId])
+  @@map("budget_comments")
+}
+
+// ──────────────────────────────────────────────
+// Schedule
+// ──────────────────────────────────────────────
+
+model SchedulePhase {
+  id                String @id
+  projectId         String @map("project_id")
+  name              String
+  startDate         String @map("start_date")
+  endDate           String @map("end_date")
+  percentComplete   Float  @map("percent_complete")
+  plannedPercent    Float  @map("planned_percent")
+  daysVariance      Int    @map("days_variance")
+  linkedTaskIds     Json   @default("[]") @map("linked_task_ids")
+  potentialImpactDays Int  @map("potential_impact_days")
+
+  project Project @relation(fields: [projectId], references: [id])
+
+  @@index([projectId])
+  @@map("schedule_phases")
+}
+
+// ──────────────────────────────────────────────
+// Quality
+// ──────────────────────────────────────────────
+
+model QualityByType {
+  id                 String @id @default(cuid())
+  projectId          String @map("project_id")
+  type               String
+  total              Int
+  current            Int
+  pendingReview      Int    @map("pending_review")
+  revisionNeeded     Int    @map("revision_needed")
+  affectedByOpenTask Int    @map("affected_by_open_task")
+
+  project Project @relation(fields: [projectId], references: [id])
+
+  @@unique([projectId, type])
+  @@map("quality_by_type")
+}
+
+// ──────────────────────────────────────────────
+// Patterns
+// ──────────────────────────────────────────────
+
+model RepeatBreach {
+  id             String @id @default(cuid())
+  projectId      String @map("project_id")
+  category       String
+  owner          String
+  count          Int
+  avgDaysOverdue Float  @map("avg_days_overdue")
+  pattern        String
+
+  project Project @relation(fields: [projectId], references: [id])
+
+  @@index([projectId])
+  @@map("repeat_breaches")
+}
+
+model OwnerLoad {
+  id        String @id @default(cuid())
+  projectId String @map("project_id")
+  owner     String
+  role      String
+  total     Int
+  overdue   Int
+  dueToday  Int    @map("due_today")
+  newItems  Int    @map("new_items")
+  watching  Int
+
+  project Project @relation(fields: [projectId], references: [id])
+
+  @@index([projectId])
+  @@map("owner_loads")
+}
+
+model InvoicePattern {
+  id               String @id @default(cuid())
+  projectId        String @map("project_id")
+  vendor           String
+  invoiceCount     Int    @map("invoice_count")
+  issueCount       Int    @map("issue_count")
+  commonIssue      String @map("common_issue")
+  avgResolutionDays Float @map("avg_resolution_days")
+
+  project Project @relation(fields: [projectId], references: [id])
+
+  @@index([projectId])
+  @@map("invoice_patterns")
+}
+
+// ──────────────────────────────────────────────
+// Critical Path
+// ──────────────────────────────────────────────
+
+model CriticalPathMilestone {
+  id              String @id @default(cuid())
+  projectId       String @map("project_id")
+  phase           String
+  startDate       String @map("start_date")
+  endDate         String @map("end_date")
+  percentComplete Float  @map("percent_complete")
+  status          String
+
+  project Project @relation(fields: [projectId], references: [id])
+
+  @@index([projectId])
+  @@map("critical_path_milestones")
+}
+
+model MilestoneActivity {
+  id              String @id
+  projectId       String @map("project_id")
+  milestonePhase  String @map("milestone_phase")
+  costCode        String @map("cost_code")
+  trade           String
+  description     String
+  owner           String
+  role            String
+  startDate       String @map("start_date")
+  endDate         String @map("end_date")
+  percentComplete Float  @map("percent_complete")
+  status          String
+  linkedTaskIds   Json   @default("[]") @map("linked_task_ids")
+
+  project Project @relation(fields: [projectId], references: [id])
+
+  @@index([projectId])
+  @@map("milestone_activities")
+}
+
+// ──────────────────────────────────────────────
+// Timesheet
+// ──────────────────────────────────────────────
+
+model TimesheetCostCode {
+  id              String @id @default(cuid())
+  projectId       String @map("project_id")
+  costCode        String @map("cost_code")
+  description     String
+  jobName         String @map("job_name")
+  totalBudgeted   Float  @map("total_budgeted")
+  totalSpent      Float  @map("total_spent")
+  totalRemaining  Float  @map("total_remaining")
+  totalCO         Float  @map("total_co")
+  totalPCO        Float  @map("total_pco")
+  percentComplete Float  @map("percent_complete")
+  percentUsed     Float  @map("percent_used")
+  overspend       Boolean
+  coRecommendation Json? @map("co_recommendation")
+
+  project       Project              @relation(fields: [projectId], references: [id])
+  roleBreakdown TimesheetRoleHours[]
+
+  @@unique([projectId, costCode])
+  @@map("timesheet_cost_codes")
+}
+
+model TimesheetRoleHours {
+  id                String @id @default(cuid())
+  timesheetCostCodeId String @map("timesheet_cost_code_id")
+  role              String
+  budgeted          Float
+  spent             Float
+  remaining         Float
+  coHours           Float  @map("co_hours")
+  pcoHours          Float  @map("pco_hours")
+
+  timesheetCostCode TimesheetCostCode @relation(fields: [timesheetCostCodeId], references: [id])
+
+  @@map("timesheet_role_hours")
+}
+
+// ──────────────────────────────────────────────
+// QA/QC
+// ──────────────────────────────────────────────
+
+model QAQCDocument {
+  id            String  @id
+  projectId     String  @map("project_id")
+  type          String
+  title         String
+  costCode      String  @map("cost_code")
+  trade         String
+  revision      Int
+  status        String
+  lastUpdated   String  @map("last_updated")
+  linkedTaskIds Json    @default("[]") @map("linked_task_ids")
+  fieldwireUrl  String? @map("fieldwire_url")
+  fileUrl       String  @map("file_url")
+
+  project Project @relation(fields: [projectId], references: [id])
+
+  @@index([projectId])
+  @@map("qaqc_documents")
+}
+
+model QCChecklist {
+  id            String @id
+  projectId     String @map("project_id")
+  costCode      String @map("cost_code")
+  trade         String
+  activity      String
+  location      String
+  overallStatus String @map("overall_status")
+  linkedTaskIds Json   @default("[]") @map("linked_task_ids")
+  items         Json   @default("[]")
+
+  project Project @relation(fields: [projectId], references: [id])
+
+  @@index([projectId])
+  @@map("qc_checklists")
+}
+
+// ──────────────────────────────────────────────
+// Warranty
+// ──────────────────────────────────────────────
+
+model WarrantyItem {
+  id            String  @id
+  projectId     String  @map("project_id")
+  unit          String
+  issueType     String  @map("issue_type")
+  description   String
+  reportedDate  String  @map("reported_date")
+  severity      String
+  status        String
+  assignedTo    String  @map("assigned_to")
+  trade         String
+  costCode      String  @map("cost_code")
+  warrantyEnd   String  @map("warranty_end")
+  resolution    String?
+  resolvedDate  String? @map("resolved_date")
+  linkedTaskIds Json    @default("[]") @map("linked_task_ids")
+
+  project Project @relation(fields: [projectId], references: [id])
+
+  @@index([projectId])
+  @@map("warranty_items")
+}
+
+// ──────────────────────────────────────────────
+// Development
+// ──────────────────────────────────────────────
+
+model DevMilestone {
+  id         String  @id
+  projectId  String  @map("project_id")
+  phase      String
+  label      String
+  targetDate String  @map("target_date")
+  status     String
+  owner      String
+  notes      String?
+
+  project Project @relation(fields: [projectId], references: [id])
+
+  @@index([projectId])
+  @@map("dev_milestones")
+}
+
+// ──────────────────────────────────────────────
+// Fund
+// ──────────────────────────────────────────────
+
+model FundDraw {
+  id          String @id
+  projectId   String @map("project_id")
+  drawNumber  Int    @map("draw_number")
+  date        String
+  amount      Float
+  status      String
+  description String
+
+  project Project @relation(fields: [projectId], references: [id])
+
+  @@index([projectId])
+  @@map("fund_draws")
+}
+
+// ──────────────────────────────────────────────
+// Sales & Showroom
+// ──────────────────────────────────────────────
+
+model LeasingUnit {
+  id          String  @id
+  projectId   String  @map("project_id")
+  unit        String
+  sqft        Int
+  status      String
+  tenant      String?
+  monthlyRent Float?  @map("monthly_rent")
+  leaseStart  String? @map("lease_start")
+  leaseEnd    String? @map("lease_end")
+
+  project Project @relation(fields: [projectId], references: [id])
+
+  @@index([projectId])
+  @@map("leasing_units")
+}
+
+model ShowroomEvent {
+  id        String  @id
+  projectId String  @map("project_id")
+  title     String
+  date      String
+  time      String
+  type      String
+  location  String
+  attendees Int?
+  notes     String?
+
+  project Project @relation(fields: [projectId], references: [id])
+
+  @@index([projectId])
+  @@map("showroom_events")
+}
+
+model POSItem {
+  id        String @id
+  projectId String @map("project_id")
+  sku       String
+  name      String
+  category  String
+  price     Float
+  stock     Int
+  sold      Int
+
+  project Project @relation(fields: [projectId], references: [id])
+
+  @@index([projectId])
+  @@map("pos_items")
+}
+
+model Membership {
+  id        String @id
+  projectId String @map("project_id")
+  name      String
+  tier      String
+  status    String
+  startDate String @map("start_date")
+  endDate   String @map("end_date")
+  email     String
+
+  project Project @relation(fields: [projectId], references: [id])
+
+  @@index([projectId])
+  @@map("memberships")
+}
+
+// ──────────────────────────────────────────────
+// Design / Finishes
+// ──────────────────────────────────────────────
+
+model FinishSelection {
+  id              String  @id
+  projectId       String  @map("project_id")
+  room            String
+  category        String
+  item            String
+  spec            String
+  costCode        String  @map("cost_code")
+  baseCost        Float   @map("base_cost")
+  selectedUpgrade String? @map("selected_upgrade")
+  upgrades        Json    @default("[]")
+  imageUrl        String  @map("image_url")
+
+  project Project @relation(fields: [projectId], references: [id])
+
+  @@index([projectId])
+  @@map("finish_selections")
+}
+
+// ──────────────────────────────────────────────
+// Bid Leveling
+// ──────────────────────────────────────────────
+
+model VendorBidScope {
+  id        String @id @default(cuid())
+  projectId String @map("project_id")
+  scopeItem String @map("scope_item")
+  costCode  String @map("cost_code")
+  vendors   Json   @default("[]")
+  delta     Float
+  notes     String
+
+  project Project @relation(fields: [projectId], references: [id])
+
+  @@index([projectId])
+  @@map("vendor_bid_scopes")
+}
+
+model BidMilestone {
+  id         String @id
+  projectId  String @map("project_id")
+  bidPackage String @map("bid_package")
+  costCode   String @map("cost_code")
+  milestones Json   @default("[]")
+
+  project Project @relation(fields: [projectId], references: [id])
+
+  @@index([projectId])
+  @@map("bid_milestones")
+}
