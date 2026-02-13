@@ -482,8 +482,102 @@ export function ProcurementDelivery({ tasks }: ProcurementDeliveryProps) {
   const changeOrders = tasks.filter((t) => t.category === 'CO');
   const decisions = tasks.filter((t) => t.category === 'Decision');
 
+  // ── Summary computations ──
+  const totalItems = tasks.length;
+  const overdueCount = tasks.filter((t) => t.urgency === 'overdue').length;
+  const dueTodayCount = tasks.filter((t) => t.urgency === 'due-today').length;
+  const onTrackCount = tasks.filter((t) => t.urgency === 'watching' || t.urgency === 'new').length;
+  const atRiskLeadTimes = leadTimes.filter((t) => {
+    const d = t.detail as LeadTimeDetail;
+    return d.riskLevel === 'at-risk' || d.riskLevel === 'critical';
+  }).length;
+  const onTimePct = totalItems > 0 ? Math.round(((totalItems - overdueCount) / totalItems) * 100) : 100;
+
+  // Status distribution for the bar
+  const statusSegments = [
+    { label: 'Overdue', count: overdueCount, color: 'bg-red-500' },
+    { label: 'Due Today', count: dueTodayCount, color: 'bg-yellow-500' },
+    { label: 'New', count: tasks.filter((t) => t.urgency === 'new').length, color: 'bg-blue-500' },
+    { label: 'Watching', count: tasks.filter((t) => t.urgency === 'watching').length, color: 'bg-gray-400' },
+  ];
+
   return (
     <div className="max-w-[90rem] mx-auto px-4 py-6 space-y-8">
+      {/* ── Summary Overview ── */}
+      <div className="bg-white border border-gray-200 rounded-lg p-4">
+        {/* Summary Cards */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 mb-4">
+          <div className="bg-gray-50 rounded-lg p-3 text-center">
+            <p className="text-lg font-bold text-gray-900 tabular-nums">{totalItems}</p>
+            <p className="text-[10px] text-gray-500 uppercase tracking-wider font-semibold">Total Items</p>
+          </div>
+          <div className="bg-green-50 rounded-lg p-3 text-center">
+            <p className="text-lg font-bold text-green-700 tabular-nums">{onTimePct}%</p>
+            <p className="text-[10px] text-green-600 uppercase tracking-wider font-semibold">On-Time</p>
+          </div>
+          <div className="bg-red-50 rounded-lg p-3 text-center">
+            <p className="text-lg font-bold text-red-700 tabular-nums">{atRiskLeadTimes}</p>
+            <p className="text-[10px] text-red-500 uppercase tracking-wider font-semibold">At Risk</p>
+          </div>
+          <div className="bg-yellow-50 rounded-lg p-3 text-center">
+            <p className="text-lg font-bold text-yellow-700 tabular-nums">{dueTodayCount + overdueCount}</p>
+            <p className="text-[10px] text-yellow-600 uppercase tracking-wider font-semibold">Needs Action</p>
+          </div>
+          <div className="bg-blue-50 rounded-lg p-3 text-center">
+            <p className="text-lg font-bold text-blue-700 tabular-nums">{onTrackCount}</p>
+            <p className="text-[10px] text-blue-500 uppercase tracking-wider font-semibold">On Track</p>
+          </div>
+        </div>
+
+        {/* Status Distribution Bar */}
+        <div>
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-[10px] uppercase tracking-wider font-semibold text-gray-400">Status Distribution</span>
+            <span className="text-[10px] text-gray-400">{totalItems} items</span>
+          </div>
+          {totalItems > 0 ? (
+            <div className="flex h-3 rounded-full overflow-hidden bg-gray-100">
+              {statusSegments.map((seg) =>
+                seg.count > 0 ? (
+                  <div
+                    key={seg.label}
+                    className={clsx('h-full', seg.color)}
+                    style={{ width: `${(seg.count / totalItems) * 100}%` }}
+                    title={`${seg.label}: ${seg.count}`}
+                  />
+                ) : null,
+              )}
+            </div>
+          ) : (
+            <div className="h-3 rounded-full bg-gray-100" />
+          )}
+          <div className="flex items-center gap-4 mt-1.5">
+            {statusSegments.map((seg) => (
+              <span key={seg.label} className="flex items-center gap-1 text-[9px] text-gray-500">
+                <span className={clsx('w-2 h-2 rounded-full inline-block', seg.color)} />
+                {seg.label} ({seg.count})
+              </span>
+            ))}
+          </div>
+        </div>
+
+        {/* Category Breakdown */}
+        <div className="grid grid-cols-5 gap-2 mt-3 pt-3 border-t border-gray-100">
+          {[
+            { label: 'Lead Times', count: leadTimes.length, color: 'text-blue-600' },
+            { label: 'Submittals', count: submittals.length, color: 'text-purple-600' },
+            { label: 'Invoices', count: invoices.length, color: 'text-amber-600' },
+            { label: 'Change Orders', count: changeOrders.length, color: 'text-orange-600' },
+            { label: 'Decisions', count: decisions.length, color: 'text-cyan-600' },
+          ].map((cat) => (
+            <div key={cat.label} className="text-center">
+              <p className={clsx('text-sm font-bold tabular-nums', cat.color)}>{cat.count}</p>
+              <p className="text-[9px] text-gray-400 uppercase">{cat.label}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* Lead-Time Risks */}
       {leadTimes.length > 0 && (
         <ProcurementSection

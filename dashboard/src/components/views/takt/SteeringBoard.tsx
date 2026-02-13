@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import clsx from 'clsx';
 
 export interface Sub {
@@ -35,7 +35,15 @@ interface SteeringBoardProps {
   onTaskDrop: (taskId: string, zone: string, day: number) => void;
   onTaskClick: (task: TaktTask) => void;
   onAddMilestone: () => void;
+  onAddSub?: (sub: Sub) => void;
 }
+
+const PRESET_COLORS = [
+  '#2563eb', '#16a34a', '#f59e0b', '#7c3aed', '#dc2626',
+  '#6b7280', '#0891b2', '#db2777', '#4b5563', '#059669',
+  '#0284c7', '#92400e', '#15803d', '#64748b', '#e11d48',
+  '#8b5cf6',
+];
 
 const STATUS_COLORS: Record<TaktTask['status'], string> = {
   planned: 'bg-blue-200 border-blue-400 text-blue-800',
@@ -53,8 +61,50 @@ export function SteeringBoard({
   onTaskDrop,
   onTaskClick,
   onAddMilestone,
+  onAddSub,
 }: SteeringBoardProps) {
   const dayHeaders = Array.from({ length: days }, (_, i) => i + 1);
+
+  // Trade-grouped sub-contractor state
+  const [collapsedTrades, setCollapsedTrades] = useState<Set<string>>(new Set());
+  const [addingForTrade, setAddingForTrade] = useState<string | null>(null);
+  const [newSubName, setNewSubName] = useState('');
+  const [newSubAbbrev, setNewSubAbbrev] = useState('');
+  const [newSubColor, setNewSubColor] = useState(PRESET_COLORS[0]);
+
+  const tradeGroups = useMemo(() => {
+    const grouped: Record<string, Sub[]> = {};
+    for (const s of subs) {
+      if (!grouped[s.trade]) grouped[s.trade] = [];
+      grouped[s.trade].push(s);
+    }
+    return Object.entries(grouped).sort(([a], [b]) => a.localeCompare(b));
+  }, [subs]);
+
+  const toggleTrade = (trade: string) => {
+    setCollapsedTrades((prev) => {
+      const next = new Set(prev);
+      if (next.has(trade)) next.delete(trade);
+      else next.add(trade);
+      return next;
+    });
+  };
+
+  const resetAddForm = () => {
+    setAddingForTrade(null);
+    setNewSubName('');
+    setNewSubAbbrev('');
+    setNewSubColor(PRESET_COLORS[0]);
+  };
+
+  const handleSubmitNewSub = (trade: string) => {
+    const trimmedName = newSubName.trim();
+    const trimmedAbbrev = newSubAbbrev.trim().toUpperCase();
+    if (!trimmedName || trimmedAbbrev.length !== 2) return;
+    if (subs.some((s) => s.abbrev === trimmedAbbrev)) return;
+    onAddSub?.({ name: trimmedName, abbrev: trimmedAbbrev, color: newSubColor, trade });
+    resetAddForm();
+  };
 
   const handleDragStart = (e: React.DragEvent, taskId: string) => {
     e.dataTransfer.setData('text/plain', taskId);
@@ -177,23 +227,161 @@ export function SteeringBoard({
         </div>
       </div>
 
-      {/* Sub-contractor legend */}
+      {/* Sub-contractor legend — grouped by trade */}
       <div className="bg-white rounded-lg shadow border border-gray-200 p-4">
-        <h4 className="text-sm font-semibold text-gray-900 mb-2">Sub-Contractors</h4>
-        <div className="flex flex-wrap gap-2">
-          {subs.map((s) => (
-            <span
-              key={s.abbrev}
-              className="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium border"
-              style={{ borderColor: s.color, backgroundColor: `${s.color}15`, color: s.color }}
-            >
-              <span
-                className="w-2 h-2 rounded-full"
-                style={{ backgroundColor: s.color }}
-              />
-              {s.abbrev} — {s.trade}
-            </span>
-          ))}
+        <h4 className="text-sm font-semibold text-gray-900 mb-3">Sub-Contractors</h4>
+        <div className="space-y-2">
+          {tradeGroups.map(([trade, tradeSubs]) => {
+            const isCollapsed = collapsedTrades.has(trade);
+            const isAdding = addingForTrade === trade;
+
+            return (
+              <div key={trade} className="border border-gray-100 rounded-lg">
+                {/* Trade header */}
+                <button
+                  type="button"
+                  onClick={() => toggleTrade(trade)}
+                  className="w-full flex items-center justify-between px-3 py-2 hover:bg-gray-50 transition-colors rounded-t-lg"
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-bold text-gray-800">{trade}</span>
+                    <span className="inline-flex items-center justify-center px-1.5 py-0.5 rounded-full bg-gray-200 text-[10px] font-semibold text-gray-600">
+                      {tradeSubs.length}
+                    </span>
+                  </div>
+                  <svg
+                    className={clsx(
+                      'w-4 h-4 text-gray-500 transition-transform',
+                      isCollapsed ? '-rotate-90' : 'rotate-0'
+                    )}
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+
+                {/* Trade body — subs + add button */}
+                {!isCollapsed && (
+                  <div className="px-3 pb-3 pt-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      {tradeSubs.map((s) => (
+                        <span
+                          key={s.abbrev}
+                          className="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium border"
+                          style={{ borderColor: s.color, backgroundColor: `${s.color}15`, color: s.color }}
+                        >
+                          <span
+                            className="w-2 h-2 rounded-full"
+                            style={{ backgroundColor: s.color }}
+                          />
+                          {s.abbrev} — {s.name}
+                        </span>
+                      ))}
+
+                      {/* "+" add-sub button */}
+                      {onAddSub && !isAdding && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            resetAddForm();
+                            setAddingForTrade(trade);
+                          }}
+                          className="inline-flex items-center justify-center w-7 h-7 rounded border border-dashed border-gray-300 text-gray-400 hover:border-blue-400 hover:text-blue-500 hover:bg-blue-50 transition-colors text-sm font-bold"
+                          title={`Add sub-contractor to ${trade}`}
+                        >
+                          +
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Inline add-sub form */}
+                    {onAddSub && isAdding && (
+                      <div className="mt-2 p-3 border border-blue-200 rounded-lg bg-blue-50/50 space-y-2">
+                        <div className="grid grid-cols-2 gap-2">
+                          <div>
+                            <label className="block text-[11px] font-medium text-gray-600 mb-0.5">Name</label>
+                            <input
+                              type="text"
+                              value={newSubName}
+                              onChange={(e) => setNewSubName(e.target.value)}
+                              placeholder="Company name"
+                              className="w-full border border-gray-300 rounded px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[11px] font-medium text-gray-600 mb-0.5">Abbreviation (2 letters)</label>
+                            <input
+                              type="text"
+                              maxLength={2}
+                              value={newSubAbbrev}
+                              onChange={(e) => setNewSubAbbrev(e.target.value.toUpperCase())}
+                              placeholder="AB"
+                              className="w-full border border-gray-300 rounded px-2 py-1 text-xs uppercase focus:outline-none focus:ring-1 focus:ring-blue-500"
+                            />
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-[11px] font-medium text-gray-600 mb-0.5">Color</label>
+                          <div className="flex flex-wrap gap-1">
+                            {PRESET_COLORS.map((c) => (
+                              <button
+                                key={c}
+                                type="button"
+                                onClick={() => setNewSubColor(c)}
+                                className={clsx(
+                                  'w-5 h-5 rounded-full border-2 transition-transform',
+                                  newSubColor === c ? 'border-gray-800 scale-125' : 'border-transparent hover:scale-110'
+                                )}
+                                style={{ backgroundColor: c }}
+                                title={c}
+                              />
+                            ))}
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-[11px] font-medium text-gray-600 mb-0.5">Trade</label>
+                          <input
+                            type="text"
+                            value={trade}
+                            disabled
+                            className="w-full border border-gray-200 rounded px-2 py-1 text-xs bg-gray-100 text-gray-500"
+                          />
+                        </div>
+
+                        <div className="flex justify-end gap-2 pt-1">
+                          <button
+                            type="button"
+                            onClick={resetAddForm}
+                            className="px-2 py-1 text-xs font-medium rounded bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleSubmitNewSub(trade)}
+                            disabled={!newSubName.trim() || newSubAbbrev.trim().length !== 2}
+                            className={clsx(
+                              'px-2 py-1 text-xs font-medium rounded transition-colors',
+                              newSubName.trim() && newSubAbbrev.trim().length === 2
+                                ? 'bg-blue-600 text-white hover:bg-blue-700'
+                                : 'bg-blue-300 text-white cursor-not-allowed'
+                            )}
+                          >
+                            Add Sub
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>

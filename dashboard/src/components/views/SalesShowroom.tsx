@@ -91,8 +91,84 @@ export function SalesShowroom({ leasing, events, pos, memberships }: SalesShowro
     }
   };
 
+  // ── Summary computations ──
+  const leasedPct = leasingStats.total > 0 ? Math.round(((leasingStats.leased + leasingStats.occupied) / leasingStats.total) * 100) : 0;
+  const upcomingEvents = events.filter((e) => new Date(e.date) >= new Date()).length;
+  const activeMemberships = memberships.filter((m) => m.status === 'active').length;
+
+  // Leasing status segments for progress bar
+  const leasingSegments = [
+    { label: 'Leased', count: leasingStats.leased, color: 'bg-green-500' },
+    { label: 'Occupied', count: leasingStats.occupied, color: 'bg-gray-500' },
+    { label: 'Pending', count: leasingStats.pending, color: 'bg-yellow-500' },
+    { label: 'Available', count: leasingStats.available, color: 'bg-blue-400' },
+  ];
+
   return (
     <div className="space-y-6">
+      {/* ── Summary Overview Strip ── */}
+      <div className="bg-white border border-gray-200 rounded-lg p-4">
+        {/* Summary Cards */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 mb-4">
+          <div className="bg-gray-50 rounded-lg p-2.5 text-center">
+            <p className="text-lg font-bold text-gray-900 tabular-nums">{leasingStats.total}</p>
+            <p className="text-[10px] text-gray-500 uppercase tracking-wider font-semibold">Total Units</p>
+          </div>
+          <div className="bg-green-50 rounded-lg p-2.5 text-center">
+            <p className="text-lg font-bold text-green-700 tabular-nums">{leasedPct}%</p>
+            <p className="text-[10px] text-green-600 uppercase tracking-wider font-semibold">Leased</p>
+          </div>
+          <div className="bg-blue-50 rounded-lg p-2.5 text-center">
+            <p className="text-lg font-bold text-blue-700 tabular-nums">{upcomingEvents}</p>
+            <p className="text-[10px] text-blue-500 uppercase tracking-wider font-semibold">Upcoming Events</p>
+          </div>
+          <div className="bg-amber-50 rounded-lg p-2.5 text-center">
+            <p className="text-lg font-bold text-amber-700 tabular-nums">{formatCurrency(posTotal)}</p>
+            <p className="text-[10px] text-amber-500 uppercase tracking-wider font-semibold">POS Revenue</p>
+          </div>
+          <div className="bg-purple-50 rounded-lg p-2.5 text-center">
+            <p className="text-lg font-bold text-purple-700 tabular-nums">{activeMemberships}</p>
+            <p className="text-[10px] text-purple-500 uppercase tracking-wider font-semibold">Active Members</p>
+          </div>
+          <div className="bg-indigo-50 rounded-lg p-2.5 text-center">
+            <p className="text-lg font-bold text-indigo-700 tabular-nums">{formatCurrency(leasingStats.monthlyRevenue)}</p>
+            <p className="text-[10px] text-indigo-500 uppercase tracking-wider font-semibold">Monthly Rev.</p>
+          </div>
+        </div>
+
+        {/* Occupancy / Leasing Progress Bar */}
+        <div>
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-[10px] uppercase tracking-wider font-semibold text-gray-400">Occupancy Overview</span>
+            <span className="text-[10px] text-gray-400">{leasedPct}% leased or occupied</span>
+          </div>
+          {leasingStats.total > 0 ? (
+            <div className="flex h-4 rounded-full overflow-hidden bg-gray-100">
+              {leasingSegments.map((seg) =>
+                seg.count > 0 ? (
+                  <div
+                    key={seg.label}
+                    className={clsx('h-full transition-all', seg.color)}
+                    style={{ width: `${(seg.count / leasingStats.total) * 100}%` }}
+                    title={`${seg.label}: ${seg.count} units`}
+                  />
+                ) : null,
+              )}
+            </div>
+          ) : (
+            <div className="h-4 rounded-full bg-gray-100" />
+          )}
+          <div className="flex items-center gap-4 mt-1.5">
+            {leasingSegments.map((seg) => (
+              <span key={seg.label} className="flex items-center gap-1 text-[9px] text-gray-500">
+                <span className={clsx('w-2 h-2 rounded-full inline-block', seg.color)} />
+                {seg.label} ({seg.count})
+              </span>
+            ))}
+          </div>
+        </div>
+      </div>
+
       {/* Sub-tab Navigation */}
       <div className="flex gap-2">
         <button
@@ -178,6 +254,7 @@ export function SalesShowroom({ leasing, events, pos, memberships }: SalesShowro
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
+                    <th className="px-2 py-3 w-16"></th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Unit</th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sqft</th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
@@ -190,6 +267,20 @@ export function SalesShowroom({ leasing, events, pos, memberships }: SalesShowro
                 <tbody className="bg-white divide-y divide-gray-200">
                   {leasing.map((unit, idx) => (
                     <tr key={idx} className={getRowBgColor(unit.status)}>
+                      <td className="px-2 py-2">
+                        <div className="flex items-center gap-0.5">
+                          <button className="p-1 rounded text-gray-400 hover:text-blue-600 transition-colors" title="Conversation">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
+                            </svg>
+                          </button>
+                          <button className="p-1 rounded text-gray-400 hover:text-blue-600 transition-colors" title="Attachments">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48" />
+                            </svg>
+                          </button>
+                        </div>
+                      </td>
                       <td className="px-4 py-3 text-sm font-medium text-gray-900">{unit.unit}</td>
                       <td className="px-4 py-3 text-sm text-gray-600">{unit.sqft.toLocaleString()}</td>
                       <td className="px-4 py-3 text-sm">
@@ -245,9 +336,21 @@ export function SalesShowroom({ leasing, events, pos, memberships }: SalesShowro
                           )}
                         </div>
                       </div>
-                      <span className={clsx('px-2 py-1 rounded-full text-xs font-medium whitespace-nowrap', getEventTypeBadgeColor(event.type))}>
-                        {event.type}
-                      </span>
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <button className="p-1 rounded text-gray-400 hover:text-blue-600 transition-colors" title="Conversation">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
+                          </svg>
+                        </button>
+                        <button className="p-1 rounded text-gray-400 hover:text-blue-600 transition-colors" title="Attachments">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48" />
+                          </svg>
+                        </button>
+                        <span className={clsx('px-2 py-1 rounded-full text-xs font-medium whitespace-nowrap', getEventTypeBadgeColor(event.type))}>
+                          {event.type}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -269,6 +372,7 @@ export function SalesShowroom({ leasing, events, pos, memberships }: SalesShowro
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
+                  <th className="px-2 py-3 w-16"></th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SKU</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
@@ -281,6 +385,20 @@ export function SalesShowroom({ leasing, events, pos, memberships }: SalesShowro
               <tbody className="bg-white divide-y divide-gray-200">
                 {pos.map((item, idx) => (
                   <tr key={idx} className={clsx(item.stock < 10 && 'bg-amber-50')}>
+                    <td className="px-2 py-2">
+                      <div className="flex items-center gap-0.5">
+                        <button className="p-1 rounded text-gray-400 hover:text-blue-600 transition-colors" title="Conversation">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
+                          </svg>
+                        </button>
+                        <button className="p-1 rounded text-gray-400 hover:text-blue-600 transition-colors" title="Attachments">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48" />
+                          </svg>
+                        </button>
+                      </div>
+                    </td>
                     <td className="px-4 py-3 text-sm font-medium text-gray-900">{item.sku}</td>
                     <td className="px-4 py-3 text-sm text-gray-900">{item.name}</td>
                     <td className="px-4 py-3 text-sm">
@@ -299,7 +417,7 @@ export function SalesShowroom({ leasing, events, pos, memberships }: SalesShowro
                   </tr>
                 ))}
                 <tr className="bg-gray-50 font-bold">
-                  <td colSpan={6} className="px-4 py-3 text-sm text-gray-900 text-right">Total Revenue</td>
+                  <td colSpan={7} className="px-4 py-3 text-sm text-gray-900 text-right">Total Revenue</td>
                   <td className="px-4 py-3 text-sm text-gray-900">{formatCurrency(posTotal)}</td>
                 </tr>
               </tbody>
@@ -333,6 +451,7 @@ export function SalesShowroom({ leasing, events, pos, memberships }: SalesShowro
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
+                    <th className="px-2 py-3 w-16"></th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tier</th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
@@ -344,6 +463,20 @@ export function SalesShowroom({ leasing, events, pos, memberships }: SalesShowro
                 <tbody className="bg-white divide-y divide-gray-200">
                   {memberships.map((member, idx) => (
                     <tr key={idx}>
+                      <td className="px-2 py-2">
+                        <div className="flex items-center gap-0.5">
+                          <button className="p-1 rounded text-gray-400 hover:text-blue-600 transition-colors" title="Conversation">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
+                            </svg>
+                          </button>
+                          <button className="p-1 rounded text-gray-400 hover:text-blue-600 transition-colors" title="Attachments">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48" />
+                            </svg>
+                          </button>
+                        </div>
+                      </td>
                       <td className="px-4 py-3 text-sm font-medium text-gray-900">{member.name}</td>
                       <td className="px-4 py-3 text-sm">
                         <span className={clsx('px-2 py-1 rounded-full text-xs font-medium', getTierBadgeColor(member.tier))}>

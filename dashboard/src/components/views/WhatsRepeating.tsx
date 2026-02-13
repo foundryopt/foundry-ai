@@ -147,6 +147,7 @@ function TimesheetTracker({ timesheet }: { timesheet: TimesheetSummary }) {
         <table className="w-full text-left border-collapse text-sm">
           <thead>
             <tr className="bg-gray-100 border-b border-gray-300 text-xs font-semibold text-gray-600 uppercase tracking-wide">
+              <th className="px-2 py-2 w-16"></th>
               <th className="px-3 py-2 min-w-[200px]">Cost Code / Role</th>
               <th className="px-3 py-2 w-20">Job</th>
               <th className="px-3 py-2 w-24 text-right">Budgeted</th>
@@ -170,6 +171,7 @@ function TimesheetTracker({ timesheet }: { timesheet: TimesheetSummary }) {
           {/* Grand total */}
           <tfoot>
             <tr className="bg-gray-100 border-t-2 border-gray-300 text-sm font-bold">
+              <td className="px-2 py-2" />
               <td className="px-3 py-2 text-gray-900">Total</td>
               <td className="px-3 py-2" />
               <td className="px-3 py-2 text-right tabular-nums">{fmtHrs(timesheet.totalBudgetedHours)}</td>
@@ -199,6 +201,7 @@ function TimesheetTracker({ timesheet }: { timesheet: TimesheetSummary }) {
               <table className="w-full text-sm border-collapse">
                 <thead>
                   <tr className="bg-gray-50 border-b border-gray-200 text-xs font-semibold text-gray-600 uppercase">
+                    <th className="px-2 py-2 w-16"></th>
                     <th className="px-3 py-2 text-left">Role</th>
                     <th className="px-3 py-2 text-right">Budgeted</th>
                     <th className="px-3 py-2 text-right">Spent</th>
@@ -215,6 +218,20 @@ function TimesheetTracker({ timesheet }: { timesheet: TimesheetSummary }) {
                     const pct = t.budgeted > 0 ? Math.round((t.spent / t.budgeted) * 100) : 0;
                     return (
                       <tr key={role} className="border-b border-gray-100">
+                        <td className="px-2 py-2">
+                          <div className="flex items-center gap-0.5">
+                            <button className="p-1 rounded text-gray-400 hover:text-blue-600 transition-colors" title="Conversation">
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
+                              </svg>
+                            </button>
+                            <button className="p-1 rounded text-gray-400 hover:text-blue-600 transition-colors" title="Attachments">
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48" />
+                              </svg>
+                            </button>
+                          </div>
+                        </td>
                         <td className="px-3 py-2 font-medium text-gray-800">{role}</td>
                         <td className="px-3 py-2 text-right tabular-nums text-gray-600">{fmtHrs(t.budgeted)}</td>
                         <td className="px-3 py-2 text-right tabular-nums text-gray-700">{fmtHrs(t.spent)}</td>
@@ -314,6 +331,20 @@ function TimesheetRow({ item, isExpanded, onToggle }: { item: TimesheetCostCode;
         )}
         onClick={onToggle}
       >
+        <td className="px-2 py-2" onClick={(e) => e.stopPropagation()}>
+          <div className="flex items-center gap-0.5">
+            <button className="p-1 rounded text-gray-400 hover:text-blue-600 transition-colors" title="Conversation">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
+              </svg>
+            </button>
+            <button className="p-1 rounded text-gray-400 hover:text-blue-600 transition-colors" title="Attachments">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48" />
+              </svg>
+            </button>
+          </div>
+        </td>
         <td className="px-3 py-2">
           <span className="inline-flex items-center gap-1">
             {isExpanded ? <ChevronDown className="text-gray-400 shrink-0" /> : <ChevronRight className="text-gray-400 shrink-0" />}
@@ -376,6 +407,7 @@ function TimesheetRow({ item, isExpanded, onToggle }: { item: TimesheetCostCode;
         const rbOver = rb.spent > rb.budgeted;
         return (
           <tr key={`${item.costCode}-${rb.role}`} className="border-b border-gray-100 text-xs bg-gray-50/50">
+            <td className="px-2 py-1.5" />
             <td className="px-3 py-1.5 pl-10 text-gray-600">{rb.role}</td>
             <td className="px-3 py-1.5" />
             <td className="px-3 py-1.5 text-right tabular-nums text-gray-500">{fmtHrs(rb.budgeted)}</td>
@@ -398,7 +430,7 @@ function TimesheetRow({ item, isExpanded, onToggle }: { item: TimesheetCostCode;
       {/* CO recommendation row */}
       {isExpanded && item.coRecommendation && (
         <tr className="border-b border-gray-200 bg-blue-50/50">
-          <td colSpan={10} className="px-3 py-2 pl-10">
+          <td colSpan={11} className="px-3 py-2 pl-10">
             <div className="flex items-start gap-2 text-xs">
               <span className="shrink-0 px-1.5 py-0.5 bg-blue-100 text-blue-700 rounded font-semibold text-[10px]">
                 CO → {item.coRecommendation.recipient}
@@ -416,8 +448,138 @@ function TimesheetRow({ item, isExpanded, onToggle }: { item: TimesheetCostCode;
 /* ── Main Component ── */
 
 export function WhatsRepeating({ repeatBreaches, ownerLoads, invoicePatterns, timesheet }: WhatsRepeatingProps) {
+  // ── Summary computations ──
+  const totalBreaches = repeatBreaches.reduce((s, r) => s + r.count, 0);
+  const categoryBreakdown = repeatBreaches.reduce<Record<string, number>>((acc, r) => {
+    acc[r.category] = (acc[r.category] ?? 0) + r.count;
+    return acc;
+  }, {});
+  const categoryEntries = Object.entries(categoryBreakdown).sort((a, b) => b[1] - a[1]);
+  const maxCategoryCount = categoryEntries.length > 0 ? categoryEntries[0][1] : 1;
+
+  const topOwner = ownerLoads.length > 0
+    ? ownerLoads.reduce((best, o) => (o.total > best.total ? o : best), ownerLoads[0])
+    : null;
+  const maxOwnerTotal = ownerLoads.length > 0 ? Math.max(...ownerLoads.map((o) => o.total)) : 1;
+
+  const totalInvoiceIssues = invoicePatterns.reduce((s, p) => s + p.issueCount, 0);
+
+  const CATEGORY_BAR_COLORS: Record<string, string> = {
+    'Lead Time': 'bg-blue-500',
+    Submittal: 'bg-purple-500',
+    Invoice: 'bg-amber-500',
+    RFI: 'bg-indigo-500',
+    CO: 'bg-orange-500',
+    Decision: 'bg-cyan-500',
+  };
+
   return (
     <div className="max-w-5xl mx-auto px-4 py-6 space-y-8">
+      {/* ── Summary Overview Strip ── */}
+      <div className="bg-white border border-gray-200 rounded-lg p-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          {/* Key Metrics */}
+          <div className="space-y-2">
+            <h3 className="text-[10px] uppercase tracking-wider font-semibold text-gray-400">Key Metrics</h3>
+            <div className="grid grid-cols-3 gap-2">
+              <div className="bg-red-50 rounded-lg p-2 text-center">
+                <p className="text-lg font-bold text-red-700 tabular-nums">{totalBreaches}</p>
+                <p className="text-[10px] text-red-500">Repeat Breaches</p>
+              </div>
+              <div className="bg-amber-50 rounded-lg p-2 text-center">
+                <p className="text-lg font-bold text-amber-700 tabular-nums">{totalInvoiceIssues}</p>
+                <p className="text-[10px] text-amber-500">Invoice Issues</p>
+              </div>
+              <div className="bg-blue-50 rounded-lg p-2 text-center">
+                <p className="text-lg font-bold text-blue-700 tabular-nums">{ownerLoads.reduce((s, o) => s + o.overdue, 0)}</p>
+                <p className="text-[10px] text-blue-500">Total Overdue</p>
+              </div>
+            </div>
+            {topOwner && (
+              <p className="text-[10px] text-gray-500 mt-1">
+                Top load: <span className="font-semibold text-gray-700">{topOwner.owner}</span> ({topOwner.total} items, {topOwner.overdue} overdue)
+              </p>
+            )}
+          </div>
+
+          {/* Category Breakdown */}
+          <div className="space-y-2">
+            <h3 className="text-[10px] uppercase tracking-wider font-semibold text-gray-400">Breaches by Category</h3>
+            <div className="space-y-1.5">
+              {categoryEntries.map(([cat, count]) => (
+                <div key={cat} className="flex items-center gap-2">
+                  <span className="text-[10px] text-gray-600 w-16 truncate shrink-0">{cat}</span>
+                  <div className="flex-1 h-3 bg-gray-100 rounded-full overflow-hidden">
+                    <div
+                      className={clsx('h-full rounded-full', CATEGORY_BAR_COLORS[cat] ?? 'bg-gray-400')}
+                      style={{ width: `${(count / maxCategoryCount) * 100}%` }}
+                    />
+                  </div>
+                  <span className="text-[10px] font-semibold text-gray-700 tabular-nums w-5 text-right">{count}</span>
+                </div>
+              ))}
+              {categoryEntries.length === 0 && (
+                <p className="text-[10px] text-gray-400">No repeat breaches</p>
+              )}
+            </div>
+          </div>
+
+          {/* Owner Workload Distribution */}
+          <div className="space-y-2">
+            <h3 className="text-[10px] uppercase tracking-wider font-semibold text-gray-400">Owner Workload</h3>
+            <div className="space-y-1.5">
+              {ownerLoads.slice(0, 6).map((o) => (
+                <div key={o.owner} className="flex items-center gap-2">
+                  <span className="text-[10px] text-gray-600 w-16 truncate shrink-0">{o.owner.split(' ')[0]}</span>
+                  <div className="flex-1 h-3 bg-gray-100 rounded-full overflow-hidden flex">
+                    {o.overdue > 0 && (
+                      <div
+                        className="h-full bg-red-500"
+                        style={{ width: `${(o.overdue / maxOwnerTotal) * 100}%` }}
+                        title={`${o.overdue} overdue`}
+                      />
+                    )}
+                    {o.dueToday > 0 && (
+                      <div
+                        className="h-full bg-yellow-400"
+                        style={{ width: `${(o.dueToday / maxOwnerTotal) * 100}%` }}
+                        title={`${o.dueToday} due today`}
+                      />
+                    )}
+                    {o.newItems > 0 && (
+                      <div
+                        className="h-full bg-blue-400"
+                        style={{ width: `${(o.newItems / maxOwnerTotal) * 100}%` }}
+                        title={`${o.newItems} new`}
+                      />
+                    )}
+                    {o.watching > 0 && (
+                      <div
+                        className="h-full bg-gray-300"
+                        style={{ width: `${(o.watching / maxOwnerTotal) * 100}%` }}
+                        title={`${o.watching} watching`}
+                      />
+                    )}
+                  </div>
+                  <span className="text-[10px] font-semibold text-gray-700 tabular-nums w-5 text-right">{o.total}</span>
+                </div>
+              ))}
+              {ownerLoads.length === 0 && (
+                <p className="text-[10px] text-gray-400">No owner data</p>
+              )}
+            </div>
+            {ownerLoads.length > 0 && (
+              <div className="flex items-center gap-3 text-[9px] text-gray-400 mt-1">
+                <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-red-500 inline-block" /> Overdue</span>
+                <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-yellow-400 inline-block" /> Today</span>
+                <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-blue-400 inline-block" /> New</span>
+                <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-gray-300 inline-block" /> Watching</span>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
       {/* ── Timesheet Tracker (new — top of view) ── */}
       <TimesheetTracker timesheet={timesheet} />
 
@@ -428,6 +590,25 @@ export function WhatsRepeating({ repeatBreaches, ownerLoads, invoicePatterns, ti
           data={repeatBreaches}
           keyFn={(r) => `${r.category}-${r.owner}`}
           columns={[
+            {
+              key: 'actions',
+              header: '',
+              render: () => (
+                <div className="flex items-center gap-0.5">
+                  <button className="p-1 rounded text-gray-400 hover:text-blue-600 transition-colors" title="Conversation">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
+                    </svg>
+                  </button>
+                  <button className="p-1 rounded text-gray-400 hover:text-blue-600 transition-colors" title="Attachments">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48" />
+                    </svg>
+                  </button>
+                </div>
+              ),
+              className: 'w-16',
+            },
             {
               key: 'category',
               header: 'Category',
@@ -475,6 +656,25 @@ export function WhatsRepeating({ repeatBreaches, ownerLoads, invoicePatterns, ti
           data={ownerLoads}
           keyFn={(r) => r.owner}
           columns={[
+            {
+              key: 'actions',
+              header: '',
+              render: () => (
+                <div className="flex items-center gap-0.5">
+                  <button className="p-1 rounded text-gray-400 hover:text-blue-600 transition-colors" title="Conversation">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
+                    </svg>
+                  </button>
+                  <button className="p-1 rounded text-gray-400 hover:text-blue-600 transition-colors" title="Attachments">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48" />
+                    </svg>
+                  </button>
+                </div>
+              ),
+              className: 'w-16',
+            },
             {
               key: 'owner',
               header: 'Owner',
@@ -553,6 +753,25 @@ export function WhatsRepeating({ repeatBreaches, ownerLoads, invoicePatterns, ti
           data={invoicePatterns}
           keyFn={(r) => r.vendor}
           columns={[
+            {
+              key: 'actions',
+              header: '',
+              render: () => (
+                <div className="flex items-center gap-0.5">
+                  <button className="p-1 rounded text-gray-400 hover:text-blue-600 transition-colors" title="Conversation">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
+                    </svg>
+                  </button>
+                  <button className="p-1 rounded text-gray-400 hover:text-blue-600 transition-colors" title="Attachments">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48" />
+                    </svg>
+                  </button>
+                </div>
+              ),
+              className: 'w-16',
+            },
             {
               key: 'vendor',
               header: 'Vendor',

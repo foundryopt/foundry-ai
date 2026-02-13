@@ -49,7 +49,7 @@ const SUB_TAB_LABELS: { key: TaktSubTab; label: string }[] = [
 
 // ── Shared mock data ──
 
-const SUBS: Sub[] = [
+const INITIAL_SUBS: Sub[] = [
   { name: 'Apex Framing', abbrev: 'AF', color: '#2563eb', trade: 'Framing' },
   { name: 'Summit Plumbing', abbrev: 'SP', color: '#16a34a', trade: 'Plumbing' },
   { name: 'Volt Electric', abbrev: 'VE', color: '#f59e0b', trade: 'Electrical' },
@@ -385,6 +385,7 @@ export function TaktPlanning({ criticalPath, schedule }: TaktPlanningProps) {
   const [activeTab, setActiveTab] = useState<TaktSubTab>('steering');
 
   // Shared state
+  const [subs, setSubs] = useState<Sub[]>(INITIAL_SUBS);
   const [tasks, setTasks] = useState<TaktTask[]>(SEED_TASKS);
   const [milestones, setMilestones] = useState<Milestone[]>(SEED_MILESTONES);
   const [roadblocks, setRoadblocks] = useState<Roadblock[]>(SEED_ROADBLOCKS);
@@ -426,6 +427,10 @@ export function TaktPlanning({ criticalPath, schedule }: TaktPlanningProps) {
     setShowRoadblockModal(false);
   };
 
+  const handleAddSub = (sub: Sub) => {
+    setSubs((prev) => [...prev, sub]);
+  };
+
   return (
     <div className="space-y-6">
       {/* Sub-tab Navigation */}
@@ -449,7 +454,7 @@ export function TaktPlanning({ criticalPath, schedule }: TaktPlanningProps) {
       {/* Sub-tab Content */}
       {activeTab === 'steering' && (
         <SteeringBoard
-          subs={SUBS}
+          subs={subs}
           zones={ZONES}
           days={TOTAL_DAYS}
           tasks={tasks}
@@ -457,6 +462,7 @@ export function TaktPlanning({ criticalPath, schedule }: TaktPlanningProps) {
           onTaskDrop={handleTaskDrop}
           onTaskClick={setEditingTask}
           onAddMilestone={() => setShowMilestoneModal(true)}
+          onAddSub={handleAddSub}
         />
       )}
       {activeTab === 'critical-path' && (
@@ -483,7 +489,7 @@ export function TaktPlanning({ criticalPath, schedule }: TaktPlanningProps) {
       {editingTask && (
         <EditTaskModal
           task={editingTask}
-          subs={SUBS}
+          subs={subs}
           onSave={handleTaskSave}
           onClose={() => setEditingTask(null)}
         />
@@ -498,7 +504,7 @@ export function TaktPlanning({ criticalPath, schedule }: TaktPlanningProps) {
       {showRoadblockModal && (
         <AddRoadblockModal
           zones={ZONES}
-          subs={SUBS}
+          subs={subs}
           onSave={handleRoadblockAdd}
           onClose={() => setShowRoadblockModal(false)}
         />

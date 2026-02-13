@@ -135,8 +135,98 @@ export function QAQC({ qaqc, tasks, isAllProjects }: QAQCProps) {
     );
   }, [qaqc.checklists, searchTerm]);
 
+  // ── Summary computations ──
+  const allCheckItems = qaqc.checklists.flatMap((c) => c.items);
+  const passCount = allCheckItems.filter((i) => i.status === 'pass').length;
+  const failCount = allCheckItems.filter((i) => i.status === 'fail').length;
+  const pendingCheckCount = allCheckItems.filter((i) => i.status === 'pending').length;
+  const totalCheckItems = allCheckItems.length;
+  const openRfis = rfiTasks.filter((t) => t.urgency !== 'watching').length;
+  const openCOs = coTasks.filter((t) => t.urgency !== 'watching').length;
+  const docsNeedingReview = qaqc.documents.filter((d) => d.status === 'pending-review' || d.status === 'revision-needed').length;
+
   return (
     <div className="max-w-6xl mx-auto px-4 py-4">
+      {/* ── Summary Overview Strip ── */}
+      <div className="bg-white border border-gray-200 rounded-lg p-4 mb-4">
+        {/* Key Metrics Row */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 mb-3">
+          <div className="bg-gray-50 rounded-lg p-2 text-center">
+            <p className="text-lg font-bold text-gray-900 tabular-nums">{qaqc.documents.length}</p>
+            <p className="text-[10px] text-gray-500 uppercase tracking-wider font-semibold">Documents</p>
+          </div>
+          <div className="bg-blue-50 rounded-lg p-2 text-center">
+            <p className="text-lg font-bold text-blue-700 tabular-nums">{qaqc.checklists.length}</p>
+            <p className="text-[10px] text-blue-500 uppercase tracking-wider font-semibold">Checklists</p>
+          </div>
+          <div className="bg-indigo-50 rounded-lg p-2 text-center">
+            <p className="text-lg font-bold text-indigo-700 tabular-nums">{rfiTasks.length}</p>
+            <p className="text-[10px] text-indigo-500 uppercase tracking-wider font-semibold">RFIs</p>
+          </div>
+          <div className="bg-orange-50 rounded-lg p-2 text-center">
+            <p className="text-lg font-bold text-orange-700 tabular-nums">{coTasks.length}</p>
+            <p className="text-[10px] text-orange-500 uppercase tracking-wider font-semibold">Change Orders</p>
+          </div>
+          <div className="bg-amber-50 rounded-lg p-2 text-center">
+            <p className="text-lg font-bold text-amber-700 tabular-nums">{docsNeedingReview}</p>
+            <p className="text-[10px] text-amber-500 uppercase tracking-wider font-semibold">Needs Review</p>
+          </div>
+          <div className="bg-red-50 rounded-lg p-2 text-center">
+            <p className="text-lg font-bold text-red-700 tabular-nums">{openRfis + openCOs}</p>
+            <p className="text-[10px] text-red-500 uppercase tracking-wider font-semibold">Open NCRs</p>
+          </div>
+        </div>
+
+        {/* Inspection Pass/Fail/Pending Bar */}
+        <div>
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-[10px] uppercase tracking-wider font-semibold text-gray-400">Inspection Results</span>
+            <span className="text-[10px] text-gray-400">{totalCheckItems} check items</span>
+          </div>
+          {totalCheckItems > 0 ? (
+            <div className="flex h-3 rounded-full overflow-hidden bg-gray-100">
+              {passCount > 0 && (
+                <div
+                  className="h-full bg-green-500"
+                  style={{ width: `${(passCount / totalCheckItems) * 100}%` }}
+                  title={`Pass: ${passCount}`}
+                />
+              )}
+              {failCount > 0 && (
+                <div
+                  className="h-full bg-red-500"
+                  style={{ width: `${(failCount / totalCheckItems) * 100}%` }}
+                  title={`Fail: ${failCount}`}
+                />
+              )}
+              {pendingCheckCount > 0 && (
+                <div
+                  className="h-full bg-yellow-400"
+                  style={{ width: `${(pendingCheckCount / totalCheckItems) * 100}%` }}
+                  title={`Pending: ${pendingCheckCount}`}
+                />
+              )}
+            </div>
+          ) : (
+            <div className="h-3 rounded-full bg-gray-100" />
+          )}
+          <div className="flex items-center gap-4 mt-1.5">
+            <span className="flex items-center gap-1 text-[9px] text-gray-500">
+              <span className="w-2 h-2 rounded-full bg-green-500 inline-block" />
+              Pass ({passCount}{totalCheckItems > 0 ? ` / ${Math.round((passCount / totalCheckItems) * 100)}%` : ''})
+            </span>
+            <span className="flex items-center gap-1 text-[9px] text-gray-500">
+              <span className="w-2 h-2 rounded-full bg-red-500 inline-block" />
+              Fail ({failCount}{totalCheckItems > 0 ? ` / ${Math.round((failCount / totalCheckItems) * 100)}%` : ''})
+            </span>
+            <span className="flex items-center gap-1 text-[9px] text-gray-500">
+              <span className="w-2 h-2 rounded-full bg-yellow-400 inline-block" />
+              Pending ({pendingCheckCount}{totalCheckItems > 0 ? ` / ${Math.round((pendingCheckCount / totalCheckItems) * 100)}%` : ''})
+            </span>
+          </div>
+        </div>
+      </div>
+
       {/* Sub-navigation */}
       <div className="flex items-center gap-1 mb-4 overflow-x-auto">
         {QA_TABS.map((tab) => (
@@ -236,6 +326,16 @@ export function QAQC({ qaqc, tasks, isAllProjects }: QAQCProps) {
                           </div>
                           {/* Actions */}
                           <div className="flex items-center gap-1.5 shrink-0">
+                            <button className="p-1 rounded text-gray-400 hover:text-blue-600 transition-colors" title="Conversation">
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
+                              </svg>
+                            </button>
+                            <button className="p-1 rounded text-gray-400 hover:text-blue-600 transition-colors" title="Attachments">
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48" />
+                              </svg>
+                            </button>
                             {doc.fieldwireUrl && (
                               <a
                                 href={doc.fieldwireUrl}
@@ -340,6 +440,7 @@ export function QAQC({ qaqc, tasks, isAllProjects }: QAQCProps) {
                     <table className="w-full text-xs">
                       <thead>
                         <tr className="bg-gray-50 text-gray-500">
+                          <th className="w-16"></th>
                           <th className="text-left px-4 py-1.5 font-medium">Check Item</th>
                           <th className="text-center px-2 py-1.5 font-medium w-20">Status</th>
                           <th className="text-left px-2 py-1.5 font-medium w-24">Inspector</th>
@@ -351,6 +452,20 @@ export function QAQC({ qaqc, tasks, isAllProjects }: QAQCProps) {
                       <tbody>
                         {checklist.items.map((item) => (
                           <tr key={item.id} className="border-t border-gray-50 hover:bg-gray-50">
+                            <td className="px-2 py-2">
+                              <div className="flex items-center gap-0.5">
+                                <button className="p-1 rounded text-gray-400 hover:text-blue-600 transition-colors" title="Conversation">
+                                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                                    <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
+                                  </svg>
+                                </button>
+                                <button className="p-1 rounded text-gray-400 hover:text-blue-600 transition-colors" title="Attachments">
+                                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                                    <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48" />
+                                  </svg>
+                                </button>
+                              </div>
+                            </td>
                             <td className="px-4 py-2 text-gray-800">{item.label}</td>
                             <td className="text-center px-2 py-2">
                               <span className={clsx('px-1.5 py-0.5 rounded text-[10px] font-medium', CHECK_STATUS_COLORS[item.status])}>
@@ -408,6 +523,7 @@ export function QAQC({ qaqc, tasks, isAllProjects }: QAQCProps) {
             <table className="w-full text-xs">
               <thead>
                 <tr className="bg-gray-50 text-gray-500">
+                  <th className="w-16"></th>
                   <th className="text-left px-3 py-2 font-medium">RFI #</th>
                   <th className="text-left px-3 py-2 font-medium">Subject</th>
                   <th className="text-left px-3 py-2 font-medium">Discipline</th>
@@ -425,6 +541,20 @@ export function QAQC({ qaqc, tasks, isAllProjects }: QAQCProps) {
                     const detail = task.detail.type === 'RFI' ? task.detail : null;
                     return (
                       <tr key={task.id} className="border-t border-gray-100 hover:bg-gray-50">
+                        <td className="px-2 py-2">
+                          <div className="flex items-center gap-0.5">
+                            <button className="p-1 rounded text-gray-400 hover:text-blue-600 transition-colors" title="Conversation">
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
+                              </svg>
+                            </button>
+                            <button className="p-1 rounded text-gray-400 hover:text-blue-600 transition-colors" title="Attachments">
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48" />
+                              </svg>
+                            </button>
+                          </div>
+                        </td>
                         <td className="px-3 py-2 font-mono text-gray-700">{task.id}</td>
                         <td className="px-3 py-2 text-gray-800 max-w-[200px] truncate">{task.subject}</td>
                         <td className="px-3 py-2 text-gray-500">{detail?.discipline ?? '—'}</td>
@@ -487,6 +617,7 @@ export function QAQC({ qaqc, tasks, isAllProjects }: QAQCProps) {
             <table className="w-full text-xs">
               <thead>
                 <tr className="bg-gray-50 text-gray-500">
+                  <th className="w-16"></th>
                   <th className="text-left px-3 py-2 font-medium">PCO #</th>
                   <th className="text-left px-3 py-2 font-medium">Subject</th>
                   <th className="text-left px-3 py-2 font-medium">Cost Code</th>
@@ -504,6 +635,20 @@ export function QAQC({ qaqc, tasks, isAllProjects }: QAQCProps) {
                     const detail = task.detail.type === 'CO' ? task.detail : null;
                     return (
                       <tr key={task.id} className="border-t border-gray-100 hover:bg-gray-50">
+                        <td className="px-2 py-2">
+                          <div className="flex items-center gap-0.5">
+                            <button className="p-1 rounded text-gray-400 hover:text-blue-600 transition-colors" title="Conversation">
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
+                              </svg>
+                            </button>
+                            <button className="p-1 rounded text-gray-400 hover:text-blue-600 transition-colors" title="Attachments">
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48" />
+                              </svg>
+                            </button>
+                          </div>
+                        </td>
                         <td className="px-3 py-2 font-mono text-gray-700">{detail?.pcoNumber ?? task.id}</td>
                         <td className="px-3 py-2 text-gray-800 max-w-[200px] truncate">{task.subject}</td>
                         <td className="px-3 py-2 text-gray-500">{detail?.costCode ?? task.costCodeRef ?? '—'}</td>
