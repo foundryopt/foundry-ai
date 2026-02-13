@@ -177,6 +177,65 @@ export function AttentionToday({ tasks, projects, schedule, criticalPath }: Atte
 
   const scheduledTaskIds = new Set(scheduled.map((s) => s.taskId));
 
+  // ── Ask Anything chatbot state ──
+  const [askOpen, setAskOpen] = useState(false);
+  const [askInput, setAskInput] = useState('');
+  const [askMessages, setAskMessages] = useState<{ role: 'user' | 'ai'; text: string }[]>([]);
+  const [askTyping, setAskTyping] = useState(false);
+
+  const overdueCount = grouped['overdue']?.length ?? 0;
+  const dueTodayCount = grouped['due-today']?.length ?? 0;
+  const totalOpen = filtered.length;
+  const atRiskPhases = schedule.phases.filter((p) => p.status === 'at-risk' || p.status === 'behind');
+
+  const generateAIResponse = useCallback((input: string): string => {
+    const q = input.toLowerCase();
+    if (q.includes('overdue') || q.includes('late')) {
+      return `There are currently **${overdueCount} overdue tasks**. The most critical ones involve ${grouped['overdue']?.slice(0, 3).map((t) => t.category).join(', ') || 'various categories'}. I recommend prioritizing these in today's standup.`;
+    }
+    if (q.includes('today') || q.includes('summary') || q.includes('status')) {
+      return `**Today's Summary:** ${totalOpen} open tasks total — ${overdueCount} overdue, ${dueTodayCount} due today. Schedule is ${schedule.overallStatus === 'on-track' ? 'on track' : schedule.overallStatus === 'at-risk' ? 'at risk' : 'behind'}${atRiskPhases.length > 0 ? ` with ${atRiskPhases.length} phase(s) needing attention: ${atRiskPhases.map((p) => p.name).join(', ')}` : ''}.`;
+    }
+    if (q.includes('report') || q.includes('daily')) {
+      return `**Daily Report Draft:**\n\n- **Open Tasks:** ${totalOpen} (${overdueCount} overdue, ${dueTodayCount} due today)\n- **Schedule:** ${schedule.overallStatus === 'on-track' ? 'On Track' : schedule.overallStatus === 'at-risk' ? 'At Risk' : 'Behind'}\n- **Key Actions:** Follow up on overdue items, review at-risk phases\n\nWould you like me to refine this or add specific sections?`;
+    }
+    if (q.includes('schedule') || q.includes('milestone') || q.includes('phase')) {
+      const phaseList = schedule.phases.map((p) => `${p.name}: ${p.percentComplete}% (${p.status}${p.daysVariance !== 0 ? `, ${p.daysVariance}d variance` : ''})`).join('\n- ');
+      return `**Schedule Overview:**\n- ${phaseList}\n\nOverall status: **${schedule.overallStatus}**`;
+    }
+    if (q.includes('budget') || q.includes('cost') || q.includes('spend')) {
+      return `For detailed budget information, check the **Budget Detail** tab. I can help you draft a change order or review specific cost codes. What would you like to focus on?`;
+    }
+    if (q.includes('rfi') || q.includes('submittal')) {
+      return `I can help draft an RFI or review submittals. Please provide the subject, description, and any relevant drawing references, and I'll prepare a draft for your review.`;
+    }
+    if (q.includes('change order') || q.includes(' co ') || q.includes('co#')) {
+      return `To draft a Change Order, I'll need:\n1. Description of the change\n2. Affected cost code(s)\n3. Estimated cost impact\n4. Schedule impact (if any)\n\nPlease provide these details and I'll prepare the CO draft.`;
+    }
+    return `I can help with project questions, draft reports, create RFIs, or review task status. You have **${totalOpen} open tasks** and the schedule is **${schedule.overallStatus}**. What specific area would you like to explore?`;
+  }, [overdueCount, dueTodayCount, totalOpen, schedule, atRiskPhases, grouped, filtered.length]);
+
+  const handleAskSend = useCallback(() => {
+    if (!askInput.trim()) return;
+    const userMsg = askInput.trim();
+    setAskMessages((prev) => [...prev, { role: 'user', text: userMsg }]);
+    setAskInput('');
+    setAskTyping(true);
+    setTimeout(() => {
+      setAskMessages((prev) => [...prev, { role: 'ai', text: generateAIResponse(userMsg) }]);
+      setAskTyping(false);
+    }, 600);
+  }, [askInput, generateAIResponse]);
+
+  const ASK_SUGGESTIONS = [
+    "What's overdue?",
+    'Summarize today',
+    'Draft daily report',
+    'Schedule status',
+    'Help with RFI',
+    'Draft change order',
+  ];
+
   return (
     <div className="flex">
       {/* Main content */}
@@ -564,6 +623,126 @@ export function AttentionToday({ tasks, projects, schedule, criticalPath }: Atte
               <span>
                 <strong className="text-green-600">{calendarTasks.filter((t) => scheduledTaskIds.has(t.id)).length}</strong> scheduled
               </span>
+            </div>
+          )}
+        </div>
+
+        {/* ── Ask Anything ── */}
+        <div className="mt-8 border-t border-gray-200 pt-6 pb-4">
+          {!askOpen ? (
+            <button
+              onClick={() => setAskOpen(true)}
+              className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl shadow-lg hover:from-blue-700 hover:to-blue-800 transition-all group"
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
+                <circle cx="12" cy="12" r="10" />
+                <path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3" />
+                <line x1="12" y1="17" x2="12.01" y2="17" />
+              </svg>
+              <div className="text-left">
+                <div className="text-sm font-semibold">Ask Anything</div>
+                <div className="text-xs text-blue-200">Get project insights, draft reports, create RFIs, review status</div>
+              </div>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="ml-auto opacity-50 group-hover:opacity-100 transition-opacity">
+                <polyline points="6 9 12 15 18 9" />
+              </svg>
+            </button>
+          ) : (
+            <div className="bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden">
+              {/* Header */}
+              <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-blue-600 to-blue-700">
+                <div className="flex items-center gap-2">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="10" />
+                    <path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3" />
+                    <line x1="12" y1="17" x2="12.01" y2="17" />
+                  </svg>
+                  <span className="text-sm font-semibold text-white">Ask Anything</span>
+                  <span className="text-xs text-blue-200">AI-powered project assistant</span>
+                </div>
+                <button
+                  onClick={() => setAskOpen(false)}
+                  className="text-white/70 hover:text-white transition-colors p-1"
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+                  </svg>
+                </button>
+              </div>
+
+              {/* Messages */}
+              <div className="max-h-[320px] overflow-y-auto p-4 space-y-3 bg-gray-50">
+                {askMessages.length === 0 && (
+                  <div className="text-center py-6">
+                    <div className="text-gray-400 text-sm mb-1">How can I help?</div>
+                    <div className="text-gray-300 text-xs">Ask about tasks, schedule, budget, or request help drafting documents</div>
+                  </div>
+                )}
+                {askMessages.map((msg, i) => (
+                  <div key={i} className={clsx('flex', msg.role === 'user' ? 'justify-end' : 'justify-start')}>
+                    <div
+                      className={clsx(
+                        'max-w-[80%] px-3 py-2 rounded-lg text-sm whitespace-pre-wrap',
+                        msg.role === 'user'
+                          ? 'bg-blue-600 text-white rounded-br-sm'
+                          : 'bg-white border border-gray-200 text-gray-800 rounded-bl-sm shadow-sm'
+                      )}
+                    >
+                      {msg.text.split('**').map((part, pi) =>
+                        pi % 2 === 1
+                          ? <strong key={pi}>{part}</strong>
+                          : <span key={pi}>{part}</span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+                {askTyping && (
+                  <div className="flex justify-start">
+                    <div className="bg-white border border-gray-200 text-gray-400 px-3 py-2 rounded-lg rounded-bl-sm shadow-sm text-sm flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                      <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                      <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Suggestion chips */}
+              <div className="px-4 py-2 flex gap-2 overflow-x-auto border-t border-gray-100">
+                {ASK_SUGGESTIONS.map((s) => (
+                  <button
+                    key={s}
+                    onClick={() => { setAskInput(s); }}
+                    className="shrink-0 px-3 py-1.5 text-xs font-medium rounded-full bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 transition-colors"
+                  >
+                    {s}
+                  </button>
+                ))}
+              </div>
+
+              {/* Input */}
+              <div className="px-4 py-3 border-t border-gray-200 flex gap-2">
+                <input
+                  type="text"
+                  value={askInput}
+                  onChange={(e) => setAskInput(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === 'Enter') handleAskSend(); }}
+                  placeholder="Ask about your project..."
+                  className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+                <button
+                  onClick={handleAskSend}
+                  disabled={!askInput.trim()}
+                  className={clsx(
+                    'px-4 py-2 rounded-lg text-sm font-medium transition-colors',
+                    askInput.trim()
+                      ? 'bg-blue-600 text-white hover:bg-blue-700'
+                      : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                  )}
+                >
+                  Send
+                </button>
+              </div>
             </div>
           )}
         </div>
