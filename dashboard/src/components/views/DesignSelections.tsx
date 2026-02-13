@@ -5,7 +5,7 @@ import clsx from 'clsx';
 
 /* ── Types ── */
 
-type DesignSubTab = 'submittals' | 'drawings' | 'specs' | 'versions';
+type DesignSubTab = 'submittals' | 'drawings' | 'specs' | 'installation' | 'versions';
 
 interface Submittal {
   id: string;
@@ -43,6 +43,19 @@ interface Spec {
   assignedTo: string;
   revision: string;
   lastUpdated: string;
+  project: string;
+}
+
+interface InstallGuide {
+  id: string;
+  trade: string;
+  title: string;
+  method: string;
+  qualityStandard: string;
+  inspectionChecklist: string[];
+  revision: string;
+  lastUpdated: string;
+  status: 'current' | 'draft' | 'under-review' | 'superseded';
   project: string;
 }
 
@@ -110,6 +123,25 @@ const VERSIONS: VersionEntry[] = [
   { id: 'v-8', docType: 'drawing', docNumber: 'P-101', title: 'Plumbing Plan Level 1', revision: 'Rev C', changedBy: 'M. Chen', date: '2026-02-04', summary: 'Rerouted waste line around new duct shaft' },
 ];
 
+const INSTALL_GUIDES: InstallGuide[] = [
+  { id: 'ig-1', trade: 'Structural', title: 'Structural Steel Erection', method: 'AISC 303 Code of Standard Practice. Bolted connections per RCSC spec. Field welds per AWS D1.1. Torque verification on all high-strength bolts.', qualityStandard: 'AISC 360-22, AWS D1.1', inspectionChecklist: ['Anchor bolt placement ±1/8"', 'Column plumbness ±1:500', 'Beam alignment verified', 'Bolt tensioning per spec', 'Weld visual + UT inspection'], revision: 'Rev 2', lastUpdated: '2026-02-05', status: 'current', project: 'SandBox — Mixed-Use' },
+  { id: 'ig-2', trade: 'Concrete', title: 'Cast-in-Place Concrete', method: 'ACI 318 structural concrete. Mix design per approved submittal. Consolidation via internal vibration. Curing per ACI 308. Min 7-day wet cure for slabs.', qualityStandard: 'ACI 318-19, ACI 301', inspectionChecklist: ['Rebar placement ±1/2" cover', 'Form alignment check', 'Slump test each truck', 'Cylinder break tests (7d, 28d)', 'Curing compound applied', 'Surface finish per spec'], revision: 'Rev 1', lastUpdated: '2026-01-28', status: 'current', project: 'SandBox — Mixed-Use' },
+  { id: 'ig-3', trade: 'Mechanical', title: 'HVAC Ductwork Installation', method: 'SMACNA standards for duct construction. Seal class A for supply, class B for return. Support spacing per SMACNA table. Leak test at 1.5× operating pressure.', qualityStandard: 'SMACNA, ASHRAE 90.1', inspectionChecklist: ['Duct gauge per spec', 'Joint sealed & taped', 'Hanger spacing correct', 'Insulation thickness verified', 'Leak test passed', 'Balancing dampers installed'], revision: 'Rev 1', lastUpdated: '2026-02-08', status: 'current', project: 'SandBox — Mixed-Use' },
+  { id: 'ig-4', trade: 'Electrical', title: 'Electrical Rough-In', method: 'NEC 2023 compliant. MC cable or EMT per spec. Box fill calculations verified. Grounding per NEC 250. Label all circuits at panels.', qualityStandard: 'NEC 2023, NFPA 70', inspectionChecklist: ['Wire sizing per load calc', 'Box fill within limits', 'Ground continuity tested', 'Circuit labels installed', 'Conduit support spacing', 'Arc-fault protection where req.'], revision: 'Rev 2', lastUpdated: '2026-02-07', status: 'current', project: 'Greenfield — Residential' },
+  { id: 'ig-5', trade: 'Plumbing', title: 'Plumbing Rough-In & Stack', method: 'IPC 2021 compliant. DWV in cast iron above grade, PVC below. Copper supply with lead-free solder. Pressure test at 150 PSI for 2 hrs. Camera inspect main lines.', qualityStandard: 'IPC 2021, ASME B31.9', inspectionChecklist: ['Pipe slope ≥1/4" per ft', 'Pressure test 150 PSI / 2hr', 'No leaks at joints', 'Cleanouts accessible', 'Vent termination height', 'Water hammer arrestors'], revision: 'Rev 1', lastUpdated: '2026-02-06', status: 'current', project: 'Greenfield — Residential' },
+  { id: 'ig-6', trade: 'Fire Protection', title: 'Fire Sprinkler Installation', method: 'NFPA 13 for commercial, NFPA 13R for residential. Heads per approved shop drawings. Hydrostatic test at 200 PSI for 2 hrs. Main drain flow test.', qualityStandard: 'NFPA 13, NFPA 25', inspectionChecklist: ['Head spacing per design', 'Pipe support per NFPA 13', 'Hydro test 200 PSI / 2hr', 'FDC connection verified', 'Escutcheons flush', 'System tagged & labeled'], revision: 'Rev 1', lastUpdated: '2026-02-10', status: 'under-review', project: 'SandBox — Mixed-Use' },
+  { id: 'ig-7', trade: 'Architectural', title: 'Curtain Wall Assembly', method: 'Install per manufacturer instructions and approved shop drawings. Structural silicone glazing where shown. Flash all perimeter joints. ASTM E2112 for window integration.', qualityStandard: 'ASTM E2112, AAMA 501', inspectionChecklist: ['Anchor embedment depth', 'Mullion plumb ±1/16"', 'Glass lite sizes correct', 'Sealant bead continuous', 'Weep holes clear', 'Water test per AAMA 501'], revision: 'Rev 3', lastUpdated: '2026-02-12', status: 'current', project: 'SandBox — Mixed-Use' },
+  { id: 'ig-8', trade: 'Drywall', title: 'Gypsum Board Installation', method: 'GA-216 standards. Screw spacing per fire rating. Tape and finish to Level 4 (Level 5 at highlight walls). Control joints at 30ft max spacing.', qualityStandard: 'GA-216, ASTM C840', inspectionChecklist: ['Stud spacing 16" OC', 'Screw pattern per fire rating', 'Joints taped & mudded', 'Corner bead straight', 'Finish level per spec', 'Fire-rated assemblies labeled'], revision: 'Rev 0', lastUpdated: '2026-02-13', status: 'draft', project: 'SandBox — Mixed-Use' },
+  { id: 'ig-9', trade: 'Waterproofing', title: 'Below-Grade Waterproofing', method: 'Self-adhered membrane per manufacturer specs. Minimum 6" laps. Protection board over membrane. Drainage mat at foundation walls.', qualityStandard: 'ASTM D4068, ASTM D6135', inspectionChecklist: ['Surface prep clean & dry', 'Primer applied full coverage', 'Lap seams ≥6"', 'Terminations sealed', 'Protection board installed', 'Drainage mat drains to footing'], revision: 'Rev 1', lastUpdated: '2026-02-09', status: 'current', project: 'Greenfield — Residential' },
+];
+
+const INSTALL_BADGE: Record<string, string> = {
+  current: 'bg-green-100 text-green-700',
+  draft: 'bg-gray-100 text-gray-700',
+  'under-review': 'bg-yellow-100 text-yellow-700',
+  superseded: 'bg-red-100 text-red-700',
+};
+
 /* ── Status badges ── */
 
 const SUBMITTAL_BADGE: Record<string, string> = {
@@ -142,6 +174,7 @@ const SUB_TAB_LABELS: { key: DesignSubTab; label: string }[] = [
   { key: 'submittals', label: 'Submittals' },
   { key: 'drawings', label: 'Drawings' },
   { key: 'specs', label: 'Specifications' },
+  { key: 'installation', label: 'Installation Guidelines' },
   { key: 'versions', label: 'Version History' },
 ];
 
@@ -154,6 +187,9 @@ const DISCIPLINE_BORDER: Record<string, string> = {
   'Electrical': 'border-l-yellow-500',
   'Plumbing': 'border-l-cyan-500',
   'Fire Protection': 'border-l-orange-500',
+  'Concrete': 'border-l-gray-500',
+  'Drywall': 'border-l-purple-500',
+  'Waterproofing': 'border-l-teal-500',
 };
 const DEFAULT_DISCIPLINE_BORDER = 'border-l-gray-400';
 
@@ -170,6 +206,9 @@ const DISCIPLINE_TAG: Record<string, string> = {
   'Electrical': 'bg-yellow-50 text-yellow-800',
   'Plumbing': 'bg-cyan-50 text-cyan-700',
   'Fire Protection': 'bg-orange-50 text-orange-700',
+  'Concrete': 'bg-gray-100 text-gray-700',
+  'Drywall': 'bg-purple-50 text-purple-700',
+  'Waterproofing': 'bg-teal-50 text-teal-700',
 };
 const DEFAULT_DISCIPLINE_TAG = 'bg-gray-50 text-gray-600';
 
@@ -271,10 +310,7 @@ export function DesignSelections({ isAllProjects: _isAllProjects }: DesignSelect
     const set = new Set<string>();
     submittals.forEach((s) => set.add(s.discipline));
     drawings.forEach((d) => set.add(d.discipline));
-    specs.forEach((s) => {
-      // Map spec divisions to disciplines for unified filtering
-      // Specs use 'division' but we extract a discipline-like label
-    });
+    INSTALL_GUIDES.forEach((g) => set.add(g.trade));
     return Array.from(set).sort();
   }, [submittals, drawings, specs]);
 
@@ -283,6 +319,7 @@ export function DesignSelections({ isAllProjects: _isAllProjects }: DesignSelect
     if (activeTab === 'submittals') return Object.keys(SUBMITTAL_BADGE);
     if (activeTab === 'drawings') return Object.keys(DRAWING_BADGE);
     if (activeTab === 'specs') return Object.keys(SPEC_BADGE);
+    if (activeTab === 'installation') return Object.keys(INSTALL_BADGE);
     return [];
   }, [activeTab]);
 
@@ -350,19 +387,35 @@ export function DesignSelections({ isAllProjects: _isAllProjects }: DesignSelect
     setSpecs((prev) => prev.map((s) => s.id === id ? { ...s, assignedTo: assignee } : s));
   }, []);
 
+  const filteredInstall = useMemo(() => {
+    return INSTALL_GUIDES.filter((g) => {
+      if (filterProject !== 'all' && g.project !== filterProject) return false;
+      if (filterDiscipline !== 'all' && g.trade !== filterDiscipline) return false;
+      if (filterStatus !== 'all' && g.status !== filterStatus) return false;
+      return true;
+    });
+  }, [filterProject, filterDiscipline, filterStatus]);
+
+  const installStats = useMemo(() => {
+    const counts: Record<string, number> = {};
+    filteredInstall.forEach((g) => { counts[g.status] = (counts[g.status] || 0) + 1; });
+    return counts;
+  }, [filteredInstall]);
+
   // Summary bar helper
-  const currentStats = activeTab === 'submittals' ? submittalStats : activeTab === 'drawings' ? drawingStats : specStats;
-  const currentBadgeMap = activeTab === 'submittals' ? SUBMITTAL_BADGE : activeTab === 'drawings' ? DRAWING_BADGE : SPEC_BADGE;
+  const currentStats = activeTab === 'submittals' ? submittalStats : activeTab === 'drawings' ? drawingStats : activeTab === 'installation' ? installStats : specStats;
+  const currentBadgeMap = activeTab === 'submittals' ? SUBMITTAL_BADGE : activeTab === 'drawings' ? DRAWING_BADGE : activeTab === 'installation' ? INSTALL_BADGE : SPEC_BADGE;
   const maxCount = Math.max(...Object.values(currentStats).map(Number), 1);
 
-  // Filtered item count for display
   const filteredCount = activeTab === 'submittals'
     ? filteredSubmittals.length
     : activeTab === 'drawings'
       ? filteredDrawings.length
       : activeTab === 'specs'
         ? filteredSpecs.length
-        : VERSIONS.length;
+        : activeTab === 'installation'
+          ? filteredInstall.length
+          : VERSIONS.length;
 
   const totalCount = activeTab === 'submittals'
     ? submittals.length
@@ -370,7 +423,9 @@ export function DesignSelections({ isAllProjects: _isAllProjects }: DesignSelect
       ? drawings.length
       : activeTab === 'specs'
         ? specs.length
-        : VERSIONS.length;
+        : activeTab === 'installation'
+          ? INSTALL_GUIDES.length
+          : VERSIONS.length;
 
   return (
     <div className="space-y-6">
@@ -436,7 +491,7 @@ export function DesignSelections({ isAllProjects: _isAllProjects }: DesignSelect
       {activeTab !== 'versions' && (
         <div className="bg-white rounded-lg shadow border border-gray-200 p-4">
           <h4 className="text-sm font-semibold text-gray-900 mb-3">
-            {activeTab === 'submittals' ? 'Submittal' : activeTab === 'drawings' ? 'Drawing' : 'Specification'} Status
+            {activeTab === 'submittals' ? 'Submittal' : activeTab === 'drawings' ? 'Drawing' : activeTab === 'installation' ? 'Installation Guide' : 'Specification'} Status
           </h4>
           <div className="space-y-2">
             {Object.entries(currentStats).length === 0 && (
@@ -622,6 +677,68 @@ export function DesignSelections({ isAllProjects: _isAllProjects }: DesignSelect
               <div className="flex items-center justify-between pt-1 border-t border-gray-100">
                 <AssigneeDropdown value={s.assignedTo} onChange={(v) => updateSpecAssignee(s.id, v)} />
                 <RowActions onChat={() => {}} onAttach={() => {}} />
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* ── Installation Guidelines tab ── */}
+      {activeTab === 'installation' && (
+        <div className="space-y-4">
+          {INSTALL_GUIDES
+            .filter((g) => filterProject === 'all' || g.project === filterProject)
+            .filter((g) => filterDiscipline === 'all' || g.trade === filterDiscipline)
+            .filter((g) => filterStatus === 'all' || g.status === filterStatus)
+            .map((g) => (
+            <div key={g.id} className="bg-white rounded-lg shadow border border-gray-200 overflow-hidden">
+              {/* Header */}
+              <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100 bg-gray-50">
+                <div className="flex items-center gap-3">
+                  <span className={clsx('text-[10px] font-medium px-2 py-0.5 rounded', getDisciplineTag(g.trade))}>
+                    {g.trade}
+                  </span>
+                  <h4 className="text-sm font-semibold text-gray-900">{g.title}</h4>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-medium px-2 py-0.5 rounded bg-gray-100 text-gray-600">{g.revision}</span>
+                  <span className={clsx('px-2 py-0.5 rounded text-[10px] font-medium capitalize', INSTALL_BADGE[g.status])}>
+                    {g.status.replace('-', ' ')}
+                  </span>
+                </div>
+              </div>
+
+              <div className="p-5 space-y-4">
+                {/* Method */}
+                <div>
+                  <h5 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Installation Method</h5>
+                  <p className="text-sm text-gray-700 leading-relaxed">{g.method}</p>
+                </div>
+
+                {/* Quality Standard */}
+                <div>
+                  <h5 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Quality Standard</h5>
+                  <p className="text-sm text-gray-800 font-medium">{g.qualityStandard}</p>
+                </div>
+
+                {/* Inspection Checklist */}
+                <div>
+                  <h5 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Inspection Checklist</h5>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                    {g.inspectionChecklist.map((item, i) => (
+                      <label key={i} className="flex items-start gap-2 text-sm text-gray-700 bg-gray-50 rounded px-3 py-2 cursor-pointer hover:bg-gray-100 transition-colors">
+                        <input type="checkbox" className="mt-0.5 rounded border-gray-300" />
+                        <span>{item}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Footer */}
+                <div className="flex items-center justify-between pt-2 border-t border-gray-100 text-[10px] text-gray-500">
+                  <span>Updated: {g.lastUpdated}</span>
+                  <span>{g.project}</span>
+                </div>
               </div>
             </div>
           ))}
