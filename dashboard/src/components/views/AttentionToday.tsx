@@ -3,14 +3,14 @@
 import { useMemo, useState, useCallback } from 'react';
 import clsx from 'clsx';
 import type { OpenTask, BudgetComment, ScheduledSlot, Project } from '@/lib/types';
-import { URGENCY_ORDER, URGENCY_COLORS, CATEGORY_COLORS } from '@/lib/constants';
+import { URGENCY_ORDER, URGENCY_COLORS, URGENCY_LABELS, CATEGORY_COLORS } from '@/lib/constants';
 import { applyFilters, groupByUrgency, getFilterOptions } from '@/lib/filters';
 import { useFilters } from '@/hooks/useFilters';
 import { useDetailPanel } from '@/hooks/useDetailPanel';
 import { SearchBar } from '@/components/filters/SearchBar';
 import { FilterBar } from '@/components/filters/FilterBar';
 import { CountsBar } from '@/components/cards/CountsBar';
-import { UrgencyGroup } from '@/components/cards/UrgencyGroup';
+
 import { DetailPanel } from '@/components/detail/DetailPanel';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { CommentThread } from '@/components/ui/CommentThread';
@@ -72,10 +72,10 @@ export function AttentionToday({ tasks, projects }: AttentionTodayProps) {
 
   const selectedTask = selectedId ? tasks.find((t) => t.id === selectedId) ?? null : null;
 
-  // ── Collapsible urgency groups ──
-  const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set());
-  const toggleGroup = useCallback((urgency: string) => {
-    setCollapsedGroups((prev) => {
+  // ── Expanded rows state ──
+  const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
+  const toggleRow = useCallback((urgency: string) => {
+    setExpandedRows((prev) => {
       const next = new Set(prev);
       if (next.has(urgency)) next.delete(urgency);
       else next.add(urgency);
@@ -164,7 +164,7 @@ export function AttentionToday({ tasks, projects }: AttentionTodayProps) {
   return (
     <div className="flex">
       {/* Main content */}
-      <div className="flex-1 min-w-0 max-w-5xl mx-auto px-4 py-4">
+      <div className="flex-1 min-w-0 max-w-7xl mx-auto px-4 py-4">
         {/* Search */}
         <SearchBar value={filters.search} onChange={setSearch} />
 
@@ -188,7 +188,7 @@ export function AttentionToday({ tasks, projects }: AttentionTodayProps) {
         {/* Counts */}
         <CountsBar tasks={filtered} />
 
-        {/* Urgency groups */}
+        {/* Kanban Rows */}
         {filtered.length === 0 ? (
           <EmptyState
             message={
@@ -198,100 +198,104 @@ export function AttentionToday({ tasks, projects }: AttentionTodayProps) {
             }
           />
         ) : (
-          <div className="space-y-2 mt-2">
+          <div className="space-y-4 mt-3">
             {URGENCY_ORDER.map((urgency) => {
               const groupTasks = grouped[urgency];
               if (groupTasks.length === 0) return null;
-              const isCollapsed = collapsedGroups.has(urgency);
+              const isExpanded = expandedRows.has(urgency);
+              const visible = isExpanded ? groupTasks : groupTasks.slice(0, 5);
+              const overflow = groupTasks.length - 5;
+
               return (
                 <div key={urgency}>
-                  <button
-                    onClick={() => toggleGroup(urgency)}
-                    className={clsx('flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider mb-1.5 w-full text-left', URGENCY_COLORS[urgency].text)}
-                  >
-                    <svg className={clsx('w-3.5 h-3.5 transition-transform shrink-0', !isCollapsed && 'rotate-90')} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
-                    {urgency === 'due-today' ? 'Due Today' : urgency === 'new' ? 'New' : urgency.charAt(0).toUpperCase() + urgency.slice(1)} ({groupTasks.length})
-                  </button>
-                  {!isCollapsed && <div className="space-y-1.5">
-                    {groupTasks.map((task) => {
+                  {/* Row header */}
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className={clsx('w-1 h-4 rounded-full', URGENCY_COLORS[urgency].border.replace('border-', 'bg-'))} />
+                    <span className={clsx('text-xs font-semibold uppercase tracking-wider', URGENCY_COLORS[urgency].text)}>
+                      {URGENCY_LABELS[urgency]}
+                    </span>
+                    <span className={clsx('text-[10px] font-bold px-1.5 py-0.5 rounded-full', URGENCY_COLORS[urgency].bg, URGENCY_COLORS[urgency].text)}>
+                      {groupTasks.length}
+                    </span>
+                  </div>
+
+                  {/* Horizontal card row */}
+                  <div className="flex gap-3 overflow-x-auto pb-2">
+                    {visible.map((task) => {
                       const isScheduled = scheduledTaskIds.has(task.id);
                       return (
-                        <div key={task.id}>
+                        <div key={task.id} className="shrink-0 w-56">
                           <div
                             draggable
                             onDragStart={() => handleDragStart(task.id)}
                             className={clsx(
-                              'bg-white rounded-lg border-l-4 p-3 shadow-sm hover:shadow-md transition-shadow cursor-grab active:cursor-grabbing',
-                              URGENCY_COLORS[task.urgency].border,
+                              'bg-white rounded-lg p-2.5 shadow-sm hover:shadow-md transition-shadow cursor-grab active:cursor-grabbing border border-gray-200 h-full',
                               isScheduled && 'ring-2 ring-green-300',
                             )}
                           >
-                            <div className="flex items-start justify-between gap-2">
-                              <div className="min-w-0 flex-1">
-                                <div className="flex items-center gap-2 mb-0.5">
-                                  <span className={clsx('text-[10px] px-1.5 py-0.5 rounded font-medium', CATEGORY_COLORS[task.category])}>
-                                    {task.category}
-                                  </span>
-                                  <span className="text-[10px] font-mono text-gray-400">{task.id}</span>
-                                  {task.costCodeRef && (
-                                    <span className="text-[10px] bg-gray-100 text-gray-500 px-1 py-0.5 rounded">{task.costCodeRef}</span>
-                                  )}
-                                  {isScheduled && (
-                                    <span className="text-[10px] bg-green-100 text-green-700 px-1 py-0.5 rounded font-medium">Scheduled</span>
-                                  )}
-                                </div>
-                                <button
-                                  onClick={() => select(task.id)}
-                                  className="text-sm font-medium text-gray-900 hover:text-blue-600 truncate block text-left"
-                                >
-                                  {task.subject}
-                                </button>
-                                <div className="flex items-center gap-2 mt-0.5">
-                                  <span className="text-xs text-gray-500">{task.owner}</span>
-                                  <span className="text-[10px] text-gray-300">|</span>
-                                  <span className="text-[10px] text-gray-400">
-                                    {projects.find((p) => p.id === task.projectId)?.name.split('—')[0].trim() ?? task.projectId}
-                                  </span>
-                                </div>
-                              </div>
-                              <div className="flex items-center gap-2 shrink-0">
-                                {/* Slack comment button */}
+                            {/* Category + id */}
+                            <div className="flex items-center gap-1.5 mb-1">
+                              <span className={clsx('text-[10px] px-1.5 py-0.5 rounded font-medium', CATEGORY_COLORS[task.category])}>
+                                {task.category}
+                              </span>
+                              <span className="text-[10px] font-mono text-gray-400">{task.id}</span>
+                              {isScheduled && (
+                                <span className="text-[10px] bg-green-100 text-green-700 px-1 py-0.5 rounded font-medium">Sched</span>
+                              )}
+                            </div>
+
+                            {/* Subject */}
+                            <button
+                              onClick={() => select(task.id)}
+                              className="text-sm font-medium text-gray-900 hover:text-blue-600 line-clamp-2 text-left w-full"
+                            >
+                              {task.subject}
+                            </button>
+
+                            {/* Owner + project */}
+                            <div className="flex items-center gap-1 mt-1">
+                              <span className="text-[10px] text-gray-500 truncate">{task.owner}</span>
+                              <span className="text-[10px] text-gray-300">|</span>
+                              <span className="text-[10px] text-gray-400 truncate">
+                                {projects.find((p) => p.id === task.projectId)?.name.split('—')[0].trim() ?? task.projectId}
+                              </span>
+                            </div>
+
+                            {/* Bottom: urgency + chat + attach */}
+                            <div className="flex items-center justify-between mt-2 pt-1.5 border-t border-gray-100">
+                              <span className={clsx('text-[10px] font-semibold', URGENCY_COLORS[task.urgency].text)}>
+                                {formatUrgencyLabel(task.urgency, task.daysOverdue, task.daysUntilDue)}
+                              </span>
+                              <div className="flex items-center gap-1">
+                                {/* Chat / conversation button */}
                                 <button
                                   onClick={() => setCommentOpenFor(commentOpenFor === task.id ? null : task.id)}
                                   className={clsx(
                                     'p-1 rounded transition-colors',
-                                    commentOpenFor === task.id ? 'bg-purple-100 text-purple-600' : 'text-gray-400 hover:text-purple-600',
+                                    commentOpenFor === task.id ? 'bg-blue-100 text-blue-600' : 'text-gray-400 hover:text-blue-600',
                                   )}
-                                  title="Slack comment"
+                                  title="Open conversation"
                                 >
-                                  <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
-                                    <path d="M6 1a2 2 0 00-2 2v3H2a2 2 0 100 4h2v3a2 2 0 104 0v-3h2v3a2 2 0 104 0V10h-2a2 2 0 110-4h2V3a2 2 0 10-4 0v3h-2V3a2 2 0 00-2-2z" />
+                                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                                    <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
                                   </svg>
                                 </button>
-                                <div className="text-right">
-                                  <span className={clsx('text-xs font-semibold', URGENCY_COLORS[task.urgency].text)}>
-                                    {formatUrgencyLabel(task.urgency, task.daysOverdue, task.daysUntilDue)}
-                                  </span>
-                                </div>
+                                {/* Attachment button */}
+                                <button
+                                  onClick={() => select(task.id)}
+                                  className="p-1 rounded text-gray-400 hover:text-blue-600 transition-colors"
+                                  title="View attachments"
+                                >
+                                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                                    <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48" />
+                                  </svg>
+                                </button>
                               </div>
                             </div>
-                            {/* Deep links */}
-                            <div className="flex items-center gap-1 mt-1.5">
-                              {task.deepLinks.slice(0, 3).map((link) => (
-                                <span key={link.target} className="text-[10px] bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded">
-                                  {link.target}
-                                </span>
-                              ))}
-                              {task.deepLinks.length > 3 && (
-                                <span className="text-[10px] text-gray-400">+{task.deepLinks.length - 3}</span>
-                              )}
-                            </div>
                           </div>
-                          {/* Inline comment thread */}
+                          {/* Inline comment thread below card */}
                           {commentOpenFor === task.id && (
-                            <div className="mt-1 ml-4">
+                            <div className="mt-1.5 w-56">
                               <CommentThread
                                 comments={comments}
                                 lineItemId={task.id}
@@ -303,7 +307,34 @@ export function AttentionToday({ tasks, projects }: AttentionTodayProps) {
                         </div>
                       );
                     })}
-                  </div>}
+
+                    {/* +N more button */}
+                    {overflow > 0 && !isExpanded && (
+                      <button
+                        onClick={() => toggleRow(urgency)}
+                        className={clsx(
+                          'shrink-0 w-14 rounded-lg border-2 border-dashed flex flex-col items-center justify-center gap-1 transition-colors hover:bg-gray-50',
+                          URGENCY_COLORS[urgency].border.replace('border-', 'border-'),
+                        )}
+                      >
+                        <span className={clsx('text-lg font-bold', URGENCY_COLORS[urgency].text)}>+{overflow}</span>
+                        <span className="text-[9px] text-gray-400">more</span>
+                      </button>
+                    )}
+
+                    {/* Collapse button when expanded */}
+                    {isExpanded && overflow > 0 && (
+                      <button
+                        onClick={() => toggleRow(urgency)}
+                        className="shrink-0 w-14 rounded-lg border-2 border-dashed border-gray-300 flex flex-col items-center justify-center gap-1 transition-colors hover:bg-gray-50"
+                      >
+                        <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+                        </svg>
+                        <span className="text-[9px] text-gray-400">less</span>
+                      </button>
+                    )}
+                  </div>
                 </div>
               );
             })}

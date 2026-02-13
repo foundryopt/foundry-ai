@@ -1,11 +1,11 @@
 'use client';
 
-import { useMemo } from 'react';
 import { TabBar } from '@/components/shell/TabBar';
 import { ContextStrip } from '@/components/shell/ContextStrip';
 import { useActiveView } from '@/hooks/useActiveView';
 import { useProject } from '@/hooks/useProject';
-import { getProjectData, PROJECTS } from '@/data';
+import { PROJECTS } from '@/data';
+import { useProjectData } from '@/hooks/useProjectData';
 import { AttentionToday } from '@/components/views/AttentionToday';
 import { WhatsRepeating } from '@/components/views/WhatsRepeating';
 import { ProcurementDelivery } from '@/components/views/ProcurementDelivery';
@@ -17,12 +17,23 @@ import { DesignSelections } from '@/components/views/DesignSelections';
 import { Development } from '@/components/views/Development';
 import { Fund } from '@/components/views/Fund';
 import { SalesShowroom } from '@/components/views/SalesShowroom';
+import { TaktPlanning } from '@/components/views/TaktPlanning';
 
 export default function DashboardPage() {
   const { view, setView } = useActiveView();
   const { projectId, isAll } = useProject();
+  const { data, loading } = useProjectData(projectId);
 
-  const data = useMemo(() => getProjectData(projectId), [projectId]);
+  if (loading) {
+    return (
+      <>
+        <TabBar active={view} onChange={setView} />
+        <div className="flex items-center justify-center py-20 text-sm text-gray-400">
+          Loading project data...
+        </div>
+      </>
+    );
+  }
 
   return (
     <>
@@ -56,6 +67,7 @@ export default function DashboardPage() {
           memberships={data.memberships}
         />
       )}
+      {view === 11 && <TaktPlanning />}
     </>
   );
 }

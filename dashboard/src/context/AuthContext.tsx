@@ -2,6 +2,7 @@
 
 import { createContext, useCallback, useEffect, useState, type ReactNode } from 'react';
 import type { Role, User } from '@/lib/types';
+import { api, setToken, clearToken, useBackend } from '@/lib/api';
 
 interface AuthState {
   user: User | null;
@@ -42,11 +43,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const login = useCallback(
-    (name: string, role: Role) => persist({ name, role }),
+    (name: string, role: Role) => {
+      persist({ name, role });
+
+      // If backend is enabled, also fetch a JWT token
+      if (useBackend()) {
+        api
+          .post<{ token: string }>('/auth/login', { name, role })
+          .then((res) => setToken(res.token))
+          .catch(() => {
+            // Fall back to mock-only mode silently
+          });
+      }
+    },
     [persist],
   );
 
-  const logout = useCallback(() => persist(null), [persist]);
+  const logout = useCallback(() => {
+    persist(null);
+    clearToken();
+  }, [persist]);
 
   const switchRole = useCallback(
     (role: Role) => {

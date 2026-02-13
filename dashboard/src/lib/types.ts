@@ -673,7 +673,7 @@ export interface FinishSelection {
 
 // ── View Tabs ──
 
-export type ViewTab = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10;
+export type ViewTab = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11;
 
 export const VIEW_LABELS: Record<ViewTab, string> = {
   0: 'Attention Today',
@@ -687,10 +687,11 @@ export const VIEW_LABELS: Record<ViewTab, string> = {
   8: 'Development',
   9: 'Fund',
   10: 'Sales & Showroom',
+  11: 'Takt Planning',
 };
 
 /** Tabs visible to all roles */
-export const COMMON_TABS: ViewTab[] = [0, 1, 2, 3, 4, 5, 6, 7];
+export const COMMON_TABS: ViewTab[] = [0, 1, 2, 3, 4, 5, 6, 7, 11];
 
 /** Restricted tabs and which roles can see them */
 export const RESTRICTED_TABS: { tab: ViewTab; roles: Role[] }[] = [
