@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import clsx from 'clsx';
+import type { CriticalPathData, ScheduleSummary } from '@/lib/types';
 import { SteeringBoard, type Sub, type TaktTask, type Milestone } from './takt/SteeringBoard';
 import { FlowCharts } from './takt/FlowCharts';
 import { Reference } from './takt/Reference';
@@ -13,11 +14,13 @@ import { PPCMetrics } from './takt/PPCMetrics';
 import { PlusDelta } from './takt/PlusDelta';
 import { Permits } from './takt/Permits';
 import { Production } from './takt/Production';
+import { CriticalPath } from './CriticalPath';
 
 // ── Sub-tab definitions ──
 
 type TaktSubTab =
   | 'steering'
+  | 'critical-path'
   | 'flowcharts'
   | 'reference'
   | 'huddle'
@@ -31,6 +34,7 @@ type TaktSubTab =
 
 const SUB_TAB_LABELS: { key: TaktSubTab; label: string }[] = [
   { key: 'steering', label: 'Steering Board' },
+  { key: 'critical-path', label: 'Critical Path' },
   { key: 'flowcharts', label: 'Flow Charts' },
   { key: 'reference', label: 'Reference' },
   { key: 'huddle', label: 'Huddle Board' },
@@ -372,7 +376,12 @@ function AddRoadblockModal({
 
 // ── Main Component ──
 
-export function TaktPlanning() {
+interface TaktPlanningProps {
+  criticalPath: CriticalPathData;
+  schedule: ScheduleSummary;
+}
+
+export function TaktPlanning({ criticalPath, schedule }: TaktPlanningProps) {
   const [activeTab, setActiveTab] = useState<TaktSubTab>('steering');
 
   // Shared state
@@ -449,6 +458,9 @@ export function TaktPlanning() {
           onTaskClick={setEditingTask}
           onAddMilestone={() => setShowMilestoneModal(true)}
         />
+      )}
+      {activeTab === 'critical-path' && (
+        <CriticalPath criticalPath={criticalPath} schedule={schedule} />
       )}
       {activeTab === 'flowcharts' && <FlowCharts />}
       {activeTab === 'reference' && <Reference />}

@@ -214,6 +214,303 @@ function MilestoneTable({ milestones }: { milestones: DevMilestone[] }) {
   );
 }
 
+/* ── Gantt Chart ── */
+
+/** Timeline boundaries for the Gantt chart (Q1 2025 through Q2 2028) */
+const GANTT_START = new Date('2025-01-01');
+const GANTT_END   = new Date('2028-07-01');
+const GANTT_TOTAL_MS = GANTT_END.getTime() - GANTT_START.getTime();
+
+/** Build year/quarter markers for the Gantt header */
+function buildQuarters(): { label: string; yearLabel: string; startMs: number; endMs: number; isQ1: boolean }[] {
+  const quarters: { label: string; yearLabel: string; startMs: number; endMs: number; isQ1: boolean }[] = [];
+  for (let year = 2025; year <= 2028; year++) {
+    for (let q = 0; q < 4; q++) {
+      const qStart = new Date(year, q * 3, 1);
+      const qEnd   = new Date(year, (q + 1) * 3, 1);
+      if (qStart.getTime() >= GANTT_END.getTime()) break;
+      if (qEnd.getTime() <= GANTT_START.getTime()) continue;
+      quarters.push({
+        label: `Q${q + 1}`,
+        yearLabel: String(year),
+        startMs: Math.max(qStart.getTime(), GANTT_START.getTime()),
+        endMs:   Math.min(qEnd.getTime(), GANTT_END.getTime()),
+        isQ1: q === 0,
+      });
+    }
+  }
+  return quarters;
+}
+
+const GANTT_QUARTERS = buildQuarters();
+
+/** Bar colors mapping status to Tailwind bg classes for the Gantt bars */
+const GANTT_BAR_COLORS: Record<string, string> = {
+  completed:     'bg-green-500',
+  'in-progress': 'bg-blue-500',
+  upcoming:      'bg-gray-300',
+  'at-risk':     'bg-red-500',
+};
+
+/** Darker hover variants for interactivity */
+const GANTT_BAR_HOVER: Record<string, string> = {
+  completed:     'hover:bg-green-600',
+  'in-progress': 'hover:bg-blue-600',
+  upcoming:      'hover:bg-gray-400',
+  'at-risk':     'hover:bg-red-600',
+};
+
+interface PhaseBar {
+  phase: DevPhase;
+  status: DevMilestone['status'];
+  startDate: Date;
+  endDate: Date;
+  milestoneCount: number;
+}
+
+interface ProjectRow {
+  key: string;
+  label: string;
+  phases: PhaseBar[];
+}
+
+function computeProjectRows(milestones: DevMilestone[]): ProjectRow[] {
+  // Group by project key
+  const projectMap = new Map<string, DevMilestone[]>();
+  for (const m of milestones) {
+    const key = extractProjectKey(m.id);
+    if (!projectMap.has(key)) projectMap.set(key, []);
+    projectMap.get(key)!.push(m);
+  }
+
+  const rows: ProjectRow[] = [];
+
+  for (const [key, projectMilestones] of projectMap) {
+    // Group milestones by phase
+    const phaseMap = new Map<DevPhase, DevMilestone[]>();
+    for (const m of projectMilestones) {
+      if (!phaseMap.has(m.phase)) phaseMap.set(m.phase, []);
+      phaseMap.get(m.phase)!.push(m);
+    }
+
+    const phases: PhaseBar[] = [];
+    // Walk DEV_PHASES in order to derive start/end per phase
+    let previousEnd: Date | null = null;
+
+    for (const phase of DEV_PHASES) {
+      const phaseMilestones = phaseMap.get(phase);
+      if (!phaseMilestones || phaseMilestones.length === 0) continue;
+
+      const dates = phaseMilestones.map((m) => new Date(m.targetDate).getTime());
+      const earliest = new Date(Math.min(...dates));
+      const latest   = new Date(Math.max(...dates));
+
+      // Phase start: use previous phase's end date (if any) to create a span,
+      // otherwise back up 60 days from the earliest milestone as a heuristic.
+      const inferredStart = previousEnd
+        ? new Date(Math.min(previousEnd.getTime(), earliest.getTime()))
+        : new Date(earliest.getTime() - 60 * 86_400_000);
+
+      // Phase end: the latest milestone target date
+      const phaseEnd = latest;
+
+      phases.push({
+        phase,
+        status: derivePhaseStatus(phaseMilestones),
+        startDate: inferredStart,
+        endDate: phaseEnd,
+        milestoneCount: phaseMilestones.length,
+      });
+
+      previousEnd = phaseEnd;
+    }
+
+    rows.push({
+      key,
+      label: projectLabel(key),
+      phases,
+    });
+  }
+
+  // Sort rows by earliest phase start
+  rows.sort((a, b) => {
+    const aStart = a.phases.length > 0 ? a.phases[0].startDate.getTime() : 0;
+    const bStart = b.phases.length > 0 ? b.phases[0].startDate.getTime() : 0;
+    return aStart - bStart;
+  });
+
+  return rows;
+}
+
+/** Convert a date to a percentage position on the Gantt timeline */
+function dateToPercent(date: Date): number {
+  const ms = date.getTime() - GANTT_START.getTime();
+  return Math.max(0, Math.min(100, (ms / GANTT_TOTAL_MS) * 100));
+}
+
+/** Today-line position */
+function todayPercent(): number {
+  return dateToPercent(new Date());
+}
+
+function DevGantt({ milestones }: { milestones: DevMilestone[] }) {
+  const rows = useMemo(() => computeProjectRows(milestones), [milestones]);
+  const today = todayPercent();
+
+  if (rows.length === 0) return null;
+
+  // Group quarters by year for the two-row header
+  const years: { year: string; startIdx: number; count: number }[] = [];
+  let prevYear = '';
+  for (let i = 0; i < GANTT_QUARTERS.length; i++) {
+    const q = GANTT_QUARTERS[i];
+    if (q.yearLabel !== prevYear) {
+      years.push({ year: q.yearLabel, startIdx: i, count: 1 });
+      prevYear = q.yearLabel;
+    } else {
+      years[years.length - 1].count++;
+    }
+  }
+
+  return (
+    <div className="bg-white border border-gray-200 rounded-lg p-4 mb-6 overflow-x-auto">
+      <h3 className="text-sm font-semibold text-gray-700 mb-4">Development Timeline</h3>
+
+      <div className="min-w-[700px]">
+        {/* ── Header: Year row ── */}
+        <div className="flex">
+          {/* Label gutter */}
+          <div className="w-44 shrink-0" />
+          {/* Timeline area */}
+          <div className="flex-1 relative flex">
+            {years.map((y) => {
+              const firstQ = GANTT_QUARTERS[y.startIdx];
+              const lastQ  = GANTT_QUARTERS[y.startIdx + y.count - 1];
+              const left   = ((firstQ.startMs - GANTT_START.getTime()) / GANTT_TOTAL_MS) * 100;
+              const right  = ((lastQ.endMs - GANTT_START.getTime()) / GANTT_TOTAL_MS) * 100;
+              const width  = right - left;
+              return (
+                <div
+                  key={y.year}
+                  className="text-center text-[11px] font-bold text-gray-700 border-b border-gray-300"
+                  style={{ width: `${width}%`, flexShrink: 0 }}
+                >
+                  {y.year}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* ── Header: Quarter row ── */}
+        <div className="flex">
+          <div className="w-44 shrink-0" />
+          <div className="flex-1 relative flex">
+            {GANTT_QUARTERS.map((q, i) => {
+              const left  = ((q.startMs - GANTT_START.getTime()) / GANTT_TOTAL_MS) * 100;
+              const right = ((q.endMs - GANTT_START.getTime()) / GANTT_TOTAL_MS) * 100;
+              const width = right - left;
+              return (
+                <div
+                  key={`${q.yearLabel}-${q.label}`}
+                  className={clsx(
+                    'text-center text-[10px] text-gray-500 border-b border-gray-200 py-0.5',
+                    q.isQ1 && i > 0 && 'border-l border-l-gray-300',
+                  )}
+                  style={{ width: `${width}%`, flexShrink: 0 }}
+                >
+                  {q.label}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* ── Project rows ── */}
+        {rows.map((row) => (
+          <div key={row.key} className="mt-3">
+            {/* Project label */}
+            <div className="flex items-center mb-1">
+              <div className="w-44 shrink-0 pr-2">
+                <span className="text-xs font-semibold text-gray-800 truncate block">{row.label}</span>
+              </div>
+            </div>
+
+            {/* Phase bars row */}
+            <div className="flex">
+              <div className="w-44 shrink-0" />
+              <div className="flex-1 relative h-7 bg-gray-50 rounded border border-gray-100">
+                {/* Quarter grid lines */}
+                {GANTT_QUARTERS.map((q) => {
+                  if (!q.isQ1) return null;
+                  const left = ((q.startMs - GANTT_START.getTime()) / GANTT_TOTAL_MS) * 100;
+                  if (left <= 0) return null;
+                  return (
+                    <div
+                      key={`grid-${row.key}-${q.yearLabel}`}
+                      className="absolute top-0 bottom-0 border-l border-gray-200"
+                      style={{ left: `${left}%` }}
+                    />
+                  );
+                })}
+
+                {/* Today marker */}
+                {today > 0 && today < 100 && (
+                  <div
+                    className="absolute top-0 bottom-0 w-px bg-amber-500 z-20"
+                    style={{ left: `${today}%` }}
+                    title="Today"
+                  />
+                )}
+
+                {/* Phase bars */}
+                {row.phases.map((pb) => {
+                  const left  = dateToPercent(pb.startDate);
+                  const right = dateToPercent(pb.endDate);
+                  const width = Math.max(right - left, 0.8); // min width so tiny phases are visible
+
+                  return (
+                    <div
+                      key={`${row.key}-${pb.phase}`}
+                      className={clsx(
+                        'absolute top-1 bottom-1 rounded-sm flex items-center justify-center z-10 transition-colors cursor-default group',
+                        GANTT_BAR_COLORS[pb.status],
+                        GANTT_BAR_HOVER[pb.status],
+                      )}
+                      style={{ left: `${left}%`, width: `${width}%` }}
+                      title={`${pb.phase} — ${STATUS_LABELS[pb.status]}\n${pb.startDate.toLocaleDateString()} – ${pb.endDate.toLocaleDateString()}`}
+                    >
+                      {width > 6 && (
+                        <span className="text-[9px] font-semibold text-white truncate px-1 select-none">
+                          {pb.phase}
+                        </span>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        ))}
+
+        {/* ── Legend ── */}
+        <div className="flex items-center gap-4 mt-4 pt-3 border-t border-gray-100">
+          {(['completed', 'in-progress', 'upcoming', 'at-risk'] as const).map((status) => (
+            <div key={status} className="flex items-center gap-1.5">
+              <div className={clsx('w-3 h-3 rounded-sm', GANTT_BAR_COLORS[status])} />
+              <span className="text-[10px] text-gray-600">{STATUS_LABELS[status]}</span>
+            </div>
+          ))}
+          <div className="flex items-center gap-1.5 ml-2">
+            <div className="w-3 h-px bg-amber-500" />
+            <span className="text-[10px] text-gray-600">Today</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ── Main Component ── */
 
 export function Development({ milestones, isAllProjects }: DevelopmentProps) {
@@ -252,6 +549,7 @@ export function Development({ milestones, isAllProjects }: DevelopmentProps) {
       {isAllProjects && projectGroups ? (
         /* ── All-Projects: grouped with collapsible headers ── */
         <div className="space-y-6">
+          <DevGantt milestones={milestones} />
           {projectGroups.map(([key, groupMilestones]) => {
             const isCollapsed = collapsedProjects.has(key);
             const label = projectLabel(key);
@@ -317,6 +615,7 @@ export function Development({ milestones, isAllProjects }: DevelopmentProps) {
         /* ── Single project view ── */
         <>
           <PipelineStrip milestones={milestones} />
+          <DevGantt milestones={milestones} />
           <MilestoneTable milestones={milestones} />
         </>
       )}

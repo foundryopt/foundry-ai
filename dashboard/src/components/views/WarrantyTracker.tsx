@@ -84,6 +84,7 @@ export function WarrantyTracker({ warranties, isAllProjects }: WarrantyTrackerPr
   const [expandedProjects, setExpandedProjects] = useState<Set<string>>(new Set());
   const [commentOpenFor, setCommentOpenFor] = useState<string | null>(null);
   const [comments, setComments] = useState<BudgetComment[]>([]);
+  const [highlightedItemId, setHighlightedItemId] = useState<string | null>(null);
 
   /* ── Filter logic ── */
   const filtered = useMemo(() => {
@@ -185,14 +186,17 @@ export function WarrantyTracker({ warranties, isAllProjects }: WarrantyTrackerPr
     const days = daysUntilExpiry(w.warrantyEnd);
     const isUrgent = w.severity === 'urgent';
     const isCommentOpen = commentOpenFor === w.id;
+    const isHighlighted = highlightedItemId === w.id;
 
     return (
       <>
         <tr
           key={w.id}
+          id={`warranty-row-${w.id}`}
           className={clsx(
-            'border-t border-gray-100 hover:bg-gray-50',
-            isUrgent && 'bg-red-50/50',
+            'border-t border-gray-100 hover:bg-gray-50 transition-colors',
+            isUrgent && !isHighlighted && 'bg-red-50/50',
+            isHighlighted && 'bg-blue-50 ring-1 ring-inset ring-blue-300',
           )}
         >
           <td className="px-3 py-2 font-mono text-gray-700 whitespace-nowrap">{w.id}</td>
@@ -347,6 +351,15 @@ export function WarrantyTracker({ warranties, isAllProjects }: WarrantyTrackerPr
         </div>
       </div>
 
+      {/* ── Timeline / Gantt chart ── */}
+      <WarrantyTimeline
+        items={filtered}
+        onBarClick={(id) =>
+          setHighlightedItemId((prev) => (prev === id ? null : id))
+        }
+        highlightedItemId={highlightedItemId}
+      />
+
       {/* ── Table ── */}
       {isAllProjects ? (
         /* Grouped by project with collapsible headers */
@@ -409,6 +422,259 @@ export function WarrantyTracker({ warranties, isAllProjects }: WarrantyTrackerPr
           )}
         </div>
       )}
+    </div>
+  );
+}
+
+/* ── Warranty Timeline / Gantt chart ── */
+
+/** Bar color per severity (Tailwind classes for background) */
+const BAR_SEVERITY_BG: Record<string, string> = {
+  urgent: 'bg-red-400',
+  standard: 'bg-amber-400',
+  monitor: 'bg-gray-300',
+};
+
+/** Faded / expired variant */
+const BAR_SEVERITY_BG_EXPIRED: Record<string, string> = {
+  urgent: 'bg-red-200',
+  standard: 'bg-amber-200',
+  monitor: 'bg-gray-200',
+};
+
+interface WarrantyTimelineProps {
+  items: WarrantyItem[];
+  onBarClick: (id: string) => void;
+  highlightedItemId: string | null;
+}
+
+function WarrantyTimeline({ items, onBarClick, highlightedItemId }: WarrantyTimelineProps) {
+  /* ── Group items by trade ── */
+  const tradeGroups = useMemo(() => {
+    const map = new Map<string, WarrantyItem[]>();
+    for (const item of items) {
+      const trade = item.trade || 'Unassigned';
+      if (!map.has(trade)) map.set(trade, []);
+      map.get(trade)!.push(item);
+    }
+    // Sort trades alphabetically
+    return Array.from(map.entries())
+      .sort(([a], [b]) => a.localeCompare(b));
+  }, [items]);
+
+  /* ── Compute global time range ── */
+  const { minDate, maxDate, todayOffset } = useMemo(() => {
+    if (items.length === 0) {
+      const now = new Date();
+      return { minDate: now, maxDate: now, totalDays: 1, todayOffset: 50 };
+    }
+
+    let earliest = Infinity;
+    let latest = -Infinity;
+
+    for (const item of items) {
+      const start = new Date(item.reportedDate).getTime();
+      const end = new Date(item.warrantyEnd).getTime();
+      if (start < earliest) earliest = start;
+      if (end > latest) latest = end;
+    }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const todayMs = today.getTime();
+
+    // Extend range to include today if it falls outside
+    if (todayMs < earliest) earliest = todayMs;
+    if (todayMs > latest) latest = todayMs;
+
+    // Add 5% padding on each side
+    const rangeMs = latest - earliest || 1;
+    const pad = rangeMs * 0.05;
+    const paddedMin = earliest - pad;
+    const paddedMax = latest + pad;
+    const paddedRange = paddedMax - paddedMin;
+
+    const offset = ((todayMs - paddedMin) / paddedRange) * 100;
+
+    return {
+      minDate: new Date(paddedMin),
+      maxDate: new Date(paddedMax),
+      todayOffset: Math.max(0, Math.min(100, offset)),
+    };
+  }, [items]);
+
+  /* ── Helper: compute bar left% and width% ── */
+  function barPosition(reportedDate: string, warrantyEnd: string) {
+    const rangeMs = maxDate.getTime() - minDate.getTime() || 1;
+    const start = new Date(reportedDate).getTime();
+    const end = new Date(warrantyEnd).getTime();
+
+    const leftPct = ((start - minDate.getTime()) / rangeMs) * 100;
+    const widthPct = ((end - start) / rangeMs) * 100;
+
+    return {
+      left: `${Math.max(0, leftPct)}%`,
+      width: `${Math.max(0.5, Math.min(widthPct, 100 - Math.max(0, leftPct)))}%`,
+    };
+  }
+
+  /* ── Helper: format month labels for the axis ── */
+  const monthLabels = useMemo(() => {
+    const labels: { label: string; left: string }[] = [];
+    const rangeMs = maxDate.getTime() - minDate.getTime() || 1;
+    const cursor = new Date(minDate);
+    // Start at the first day of the next month
+    cursor.setDate(1);
+    cursor.setMonth(cursor.getMonth() + 1);
+    cursor.setHours(0, 0, 0, 0);
+
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+    while (cursor.getTime() <= maxDate.getTime()) {
+      const pct = ((cursor.getTime() - minDate.getTime()) / rangeMs) * 100;
+      const yr = cursor.getFullYear();
+      const mo = cursor.getMonth();
+      labels.push({
+        label: `${monthNames[mo]} ${yr !== new Date().getFullYear() ? yr : ''}`.trim(),
+        left: `${pct}%`,
+      });
+      cursor.setMonth(cursor.getMonth() + 1);
+    }
+    return labels;
+  }, [minDate, maxDate]);
+
+  if (items.length === 0) return null;
+
+  const ROW_H = 28; // px per bar row
+  const HEADER_H = 24; // px for trade header
+
+  return (
+    <div className="border border-gray-200 rounded-lg overflow-hidden mb-4 bg-white">
+      {/* Title bar */}
+      <div className="flex items-center justify-between px-3 py-2 bg-gray-50 border-b border-gray-200">
+        <span className="text-xs font-semibold text-gray-700 uppercase tracking-wide">
+          Warranty Timeline
+        </span>
+        <div className="flex items-center gap-3 text-[10px] text-gray-500">
+          <span className="flex items-center gap-1"><span className="inline-block w-3 h-2 rounded-sm bg-red-400" /> Urgent</span>
+          <span className="flex items-center gap-1"><span className="inline-block w-3 h-2 rounded-sm bg-amber-400" /> Standard</span>
+          <span className="flex items-center gap-1"><span className="inline-block w-3 h-2 rounded-sm bg-gray-300" /> Monitor</span>
+          <span className="flex items-center gap-1">
+            <span className="inline-block w-3 h-2 rounded-sm bg-gray-200" style={{
+              backgroundImage: 'repeating-linear-gradient(135deg, transparent, transparent 2px, rgba(0,0,0,0.12) 2px, rgba(0,0,0,0.12) 4px)',
+            }} /> Expired
+          </span>
+        </div>
+      </div>
+
+      <div className="relative overflow-x-auto">
+        {/* ── Month axis ── */}
+        <div className="relative h-5 border-b border-gray-100 bg-gray-50/50">
+          {monthLabels.map((m, i) => (
+            <span
+              key={i}
+              className="absolute text-[9px] text-gray-400 font-medium -translate-x-1/2 top-1"
+              style={{ left: m.left }}
+            >
+              {m.label}
+            </span>
+          ))}
+        </div>
+
+        {/* ── Chart body ── */}
+        <div className="relative">
+          {/* Today marker (full height, drawn once) */}
+          <div
+            className="absolute top-0 bottom-0 w-px bg-blue-500 z-10 pointer-events-none"
+            style={{ left: `${todayOffset}%` }}
+          >
+            <span className="absolute -top-0 left-1 text-[8px] font-bold text-blue-600 whitespace-nowrap bg-white/80 px-0.5 rounded">
+              Today
+            </span>
+          </div>
+
+          {tradeGroups.map(([trade, tradeItems]) => {
+            // Sort items within a trade by reportedDate
+            const sorted = [...tradeItems].sort(
+              (a, b) => new Date(a.reportedDate).getTime() - new Date(b.reportedDate).getTime(),
+            );
+
+            return (
+              <div key={trade}>
+                {/* Trade header */}
+                <div
+                  className="px-3 flex items-center bg-gray-50/80 border-b border-gray-100"
+                  style={{ height: HEADER_H }}
+                >
+                  <span className="text-[10px] font-semibold text-gray-600 uppercase tracking-wide">
+                    {trade}
+                  </span>
+                  <span className="ml-1.5 text-[9px] text-gray-400">
+                    ({sorted.length})
+                  </span>
+                </div>
+
+                {/* Bars */}
+                {sorted.map((item) => {
+                  const { left, width } = barPosition(item.reportedDate, item.warrantyEnd);
+                  const days = daysUntilExpiry(item.warrantyEnd);
+                  const isExpired = days < 0;
+                  const isHighlighted = highlightedItemId === item.id;
+
+                  const bgClass = isExpired
+                    ? BAR_SEVERITY_BG_EXPIRED[item.severity] ?? 'bg-gray-200'
+                    : BAR_SEVERITY_BG[item.severity] ?? 'bg-gray-300';
+
+                  return (
+                    <div
+                      key={item.id}
+                      className={clsx(
+                        'relative border-b border-gray-50 px-3',
+                        isHighlighted && 'bg-blue-50',
+                      )}
+                      style={{ height: ROW_H }}
+                    >
+                      {/* Label on the left side (absolute so it doesn't affect bar) */}
+                      <span className="absolute left-1 top-1/2 -translate-y-1/2 text-[9px] text-gray-400 font-mono truncate max-w-[60px] pointer-events-none z-[5]">
+                        {item.id}
+                      </span>
+
+                      {/* The bar */}
+                      <button
+                        onClick={() => onBarClick(item.id)}
+                        title={`${item.id} — ${item.unit} — ${item.issueType}\n${formatDate(item.reportedDate)} to ${formatDate(item.warrantyEnd)}\nSeverity: ${item.severity} | ${isExpired ? 'EXPIRED' : formatExpiryLabel(days)}`}
+                        className={clsx(
+                          'absolute top-1 rounded-sm cursor-pointer transition-all',
+                          'hover:ring-2 hover:ring-blue-400 hover:ring-offset-1',
+                          isHighlighted && 'ring-2 ring-blue-500 ring-offset-1',
+                          bgClass,
+                        )}
+                        style={{
+                          left,
+                          width,
+                          height: ROW_H - 8,
+                          // Striped pattern for expired
+                          ...(isExpired
+                            ? {
+                                backgroundImage:
+                                  'repeating-linear-gradient(135deg, transparent, transparent 3px, rgba(0,0,0,0.10) 3px, rgba(0,0,0,0.10) 6px)',
+                              }
+                            : {}),
+                        }}
+                      >
+                        {/* Inner label when bar is wide enough */}
+                        <span className="absolute inset-0 flex items-center px-1.5 text-[9px] font-medium text-white truncate drop-shadow-sm pointer-events-none">
+                          {item.unit} &mdash; {item.issueType}
+                        </span>
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            );
+          })}
+        </div>
+      </div>
     </div>
   );
 }

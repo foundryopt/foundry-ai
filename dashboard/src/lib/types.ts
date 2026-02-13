@@ -246,6 +246,7 @@ export type BidStatus = 'completed' | 'in-progress' | 'upcoming';
 export interface VendorBid {
   scopeItem: string;
   costCode: string;
+  budget?: number;
   vendors: { name: string; price: number; recommended?: boolean }[];
   delta: number;
   notes: string;
@@ -317,6 +318,7 @@ export interface SchedulePhase {
   percentComplete: number;
   plannedPercent: number;
   daysVariance: number; // negative = behind
+  status: 'on-track' | 'at-risk' | 'behind';
   linkedTaskIds: string[];
   potentialImpactDays: number;
 }
@@ -691,12 +693,11 @@ export const VIEW_LABELS: Record<ViewTab, string> = {
 };
 
 /** Tabs visible to all roles */
-export const COMMON_TABS: ViewTab[] = [0, 1, 2, 3, 4, 5, 6, 7, 11];
+export const COMMON_TABS: ViewTab[] = [0, 1, 2, 4, 5, 6, 7, 11];
 
 /** Restricted tabs and which roles can see them */
 export const RESTRICTED_TABS: { tab: ViewTab; roles: Role[] }[] = [
   { tab: 8, roles: ['Principal', "Owner's Rep"] },
-  { tab: 9, roles: ['Principal', "Owner's Rep"] },
   { tab: 10, roles: ['Principal', "Owner's Rep", 'Ops'] },
 ];
 

@@ -2,7 +2,7 @@
 
 import { useMemo, useState, useCallback } from 'react';
 import clsx from 'clsx';
-import type { OpenTask, BudgetComment, ScheduledSlot, Project } from '@/lib/types';
+import type { OpenTask, BudgetComment, ScheduledSlot, Project, ScheduleSummary, CriticalPathData } from '@/lib/types';
 import { URGENCY_ORDER, URGENCY_COLORS, URGENCY_LABELS, CATEGORY_COLORS } from '@/lib/constants';
 import { applyFilters, groupByUrgency, getFilterOptions } from '@/lib/filters';
 import { useFilters } from '@/hooks/useFilters';
@@ -45,9 +45,25 @@ function hourLabel(h: number): string {
 interface AttentionTodayProps {
   tasks: OpenTask[];
   projects: Project[];
+  schedule: ScheduleSummary;
+  criticalPath: CriticalPathData;
 }
 
-export function AttentionToday({ tasks, projects }: AttentionTodayProps) {
+/* ── Schedule status colors ── */
+const SCHEDULE_STATUS_COLORS = {
+  'on-track': { bg: 'bg-green-500', text: 'text-green-700', light: 'bg-green-50', border: 'border-green-300', badge: 'bg-green-100 text-green-700' },
+  'at-risk': { bg: 'bg-yellow-500', text: 'text-yellow-700', light: 'bg-yellow-50', border: 'border-yellow-300', badge: 'bg-yellow-100 text-yellow-700' },
+  'behind': { bg: 'bg-red-500', text: 'text-red-700', light: 'bg-red-50', border: 'border-red-300', badge: 'bg-red-100 text-red-700' },
+} as const;
+
+const MILESTONE_STATUS_COLORS = {
+  completed: { bg: 'bg-green-500', text: 'text-green-700' },
+  'in-progress': { bg: 'bg-blue-500', text: 'text-blue-700' },
+  upcoming: { bg: 'bg-gray-300', text: 'text-gray-500' },
+  'at-risk': { bg: 'bg-red-500', text: 'text-red-700' },
+} as const;
+
+export function AttentionToday({ tasks, projects, schedule, criticalPath }: AttentionTodayProps) {
   const {
     filters,
     setSearch,
@@ -341,6 +357,100 @@ export function AttentionToday({ tasks, projects }: AttentionTodayProps) {
             })}
           </div>
         )}
+
+        {/* ── Schedule Overview ── */}
+        <div className="mt-6 border-t border-gray-200 pt-6">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-sm font-semibold text-gray-800">Schedule Overview</h2>
+            <span className={clsx('text-xs font-semibold px-2 py-0.5 rounded-full', SCHEDULE_STATUS_COLORS[schedule.overallStatus].badge)}>
+              {schedule.overallStatus === 'on-track' ? 'On Track' : schedule.overallStatus === 'at-risk' ? 'At Risk' : 'Behind'}
+            </span>
+          </div>
+
+          {/* Summary row */}
+          <div className="flex items-center gap-4 mb-3 text-xs text-gray-600">
+            <span>
+              <strong className="text-gray-800">{schedule.phases.length}</strong> phases
+            </span>
+            <span>
+              <strong className="text-green-600">{schedule.phases.filter((p) => p.status === 'on-track').length}</strong> on track
+            </span>
+            <span>
+              <strong className="text-yellow-600">{schedule.phases.filter((p) => p.status === 'at-risk').length}</strong> at risk
+            </span>
+            <span>
+              <strong className="text-red-600">{schedule.phases.filter((p) => p.status === 'behind').length}</strong> behind
+            </span>
+            <span className="ml-auto text-gray-500">
+              Overall completion:{' '}
+              <strong className="text-gray-800">
+                {schedule.phases.length > 0
+                  ? Math.round(schedule.phases.reduce((sum, p) => sum + p.percentComplete, 0) / schedule.phases.length)
+                  : 0}%
+              </strong>
+            </span>
+          </div>
+
+          {/* Compact milestone strip */}
+          <div className="bg-white border border-gray-200 rounded-lg p-3">
+            <div className="flex gap-1">
+              {criticalPath.milestones.map((ms) => {
+                const msColors = MILESTONE_STATUS_COLORS[ms.status];
+                const schedPhase = schedule.phases.find((p) => p.name === ms.phase);
+                return (
+                  <div key={ms.phase} className="flex-1 min-w-0">
+                    <div
+                      className={clsx('h-6 rounded flex items-center justify-center px-1 relative overflow-hidden', msColors.bg)}
+                      title={`${ms.phase}: ${ms.percentComplete}% complete — ${ms.status}`}
+                    >
+                      {/* Progress fill */}
+                      <div
+                        className="absolute inset-y-0 left-0 bg-white/20 rounded-l"
+                        style={{ width: `${ms.percentComplete}%` }}
+                      />
+                      <span className="text-white text-[9px] font-semibold truncate relative z-10">{ms.phase}</span>
+                    </div>
+                    <div className="mt-0.5 text-center">
+                      <span className={clsx('text-[10px] font-semibold', msColors.text)}>{ms.percentComplete}%</span>
+                      {schedPhase && schedPhase.daysVariance < 0 && (
+                        <span className="text-[9px] text-red-600 ml-1">{schedPhase.daysVariance}d</span>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* At-risk / behind items */}
+          {schedule.phases.filter((p) => p.status === 'at-risk' || p.status === 'behind').length > 0 && (
+            <div className="mt-3 space-y-1.5">
+              {schedule.phases
+                .filter((p) => p.status === 'at-risk' || p.status === 'behind')
+                .map((phase) => {
+                  const colors = SCHEDULE_STATUS_COLORS[phase.status];
+                  return (
+                    <div
+                      key={phase.id}
+                      className={clsx('flex items-center gap-3 px-3 py-2 rounded-lg border text-xs', colors.light, colors.border)}
+                    >
+                      <span className={clsx('w-2 h-2 rounded-full shrink-0', colors.bg)} />
+                      <span className="font-medium text-gray-800">{phase.name}</span>
+                      <span className={clsx('font-semibold', colors.text)}>
+                        {phase.status === 'at-risk' ? 'At Risk' : 'Behind'}
+                      </span>
+                      <span className="text-gray-500">{phase.percentComplete}% complete</span>
+                      {phase.daysVariance !== 0 && (
+                        <span className={clsx('ml-auto font-semibold', phase.daysVariance < 0 ? 'text-red-600' : 'text-green-600')}>
+                          {phase.daysVariance > 0 ? '+' : ''}{phase.daysVariance}d variance
+                        </span>
+                      )}
+                    </div>
+                  );
+                })}
+            </div>
+          )}
+        </div>
 
         {/* ── 7-Day Calendar ── */}
         <div className="mt-8 border-t border-gray-200 pt-6">

@@ -3,8 +3,8 @@
 import { useMemo, useState, useCallback } from 'react';
 import clsx from 'clsx';
 import dynamic from 'next/dynamic';
-import type { BudgetSummary, BudgetCategory, BudgetLineItem, BudgetComment } from '@/lib/types';
-import { formatCurrency, formatPercent } from '@/lib/utils';
+import type { BudgetSummary, BudgetCategory, BudgetLineItem, BudgetComment, FundSummary, FundDraw } from '@/lib/types';
+import { formatCurrency, formatPercent, formatDate } from '@/lib/utils';
 import { CostDrillDown } from '@/components/charts/CostDrillDown';
 import { AttachmentPopover } from '@/components/ui/AttachmentPopover';
 import { CommentThread } from '@/components/ui/CommentThread';
@@ -19,6 +19,7 @@ const CostChart = dynamic(
 
 interface BudgetDetailProps {
   budget: BudgetSummary;
+  fund: FundSummary;
   isAllProjects: boolean;
 }
 
@@ -45,10 +46,6 @@ function ChevronDown({ className }: { className?: string }) {
 const COLUMNS = [
   { key: 'costCode', label: 'Cost Code', align: 'left' as const, width: 'w-24' },
   { key: 'description', label: 'Description', align: 'left' as const, width: 'min-w-[200px]' },
-  { key: 'costType', label: 'Type', align: 'center' as const, width: 'w-14' },
-  { key: 'unitPrice', label: 'Unit Price', align: 'right' as const, width: 'w-24' },
-  { key: 'quantity', label: 'Qty', align: 'right' as const, width: 'w-16' },
-  { key: 'unitType', label: 'Unit', align: 'center' as const, width: 'w-14' },
   { key: 'budget', label: 'Budget', align: 'right' as const, width: 'w-28' },
   { key: 'previousPaid', label: 'Prev Paid', align: 'right' as const, width: 'w-28' },
   { key: 'due', label: 'Due', align: 'right' as const, width: 'w-24' },
@@ -110,9 +107,101 @@ function ChatIcon() {
   );
 }
 
+/* ── Draw Section (formerly Fund tab) ── */
+
+function DrawSection({ fund }: { fund: FundSummary }) {
+  const sortedDraws = [...fund.draws].sort((a, b) => a.drawNumber - b.drawNumber);
+  const percentDrawn = fund.totalCommitment > 0
+    ? Math.round((fund.totalDrawn / fund.totalCommitment) * 100)
+    : 0;
+
+  const getStatusBadge = (status: FundDraw['status']) => {
+    switch (status) {
+      case 'approved': return 'bg-green-100 text-green-700';
+      case 'pending': return 'bg-yellow-100 text-yellow-700';
+      case 'submitted': return 'bg-blue-100 text-blue-700';
+      default: return 'bg-gray-100 text-gray-700';
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      {/* Summary strip */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="bg-white border border-gray-200 rounded-lg p-3">
+          <p className="text-[10px] text-gray-400 uppercase tracking-wider font-semibold">Total Commitment</p>
+          <p className="text-lg font-bold tabular-nums text-gray-900">{formatCurrency(fund.totalCommitment)}</p>
+        </div>
+        <div className="bg-white border border-gray-200 rounded-lg p-3">
+          <p className="text-[10px] text-gray-400 uppercase tracking-wider font-semibold">Total Drawn</p>
+          <p className="text-lg font-bold tabular-nums text-blue-700">{formatCurrency(fund.totalDrawn)}</p>
+        </div>
+        <div className="bg-white border border-gray-200 rounded-lg p-3">
+          <p className="text-[10px] text-gray-400 uppercase tracking-wider font-semibold">Remaining</p>
+          <p className="text-lg font-bold tabular-nums text-gray-700">{formatCurrency(fund.totalRemaining)}</p>
+        </div>
+        <div className="bg-white border border-gray-200 rounded-lg p-3">
+          <p className="text-[10px] text-gray-400 uppercase tracking-wider font-semibold">% Drawn</p>
+          <p className={clsx('text-lg font-bold tabular-nums', percentDrawn >= 90 ? 'text-red-600' : percentDrawn >= 70 ? 'text-amber-600' : 'text-green-600')}>{percentDrawn}%</p>
+        </div>
+      </div>
+
+      {/* Progress bar */}
+      <div className="w-full h-4 bg-gray-200 rounded-lg overflow-hidden">
+        <div className="h-full bg-green-500 transition-all" style={{ width: `${Math.min(100, percentDrawn)}%` }} />
+      </div>
+
+      {/* Draw table */}
+      <div className="overflow-x-auto border border-gray-200 rounded-lg">
+        <table className="w-full text-left border-collapse text-sm">
+          <thead>
+            <tr className="bg-gray-100 border-b border-gray-300 text-xs font-semibold text-gray-600 uppercase tracking-wide">
+              <th className="px-3 py-2 w-20">Draw #</th>
+              <th className="px-3 py-2 w-32">Date</th>
+              <th className="px-3 py-2 w-32 text-right">Amount</th>
+              <th className="px-3 py-2">Description</th>
+              <th className="px-3 py-2 w-28">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {sortedDraws.length === 0 ? (
+              <tr>
+                <td colSpan={5} className="px-3 py-6 text-center text-sm text-gray-400">No draws recorded</td>
+              </tr>
+            ) : (
+              sortedDraws.map((draw) => (
+                <tr key={draw.id} className="border-b border-gray-100 hover:bg-gray-50">
+                  <td className="px-3 py-2 font-semibold text-gray-900">#{draw.drawNumber}</td>
+                  <td className="px-3 py-2 text-gray-700">{formatDate(draw.date)}</td>
+                  <td className="px-3 py-2 text-right font-semibold text-gray-900 tabular-nums">{formatCurrency(draw.amount)}</td>
+                  <td className="px-3 py-2 text-gray-600">{draw.description}</td>
+                  <td className="px-3 py-2">
+                    <span className={clsx('inline-block px-2 py-1 rounded text-xs font-medium capitalize', getStatusBadge(draw.status))}>
+                      {draw.status}
+                    </span>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+          {sortedDraws.length > 0 && (
+            <tfoot>
+              <tr className="bg-gray-100 border-t-2 border-gray-300 text-sm font-bold">
+                <td className="px-3 py-2" colSpan={2}>Total Drawn</td>
+                <td className="px-3 py-2 text-right tabular-nums text-gray-900">{formatCurrency(fund.totalDrawn)}</td>
+                <td className="px-3 py-2" colSpan={2} />
+              </tr>
+            </tfoot>
+          )}
+        </table>
+      </div>
+    </div>
+  );
+}
+
 /* ── Component ── */
 
-export function BudgetDetail({ budget, isAllProjects }: BudgetDetailProps) {
+export function BudgetDetail({ budget, fund, isAllProjects }: BudgetDetailProps) {
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const [allExpanded, setAllExpanded] = useState(false);
   const [selectedCostCode, setSelectedCostCode] = useState<string | null>(null);
@@ -205,14 +294,10 @@ export function BudgetDetail({ budget, isAllProjects }: BudgetDetailProps) {
 
     return (
       <>
-        <tr key={li.id} className="border-b border-gray-100 text-sm hover:bg-gray-50/50">
+        <tr key={li.id} className="border-b border-gray-50 text-sm hover:bg-gray-50/50">
           {showProjectCol && <td className="px-3 py-2" />}
           <td className={clsx('px-3 py-2 text-gray-500', pl)}>{li.costCode}</td>
           <td className="px-3 py-2 text-gray-700">{li.description}</td>
-          <td className="px-3 py-2 text-center text-gray-500">{li.costType}</td>
-          <td className="px-3 py-2 text-right tabular-nums text-gray-600">{formatCurrency(li.unitPrice)}</td>
-          <td className="px-3 py-2 text-right tabular-nums text-gray-600">{li.quantity.toLocaleString()}</td>
-          <td className="px-3 py-2 text-center text-gray-500">{li.unitType}</td>
           <td className="px-3 py-2 text-right tabular-nums font-medium">{formatCurrency(li.budget)}</td>
           <td className="px-3 py-2 text-right tabular-nums text-gray-600">{formatCurrency(li.previousPaid)}</td>
           <td className="px-3 py-2 text-right tabular-nums text-gray-600">{formatCurrency(li.due)}</td>
@@ -246,6 +331,21 @@ export function BudgetDetail({ budget, isAllProjects }: BudgetDetailProps) {
               )}
             </button>
           </td>
+        </tr>
+        {/* Sub-row: Type, Unit Price, Qty, Unit */}
+        <tr key={`${li.id}-detail`} className="border-b border-gray-100">
+          {showProjectCol && <td />}
+          <td />
+          <td colSpan={colCount - (showProjectCol ? 4 : 3)} className={clsx('px-3 pb-2 pt-0', pl)}>
+            <div className="flex items-center gap-4 text-[11px] text-gray-400">
+              <span>Type: <span className="text-gray-500 font-medium">{li.costType}</span></span>
+              <span>Unit Price: <span className="text-gray-500 font-medium">{formatCurrency(li.unitPrice)}</span></span>
+              <span>Qty: <span className="text-gray-500 font-medium">{li.quantity.toLocaleString()}</span></span>
+              <span>Unit: <span className="text-gray-500 font-medium">{li.unitType}</span></span>
+            </div>
+          </td>
+          <td />
+          <td />
         </tr>
         {/* Inline comment thread */}
         {isCommentOpen && (
@@ -292,10 +392,6 @@ export function BudgetDetail({ budget, isAllProjects }: BudgetDetailProps) {
             </span>
           </td>
           <td className="px-3 py-2 font-semibold text-gray-800">{cat.label}</td>
-          <td className="px-3 py-2" />
-          <td className="px-3 py-2" />
-          <td className="px-3 py-2" />
-          <td className="px-3 py-2" />
           <td className="px-3 py-2 text-right tabular-nums font-semibold">{formatCurrency(cat.current)}</td>
           <td className="px-3 py-2 text-right tabular-nums">{formatCurrency(catPrevPaid)}</td>
           <td className="px-3 py-2 text-right tabular-nums">{formatCurrency(catDue)}</td>
@@ -346,10 +442,6 @@ export function BudgetDetail({ budget, isAllProjects }: BudgetDetailProps) {
               {pg.projectName}
             </span>
           </td>
-          <td className="px-3 py-2" />
-          <td className="px-3 py-2" />
-          <td className="px-3 py-2" />
-          <td className="px-3 py-2" />
           <td className="px-3 py-2" />
           <td className="px-3 py-2" />
           <td className="px-3 py-2 text-right tabular-nums">{formatCurrency(projBudget)}</td>
@@ -428,7 +520,6 @@ export function BudgetDetail({ budget, isAllProjects }: BudgetDetailProps) {
                       'px-3 py-3',
                       col.width,
                       col.align === 'right' && 'text-right',
-                      col.align === 'center' && 'text-center',
                     )}
                   >
                     {col.label}
@@ -449,10 +540,6 @@ export function BudgetDetail({ budget, isAllProjects }: BudgetDetailProps) {
                 {showProjectCol && <td className="px-3 py-3 text-gray-900">All Projects</td>}
                 <td className="px-3 py-3 text-gray-900" />
                 <td className="px-3 py-3 text-gray-900">Grand Total</td>
-                <td className="px-3 py-3" />
-                <td className="px-3 py-3" />
-                <td className="px-3 py-3" />
-                <td className="px-3 py-3" />
                 <td className="px-3 py-3 text-right tabular-nums">{formatCurrency(budget.currentBudget)}</td>
                 <td className="px-3 py-3 text-right tabular-nums">{formatCurrency(grandTotalPrevPaid)}</td>
                 <td className="px-3 py-3 text-right tabular-nums">{formatCurrency(grandTotalDue)}</td>
@@ -478,6 +565,12 @@ export function BudgetDetail({ budget, isAllProjects }: BudgetDetailProps) {
             )}
           </table>
         </div>
+      </div>
+
+      {/* ── Draw Schedule ── */}
+      <div>
+        <h3 className="text-base font-semibold text-gray-900 mb-4">Draw Schedule</h3>
+        <DrawSection fund={fund} />
       </div>
 
       {/* ── Bid Leveling ── */}

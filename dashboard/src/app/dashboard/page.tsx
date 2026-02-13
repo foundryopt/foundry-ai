@@ -9,15 +9,28 @@ import { useProjectData } from '@/hooks/useProjectData';
 import { AttentionToday } from '@/components/views/AttentionToday';
 import { WhatsRepeating } from '@/components/views/WhatsRepeating';
 import { ProcurementDelivery } from '@/components/views/ProcurementDelivery';
-import { CriticalPath } from '@/components/views/CriticalPath';
 import { BudgetDetail } from '@/components/views/BudgetDetail';
 import { QAQC } from '@/components/views/QAQC';
 import { WarrantyTracker } from '@/components/views/WarrantyTracker';
 import { DesignSelections } from '@/components/views/DesignSelections';
 import { Development } from '@/components/views/Development';
-import { Fund } from '@/components/views/Fund';
 import { SalesShowroom } from '@/components/views/SalesShowroom';
 import { TaktPlanning } from '@/components/views/TaktPlanning';
+import { TabAssistant } from '@/components/ui/TabAssistant';
+
+/* ---- AI-assistant context & label mapping ---- */
+const VIEW_CONTEXT_MAP: Record<number, { context: React.ComponentProps<typeof TabAssistant>['context']; label: string }> = {
+  0: { context: 'attention', label: 'Attention Today' },
+  1: { context: 'general', label: "What's Repeating" },
+  2: { context: 'procurement', label: 'Procurement & Delivery' },
+  4: { context: 'budget', label: 'Budget Detail' },
+  5: { context: 'quality', label: 'QA/QC' },
+  6: { context: 'warranty', label: 'Warranty' },
+  7: { context: 'design', label: 'Design' },
+  8: { context: 'development', label: 'Development' },
+  10: { context: 'sales', label: 'Sales & Showroom' },
+  11: { context: 'takt', label: 'Takt Planning' },
+};
 
 export default function DashboardPage() {
   const { view, setView } = useActiveView();
@@ -40,7 +53,7 @@ export default function DashboardPage() {
       <TabBar active={view} onChange={setView} />
       <ContextStrip budget={data.budget} schedule={data.schedule} quality={data.quality} />
 
-      {view === 0 && <AttentionToday tasks={data.tasks} projects={PROJECTS} />}
+      {view === 0 && <AttentionToday tasks={data.tasks} projects={PROJECTS} schedule={data.schedule} criticalPath={data.criticalPath} />}
       {view === 1 && (
         <WhatsRepeating
           repeatBreaches={data.repeatBreaches}
@@ -50,15 +63,11 @@ export default function DashboardPage() {
         />
       )}
       {view === 2 && <ProcurementDelivery tasks={data.tasks} />}
-      {view === 3 && (
-        <CriticalPath criticalPath={data.criticalPath} schedule={data.schedule} />
-      )}
-      {view === 4 && <BudgetDetail budget={data.budget} isAllProjects={isAll} />}
+      {view === 4 && <BudgetDetail budget={data.budget} fund={data.fund} isAllProjects={isAll} />}
       {view === 5 && <QAQC qaqc={data.qaqc} tasks={data.tasks} isAllProjects={isAll} />}
       {view === 6 && <WarrantyTracker warranties={data.warranties} isAllProjects={isAll} />}
       {view === 7 && <DesignSelections finishes={data.finishes} isAllProjects={isAll} />}
       {view === 8 && <Development milestones={data.devMilestones} isAllProjects={isAll} />}
-      {view === 9 && <Fund fund={data.fund} isAllProjects={isAll} />}
       {view === 10 && (
         <SalesShowroom
           leasing={data.leasing}
@@ -67,7 +76,14 @@ export default function DashboardPage() {
           memberships={data.memberships}
         />
       )}
-      {view === 11 && <TaktPlanning />}
+      {view === 11 && (
+        <TaktPlanning criticalPath={data.criticalPath} schedule={data.schedule} />
+      )}
+
+      <TabAssistant
+        context={VIEW_CONTEXT_MAP[view]?.context ?? 'general'}
+        tabLabel={VIEW_CONTEXT_MAP[view]?.label ?? 'Dashboard'}
+      />
     </>
   );
 }
