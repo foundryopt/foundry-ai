@@ -76,9 +76,7 @@ export default function DashboardPage() {
           memberships={data.memberships}
         />
       )}
-      {view === 11 && (
-        <TaktPlanning criticalPath={data.criticalPath} schedule={data.schedule} />
-      )}
+      {view === 11 && <TaktPlanning />}
 
       <TabAssistant
         context={VIEW_CONTEXT_MAP[view]?.context ?? 'general'}
