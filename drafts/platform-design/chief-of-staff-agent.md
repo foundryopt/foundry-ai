@@ -184,7 +184,7 @@ If a future authority level (e.g., "Level 5: COS Auto-Route") is proposed, it mu
 5. The COS **does not create, close, or modify items** in any tool.
 6. The COS **logs every read and every consolidation** to `#foundry-bot-log`.
 7. The COS **cites the source agent** for every item in its packet.
-8. The COS **does not chain agents** — its packet is consumed by a human, not by another agent.
+8. The COS **does not chain agents** — its packet is consumed by a human, **and only by a human**. No other agent (current or future) may ingest the COS Daily Packet, the COS Log Sheet, or any COS audit entry as an input. This is enforced at the agent boundary: any agent that lists a COS artifact in its `Inputs` table is out of spec and must be rejected at code review. Rationale: without this rule, a circular feedback path opens (Watcher → COS → Watcher) that breaks the human-gate guarantee in `CLAUDE.md` §6 and lets an agent indirectly act on its own prior output.
 9. The COS **does not loop directions back to other agents**. If an agent's draft is wrong, the human edits or rejects it; the COS does not "correct" it.
 10. The COS **cannot expand its own scope**. New checks, new inputs, or new outputs require a spec update to this file and human approval.
 

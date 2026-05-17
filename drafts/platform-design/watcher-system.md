@@ -41,7 +41,9 @@ Each watcher operates independently. Watchers do not chain — they surface item
 
 ### Why
 
-Email is the **most trusted source of truth** in current operations. Invoices, RFIs, submittals, warranty reports, and vendor correspondence arrive via email before they appear anywhere else. The watcher system must treat email as a primary input.
+Email is the **most trusted intake source** in current operations — the first place real-world events arrive. Invoices, RFIs, submittals, warranty reports, and vendor correspondence land in email before they appear anywhere else. The watcher system must treat email as a primary input.
+
+Email is *intake truth*, not *record truth*. An email is not a record until a human has approved the resulting Drive Sheet entry via the Log gate (`CLAUDE.md` §1, §6). The watcher reads email; it does not declare email a record.
 
 ### Email Inboxes (Pilot)
 
