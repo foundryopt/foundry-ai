@@ -16,6 +16,7 @@ import { DesignSelections } from '@/components/views/DesignSelections';
 import { Development } from '@/components/views/Development';
 import { SalesShowroom } from '@/components/views/SalesShowroom';
 import { TaktPlanning } from '@/components/views/TaktPlanning';
+import { TaskBoard } from '@/components/views/TaskBoard';
 import { TabAssistant } from '@/components/ui/TabAssistant';
 
 /* ---- AI-assistant context & label mapping ---- */
@@ -30,6 +31,7 @@ const VIEW_CONTEXT_MAP: Record<number, { context: React.ComponentProps<typeof Ta
   8: { context: 'development', label: 'Development' },
   10: { context: 'sales', label: 'Sales & Showroom' },
   11: { context: 'takt', label: 'Takt Planning' },
+  12: { context: 'attention', label: 'Task Board' },
 };
 
 export default function DashboardPage() {
@@ -77,6 +79,7 @@ export default function DashboardPage() {
         />
       )}
       {view === 11 && <TaktPlanning />}
+      {view === 12 && <TaskBoard tasks={data.tasks} projectId={projectId} />}
 
       <TabAssistant
         context={VIEW_CONTEXT_MAP[view]?.context ?? 'general'}

@@ -675,7 +675,7 @@ export interface FinishSelection {
 
 // ── View Tabs ──
 
-export type ViewTab = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11;
+export type ViewTab = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
 
 export const VIEW_LABELS: Record<ViewTab, string> = {
   0: 'Attention Today',
@@ -690,10 +690,11 @@ export const VIEW_LABELS: Record<ViewTab, string> = {
   9: 'Fund',
   10: 'Sales & Showroom',
   11: 'Takt Planning',
+  12: 'Task Board',
 };
 
 /** Tabs visible to all roles */
-export const COMMON_TABS: ViewTab[] = [0, 1, 2, 4, 5, 6, 7, 11];
+export const COMMON_TABS: ViewTab[] = [0, 12, 1, 2, 4, 5, 6, 7, 11];
 
 /** Restricted tabs and which roles can see them */
 export const RESTRICTED_TABS: { tab: ViewTab; roles: Role[] }[] = [
@@ -719,4 +720,32 @@ export interface ScheduledSlot {
   date: string; // ISO date
   hour: number; // 0-23
   projectId: string;
+}
+
+// ── Task Board (Kanban) ──
+
+export type BoardStatus = 'todo' | 'in-progress' | 'blocked' | 'done';
+
+export const BOARD_STATUS_ORDER: BoardStatus[] = ['todo', 'in-progress', 'blocked', 'done'];
+
+export const BOARD_STATUS_LABELS: Record<BoardStatus, string> = {
+  todo: 'To Do',
+  'in-progress': 'In Progress',
+  blocked: 'Blocked',
+  done: 'Done',
+};
+
+export interface BoardTask {
+  id: string;
+  projectId: string;
+  category: TaskCategory;
+  subject: string;
+  owner: string;
+  slaDate: string;
+  createdDate: string;
+  status: BoardStatus;
+  source?: string;
+  costImpact?: number;
+  scheduleImpactDays?: number;
+  costCodeRef?: string;
 }
