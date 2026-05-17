@@ -86,6 +86,7 @@ These live in their respective `logs/` or tracker folders. Created from the CSV 
 | Lead-Time Tracker | `04-procurement/lead-time-tracker/` | `procurement/templates/lead-time-tracker-schema.md` |
 | Vendor Invoice Tracker | `05-financial/vendor-invoices/` | `construction/templates/vendor-invoice-intake-schema.md` |
 | Warranty Claim Log | `08-property-management/warranty-claims/` | `property-management/warranty/warranty-claim-log-schema.md` |
+| Inquiries Log (Hermes) | `01-project-admin/logs/` | `hermes-sms-watcher.md` (Logging section) — records approved Q&A from SMS/email/Slack inbound |
 
 ## Naming Convention
 

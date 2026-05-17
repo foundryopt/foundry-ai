@@ -35,6 +35,7 @@ Cross-project channels for functional teams.
 | `#decisions` | Decision log items pending Owner's Rep or Principal action | Owner's Rep, Concierge, PMs |
 | `#fund` | Investor updates, draw requests, fund-level decisions | Fund Manager, Owner's Rep, Principal |
 | `#warranty` | Open warranty claims, contractor follow-up | Property Mgmt, PMs (as needed) |
+| `#foundry-ask` | Hermes inbound-inquiry drafts (SMS/email/mentions). Each inbound = one thread. PM/Super approves with reactions. | PMs, Supers, Owner's Rep |
 
 ### System Channels
 
@@ -42,6 +43,12 @@ Cross-project channels for functional teams.
 |---|---|---|
 | `#foundry-bot-log` | Audit log of all bot actions (drafts created, commands run, escalations surfaced) | Kuan, Owner's Rep |
 | `#daily-summaries` | AI-generated daily summaries by role, posted each morning | All |
+
+### Reaction-Approver User Groups
+
+| Group | Members | Purpose |
+|---|---|---|
+| `@hermes-approvers` | PMs + Supers on active projects | Only these users' ✅ / ✏️ reactions on Hermes drafts trigger the Send gate. Reactions from non-members are ignored. |
 
 ---
 
