@@ -690,7 +690,7 @@ export const VIEW_LABELS: Record<ViewTab, string> = {
   9: 'Fund',
   10: 'Sales & Showroom',
   11: 'Takt Planning',
-  12: 'Task Board',
+  12: 'Takt Board',
 };
 
 /** Tabs visible to all roles */
@@ -722,30 +722,3 @@ export interface ScheduledSlot {
   projectId: string;
 }
 
-// ── Task Board (Kanban) ──
-
-export type BoardStatus = 'todo' | 'in-progress' | 'blocked' | 'done';
-
-export const BOARD_STATUS_ORDER: BoardStatus[] = ['todo', 'in-progress', 'blocked', 'done'];
-
-export const BOARD_STATUS_LABELS: Record<BoardStatus, string> = {
-  todo: 'To Do',
-  'in-progress': 'In Progress',
-  blocked: 'Blocked',
-  done: 'Done',
-};
-
-export interface BoardTask {
-  id: string;
-  projectId: string;
-  category: TaskCategory;
-  subject: string;
-  owner: string;
-  slaDate: string;
-  createdDate: string;
-  status: BoardStatus;
-  source?: string;
-  costImpact?: number;
-  scheduleImpactDays?: number;
-  costCodeRef?: string;
-}
