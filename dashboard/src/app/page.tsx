@@ -1,20 +1,15 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuth } from '@/hooks/useAuth';
 
 export default function Home() {
-  const { user } = useAuth();
-  const router = useRouter();
-
   useEffect(() => {
-    if (user) {
-      router.replace('/dashboard');
-    } else {
-      router.replace('/login');
-    }
-  }, [user, router]);
+    window.location.replace('/taktboard.html');
+  }, []);
 
-  return null;
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <p className="text-sm text-gray-500">Loading Takt Board…</p>
+    </div>
+  );
 }
