@@ -100,8 +100,11 @@ One active project. Two authority levels active.
 |---|---|---|---|
 | Level 1: Auto-Log | **ACTIVE** | 2026-02-08 | 2026-02-15 |
 | Level 2: Auto-Notify | **ACTIVE** | 2026-02-08 | 2026-02-15 |
-| Level 3: Auto-Forward Invoice | NOT ACTIVE | — | — |
+| Level 3: Auto-Forward Invoice | NOT ACTIVE — spec ready, see `authority-level-3-activation-auto-forward-clean-invoice.md` | — | — |
 | Level 4: GHL Draft-to-Send | NOT ACTIVE | — | — |
+| Level 5: Auto-Reply Templated Vendor Email | NOT ACTIVE — spec ready, see `authority-level-5-new-auto-reply-templated-vendor.md` | — | — |
+| Level 1 — Routine Auto-Log (sub-mode) | NOT ACTIVE — spec ready, see `authority-level-1-expansion-routine-auto-log.md` | — | — |
+| Level 2 — Internal Ack-Reply (sub-mode) | NOT ACTIVE — spec ready, see `authority-level-2-expansion-internal-ack-reply.md` | — | — |
 | Phase 3: Limited Dashboard Interaction | NOT ACTIVE | — | — |
 | Phase 4: Status & Resolution | NOT ACTIVE | — | — |
 | Phase F: Live Human Pilot | NOT ACTIVE | — | — |
@@ -171,3 +174,7 @@ All detailed specifications live in `drafts/platform-design/`:
 | `pilot-sandbox-day1-simulation.md` | Day 1 watcher output simulation |
 | `intake-classifier-spec.md` | Email/Slack Intake Classifier — what it does, what it produces, where it stops. Referenced by `chief-of-staff-agent.md` and `watcher-system.md`. |
 | `phase-renumbering-proposal.md` | Proposal to replace the current mixed Phase 2 / 3 / 4 / F / E / G labels with a linear sequence. Informational only until adopted in §7. |
+| `authority-level-1-expansion-routine-auto-log.md` | Spec to expand Level 1 with a Routine Auto-Log sub-mode — auto-log items meeting 7 strict criteria, daily digest instead of per-item Approve clicks. NOT ACTIVE until §7 activation. |
+| `authority-level-2-expansion-internal-ack-reply.md` | Spec to expand Level 2 with templated acknowledgment replies in internal Slack channels (zero external members). NOT ACTIVE until §7 activation. |
+| `authority-level-3-activation-auto-forward-clean-invoice.md` | Spec to activate Level 3 (named in §7 but never activated) — auto-forward Clean invoices to Adaptive Build with `PENDING APPROVAL` status. Adaptive Build approval is preserved; payment is never automated. NOT ACTIVE until §7 activation. |
+| `authority-level-5-new-auto-reply-templated-vendor.md` | Spec for a NEW Level 5 — templated auto-reply to vendor email from a dedicated `auto-ack@` mailbox. Three templates, vendor allowlist, 14-day probation. Highest-risk authority; mutates §4. NOT ACTIVE until §4 + §7 activation. |
