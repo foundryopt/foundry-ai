@@ -17,7 +17,7 @@ export function useActiveView() {
     const v = params.get('view');
     if (v !== null) {
       const n = Number(v);
-      if (n >= 0 && n <= 11) {
+      if (n >= 0 && n <= 12) {
         setViewState(n as ViewTab);
         return;
       }
