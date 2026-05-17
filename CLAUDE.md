@@ -123,6 +123,7 @@ All detailed specifications live in `drafts/platform-design/`:
 | Document | Contents |
 |---|---|
 | `watcher-system.md` | Function-level watchers, email intake, invoice gate, daily packets, bidding/outreach |
+| `chief-of-staff-agent.md` | Meta-watcher that consolidates other agents' drafts into one daily review packet. Draft-only, stops at Approval gate. |
 | `integration-architecture.md` | System layers, data flows, full application inventory, human gates |
 | `dashboard-human-simple-v1.md` | Human-Simple Open Task Dashboard — role-based views, Cost/Time/Quality visuals (Smartsheet), Phase 3 interactions, Phase 4 preview |
 | `phase-f-live-human-pilot.md` | Phase F — live human pilot for instrumentation validation, consent protocol, exit criteria, KPI gating |
