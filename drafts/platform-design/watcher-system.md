@@ -32,8 +32,11 @@ Humans remain accountable for every decision and every action.
 | **Financial** | Invoices, pay apps, budget exposure | Email (`info@shb.studio`, `shb-studio@adaptive.build`), CO log, budget data | PM Dashboard (invoice queue), `#proj-[name]` |
 | **Warranty** | Claims, warranty expiry, contractor response | Warranty claim log, email (`support@shb.studio`), Slack | `#warranty`, `#proj-[name]` |
 | **Executive** | Decisions, cost exposure, SLA breaches | Decision log, CO log, all watcher summaries | Executive Dashboard, `#decisions` |
+| **Hermes** | Inbound inquiries (CO status, contract scope, schedule, drawings/specs) | SMS (GHL inbound), email, Slack mentions; reads CO log, contracts, Smartsheet schedule, Drawings folder | `#foundry-ask` (threaded drafts), `Inquiries_Log` Sheet |
 
 Each watcher operates independently. Watchers do not chain — they surface items and wait.
+
+Hermes is **inbound-facing** (the others are outbound-monitoring). Full spec: `hermes-sms-watcher.md`.
 
 ---
 

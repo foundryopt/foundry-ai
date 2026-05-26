@@ -61,15 +61,18 @@ All AI output that is not covered by an active authority level is a draft. Human
 | Layer | Tool | Role |
 |---|---|---|
 | Command surface | **Slack** (single — not Google Chat) | Slash commands, approvals, daily briefs, watcher output |
-| Intake | **Email** (all functions) | First-class input. AI reads, classifies, drafts review prompts. |
+| Intake | **Email** + **SMS (read-only)** | Email is first-class intake. SMS (via GHL inbound number) is read-only intake for Hermes watcher — AI reads inbound, drafts replies, never sends. |
 | System of record | **Google Drive** | Documents, attachments, log Sheets, final records |
 | Dashboards | Read-only, mobile-first | Fed by watcher summaries — not raw tool screens |
 | Governance | **GitHub** | SOPs, schemas, CLAUDE.md only |
+
+SMS inbound is bound to one GHL number per project. AI does not initiate SMS. Outbound SMS replies, when authorized, are sent by GHL after a human approves the draft (Send gate, §6).
 
 ## 6. Human Gates (Non-Negotiable)
 
 Every workflow has explicit points where AI stops and a human acts:
 
+- **Identity gate** — AI verifies sender (phone → GHL contact, email → known sender, Slack → workspace member) before retrieving from SoR. Unknown senders get a holding draft + route, no retrieval-based answer.
 - **Draft gate** — AI produces draft, human reviews and approves
 - **Log gate** — AI formats entry, human clicks "Approve & Log," Open Task writes to Drive Sheet (Level 1 active)
 - **Route gate** — AI suggests routing per RACI, human confirms

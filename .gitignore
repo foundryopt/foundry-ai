@@ -12,6 +12,7 @@ Thumbs.db
 # Environment
 .env
 .env.*
+!.env.example
 
 # Data exports (no client data in repo)
 data/exports/
