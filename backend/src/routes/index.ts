@@ -16,6 +16,7 @@ import { patternsRouter } from './patterns';
 import { commentsRouter } from './comments';
 import { bidLevelingRouter } from './bid-leveling';
 import { chatRouter } from './chat';
+import { webhooksRouter } from './webhooks';
 
 export const apiRouter = Router();
 
@@ -36,3 +37,4 @@ apiRouter.use('/patterns', patternsRouter);
 apiRouter.use('/comments', commentsRouter);
 apiRouter.use('/bid-leveling', bidLevelingRouter);
 apiRouter.use('/chat', chatRouter);
+apiRouter.use('/webhooks', webhooksRouter);
