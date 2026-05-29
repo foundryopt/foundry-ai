@@ -44,12 +44,13 @@ All functions use Email and Slack for intake.
 
 - Write approved log entries to Drive Sheets after human clicks "Approve & Log" (Level 1: Auto-Log)
 - Post internal Slack notifications for SLA breaches, new item classifications, and delivery confirmations (Level 2: Auto-Notify)
+- Send email via admin@shb.studio after human clicks "Approve & Send" (Level 5: Auto-Send Email)
 
 **AI may NOT:**
 
 - Approve, publish, or execute without explicit human confirmation
 - Write to Smartsheet, Adaptive Build, QBO, or any SOR other than Drive Sheets via Auto-Log
-- Reply to or forward email
+- Reply to or forward email (unless Level 5: Auto-Send Email is ACTIVE and human approves)
 - Send SMS, make calls, or send external-facing messages (including Slack DMs to external guests)
 - Trigger CRM automations or marketing sends
 - Bypass decision gates or replace human sign-off
@@ -89,6 +90,7 @@ One active project. Two authority levels active.
 | Level 2: Auto-Notify | **ACTIVE** | 2026-02-08 | 2026-02-15 |
 | Level 3: Auto-Forward Invoice | NOT ACTIVE | — | — |
 | Level 4: GHL Draft-to-Send | NOT ACTIVE | — | — |
+| Level 5: Auto-Send Email | NOT ACTIVE | — | — |
 | Phase 3: Limited Dashboard Interaction | NOT ACTIVE | — | — |
 | Phase 4: Status & Resolution | NOT ACTIVE | — | — |
 | Phase F: Live Human Pilot | NOT ACTIVE | — | — |
@@ -98,7 +100,7 @@ One active project. Two authority levels active.
 - Slack is the interaction surface
 - Google Drive is the system of record
 - Downstream tools (Adaptive Build, Smartsheet, GHL, etc.) are unchanged
-- Email is read-only intake — AI does not reply or forward
+- Email is read-only intake — AI does not reply or forward (unless Level 5 is activated)
 - Either authority can be revoked immediately during probation
 
 ## 8. Design Principles
