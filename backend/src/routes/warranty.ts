@@ -189,7 +189,7 @@ router.patch('/claims/:claimNumber', authenticate, async (req: Request, res: Res
         action: 'updated',
         description: `Claim updated: ${Object.keys(updates).join(', ')}`,
         performedBy: (req as any).user?.name || 'system',
-        metadata: updates,
+        metadata: updates as any,
       },
     });
 
@@ -300,7 +300,7 @@ router.post('/claims/:claimNumber/photos', authenticate, async (req: Request, re
         action: 'photo_upload',
         description: `Photos uploaded: ${Object.keys(updates).join(', ')}`,
         performedBy: (req as any).user?.name || 'system',
-        metadata: updates,
+        metadata: updates as any,
       },
     });
 
