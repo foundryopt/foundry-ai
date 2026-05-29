@@ -30,7 +30,7 @@ Humans remain accountable for every decision and every action.
 | **Construction** | RFIs, COs, pre-task readiness | RFI log, CO log, email (project inbox), Slack | PM Dashboard, `#proj-[name]`, `#construction-ops` |
 | **Procurement** | Submittals, lead times, material QC | Submittal register, lead-time tracker, email (`info@shb.studio`), Slack | Procurement Dashboard, `#procurement` |
 | **Financial** | Invoices, pay apps, budget exposure | Email (`info@shb.studio`, `shb-studio@adaptive.build`), CO log, budget data | PM Dashboard (invoice queue), `#proj-[name]` |
-| **Warranty** | Claims, warranty expiry, contractor response | Warranty claim log, email (`support@shb.studio`), Slack | `#warranty`, `#proj-[name]` |
+| **Warranty** | Claims, warranty expiry, contractor response, signoff tracking | Warranty claim log, email (`support@shb.studio`), GHL webhook, Slack | `#warranty`, `#proj-[name]` |
 | **Executive** | Decisions, cost exposure, SLA breaches | Decision log, CO log, all watcher summaries | Executive Dashboard, `#decisions` |
 
 Each watcher operates independently. Watchers do not chain — they surface items and wait.
