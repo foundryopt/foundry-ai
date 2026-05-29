@@ -59,7 +59,9 @@ Not Covered:
 • Tenant-caused damage
 • Cosmetic preferences
 
-Questions? Contact support@shb.studio
+Questions? Email support@shb.studio or call [contact number]
+
+You can also file claims by emailing support@shb.studio directly.
 ```
 
 ### File New Claim Page (`/warranty/new`)
@@ -96,6 +98,20 @@ Embeds the GHL warranty claim form (see below). After submission:
 | New claim form | GHL Form (embedded) | See form fields below |
 | Status lookup | GHL or custom integration | Query Google Sheet via API |
 | Hosting | GHL subdomain or Webflow | Point `www.shb.studio/warranty` |
+
+---
+
+## Intake Methods
+
+Homeowners can file warranty claims through multiple channels:
+
+| Method | How | Routes To |
+|---|---|---|
+| **Web portal** | `www.shb.studio/warranty` → GHL form | GHL webhook → Slack `#warranty` |
+| **Email** | `support@shb.studio` | Warranty Watcher → Slack `#warranty` |
+| **Phone/In-person** | Contact PM directly | PM logs manually via Slack `/warranty` |
+
+Both `support@shb.studio` and the GHL form feed into the same intake queue. AI monitors both sources and drafts claim entries for human review.
 
 ---
 
