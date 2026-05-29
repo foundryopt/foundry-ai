@@ -1,0 +1,1314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Foundry Fund I — Invest Where Design Creates Enduring Value</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ========== RESET ========== */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg-dark: #1a1a1a;
+  --bg-darker: #111111;
+  --bg-card: #2d2d2d;
+  --white: #ffffff;
+  --text-light: #e0e0e0;
+  --text-muted: #999999;
+  --text-dark: #333333;
+  --accent: #d4956b;
+  --accent-light: #f5a088;
+  --accent-hover: #c27f55;
+  --blue: #1a73e8;
+  --divider: rgba(255,255,255,0.08);
+  --divider-dark: #e5e5e5;
+  --font-body: 'Inter', sans-serif;
+  --font-heading: 'Space Grotesk', sans-serif;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font-body);
+  color: var(--text-dark);
+  background: var(--white);
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+img { max-width: 100%; display: block; }
+a { text-decoration: none; color: inherit; }
+ul { list-style: none; }
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 40px;
+}
+
+/* ========== NAV ========== */
+nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 1000;
+  background: var(--bg-dark);
+  padding: 20px 60px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.3s ease;
+}
+
+nav.scrolled {
+  padding: 14px 60px;
+  background: rgba(17,17,17,0.97);
+  box-shadow: 0 2px 20px rgba(0,0,0,0.3);
+}
+
+.nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.nav-brand-icon {
+  width: 38px;
+  height: 38px;
+  background: var(--white);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-heading);
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--bg-dark);
+  flex-shrink: 0;
+}
+
+.nav-brand-text {
+  color: var(--white);
+  font-family: var(--font-heading);
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  line-height: 1.3;
+}
+
+.nav-links {
+  display: flex;
+  gap: 36px;
+  align-items: center;
+}
+
+.nav-links a {
+  color: var(--white);
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  transition: color 0.3s;
+}
+
+.nav-links a:hover {
+  color: var(--accent);
+}
+
+/* ========== HERO ========== */
+.hero {
+  position: relative;
+  height: 100vh;
+  min-height: 680px;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+}
+
+.hero-slides {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+.hero-slide {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  opacity: 0;
+  transition: opacity 1.2s ease-in-out;
+}
+
+.hero-slide.active {
+  opacity: 1;
+}
+
+.hero-slide:nth-child(1) {
+  background-image: url('https://images.leadconnectorhq.com/image/f_webp/q_80/r_1200/u_https://assets.cdn.filesafe.space/43kWeETY6y2nfRl7d6fg/media/697a1c63b700a22c7c646625.webp');
+}
+
+.hero-slide:nth-child(2) {
+  background-image: url('https://images.leadconnectorhq.com/image/f_webp/q_80/r_1200/u_https://assets.cdn.filesafe.space/43kWeETY6y2nfRl7d6fg/media/6978ca9fd119a5deff425dcd.png');
+}
+
+.hero-slide:nth-child(3) {
+  background-image: url('https://images.leadconnectorhq.com/image/f_webp/q_80/r_1200/u_https://assets.cdn.filesafe.space/43kWeETY6y2nfRl7d6fg/media/696e3430d4fb90556d422c36.png');
+}
+
+.hero-slide:nth-child(4) {
+  background-image: url('https://images.leadconnectorhq.com/image/f_webp/q_80/r_1200/u_https://assets.cdn.filesafe.space/43kWeETY6y2nfRl7d6fg/media/69b8a8809379cfb755c894d1.png');
+}
+
+.hero-slides::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.2) 100%);
+  z-index: 2;
+}
+
+/* Slideshow progress dots */
+.hero-dots {
+  position: absolute;
+  bottom: 40px;
+  left: 60px;
+  z-index: 5;
+  display: flex;
+  gap: 10px;
+}
+
+.hero-dot {
+  width: 40px;
+  height: 3px;
+  background: rgba(255,255,255,0.35);
+  border-radius: 2px;
+  cursor: pointer;
+  transition: background 0.3s;
+  overflow: hidden;
+  position: relative;
+}
+
+.hero-dot.active {
+  background: rgba(255,255,255,0.35);
+}
+
+.hero-dot .fill {
+  position: absolute;
+  inset: 0;
+  background: var(--white);
+  border-radius: 2px;
+  transform: scaleX(0);
+  transform-origin: left;
+}
+
+.hero-dot.active .fill {
+  animation: dotFill 5s linear forwards;
+}
+
+@keyframes dotFill {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+.hero-content {
+  position: relative;
+  z-index: 3;
+  padding: 0 60px;
+  max-width: 700px;
+}
+
+.hero-tag {
+  display: inline-block;
+  background: rgba(255,255,255,0.15);
+  backdrop-filter: blur(10px);
+  padding: 8px 20px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--white);
+  margin-bottom: 24px;
+}
+
+.hero h1 {
+  font-family: var(--font-heading);
+  font-size: clamp(2.5rem, 5vw, 3.8rem);
+  font-weight: 400;
+  color: var(--white);
+  line-height: 1.15;
+  margin-bottom: 20px;
+  letter-spacing: -0.01em;
+}
+
+.hero p {
+  font-size: 1rem;
+  color: rgba(255,255,255,0.8);
+  font-weight: 400;
+  line-height: 1.7;
+  margin-bottom: 36px;
+  max-width: 520px;
+}
+
+.btn-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--accent-light);
+  color: var(--bg-dark);
+  padding: 16px 32px;
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.btn-cta:hover {
+  background: var(--accent-hover);
+  color: var(--white);
+  transform: translateY(-1px);
+}
+
+.btn-cta .arrow {
+  transition: transform 0.3s;
+}
+
+.btn-cta:hover .arrow {
+  transform: translateX(4px);
+}
+
+/* ========== OVERVIEW STATS ========== */
+.overview {
+  background: var(--bg-dark);
+  padding: 80px 0;
+  text-align: center;
+}
+
+.overview h2 {
+  font-family: var(--font-heading);
+  font-size: 2.5rem;
+  font-weight: 400;
+  color: var(--white);
+  margin-bottom: 12px;
+}
+
+.overview > .container > p {
+  color: var(--text-muted);
+  font-size: 1rem;
+  margin-bottom: 50px;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+.stat-card {
+  background: var(--bg-card);
+  border-radius: 8px;
+  padding: 36px 24px;
+  text-align: center;
+  transition: transform 0.3s;
+}
+
+.stat-card:hover {
+  transform: translateY(-4px);
+}
+
+.stat-icon {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 20px;
+  opacity: 0.85;
+}
+
+.stat-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: brightness(1.2) sepia(0.3) hue-rotate(-10deg) saturate(1.5);
+}
+
+.stat-value {
+  font-family: var(--font-heading);
+  font-size: 2rem;
+  font-weight: 500;
+  color: var(--white);
+  margin-bottom: 6px;
+}
+
+.stat-label {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+/* ========== PHILOSOPHY ========== */
+.philosophy {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: 560px;
+}
+
+.philosophy-img {
+  background-image: url('https://images.leadconnectorhq.com/image/f_webp/q_80/r_1200/u_https://assets.cdn.filesafe.space/43kWeETY6y2nfRl7d6fg/media/690b01b973f16244237a8680.png');
+  background-size: cover;
+  background-position: center;
+  min-height: 400px;
+}
+
+.philosophy-content {
+  padding: 60px 60px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.philosophy-content h2 {
+  font-family: var(--font-heading);
+  font-size: 2.5rem;
+  font-weight: 400;
+  color: var(--text-dark);
+  margin-bottom: 20px;
+}
+
+.philosophy-content > p {
+  font-size: 0.95rem;
+  color: #555;
+  line-height: 1.7;
+  margin-bottom: 36px;
+}
+
+.philosophy-content > p strong {
+  color: var(--text-dark);
+  font-weight: 600;
+}
+
+.pillar {
+  border-top: 1px solid var(--divider-dark);
+  padding: 24px 0;
+}
+
+.pillar:last-child {
+  border-bottom: 1px solid var(--divider-dark);
+}
+
+.pillar-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 10px;
+}
+
+.pillar-icon {
+  width: 28px;
+  height: 28px;
+  opacity: 0.7;
+}
+
+.pillar-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: sepia(0.5) hue-rotate(-10deg) saturate(2) brightness(0.7);
+}
+
+.pillar h3 {
+  font-family: var(--font-heading);
+  font-size: 1.3rem;
+  font-weight: 500;
+  color: var(--text-dark);
+}
+
+.pillar p {
+  font-size: 0.9rem;
+  color: #777;
+  line-height: 1.6;
+  padding-left: 42px;
+}
+
+/* ========== VENDORS ========== */
+.vendors {
+  background: var(--bg-card);
+  padding: 70px 0;
+  text-align: center;
+  overflow: hidden;
+}
+
+.vendors h2 {
+  font-family: var(--font-heading);
+  font-size: 2.2rem;
+  font-weight: 400;
+  color: var(--white);
+  margin-bottom: 40px;
+}
+
+.vendor-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: rgba(255,255,255,0.06);
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.vendor-cell {
+  background: var(--bg-card);
+  padding: 30px 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.vendor-cell img {
+  max-height: 50px;
+  width: auto;
+  max-width: 200px;
+  opacity: 0.8;
+  filter: brightness(10);
+  transition: opacity 0.3s;
+}
+
+.vendor-cell:hover img {
+  opacity: 1;
+}
+
+/* ========== CASE STUDIES ========== */
+.case-studies {
+  padding: 80px 0;
+  background: var(--white);
+  text-align: center;
+}
+
+.case-studies h2 {
+  font-family: var(--font-heading);
+  font-size: 2.5rem;
+  font-weight: 400;
+  color: var(--text-dark);
+  margin-bottom: 10px;
+}
+
+.case-studies > .container > p {
+  color: #777;
+  font-size: 1rem;
+  margin-bottom: 50px;
+}
+
+.projects-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 30px;
+}
+
+.project-card {
+  border: 1px solid #eee;
+  border-radius: 8px;
+  overflow: hidden;
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.project-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 16px 40px rgba(0,0,0,0.08);
+}
+
+.project-img {
+  width: 100%;
+  height: 240px;
+  object-fit: cover;
+}
+
+.project-body {
+  padding: 24px;
+  text-align: left;
+}
+
+.project-tag {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--blue);
+  margin-bottom: 8px;
+}
+
+.project-body h3 {
+  font-family: var(--font-heading);
+  font-size: 1.4rem;
+  font-weight: 500;
+  color: var(--text-dark);
+  margin-bottom: 14px;
+}
+
+.project-body > p {
+  font-size: 0.88rem;
+  color: #666;
+  line-height: 1.65;
+  margin-bottom: 20px;
+}
+
+.project-meta {
+  border-top: 1px solid #eee;
+  padding-top: 14px;
+}
+
+.project-meta-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 0;
+}
+
+.project-meta-row .label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.82rem;
+  color: #888;
+}
+
+.project-meta-row .label img {
+  width: 18px;
+  height: 18px;
+  opacity: 0.5;
+}
+
+.project-meta-row .value {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-dark);
+}
+
+/* ========== TEAM ========== */
+.team {
+  background: var(--bg-dark);
+  padding: 80px 0;
+  text-align: center;
+}
+
+.team h2 {
+  font-family: var(--font-heading);
+  font-size: 2.2rem;
+  font-weight: 400;
+  color: var(--white);
+  margin-bottom: 10px;
+}
+
+.team > .container > p {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  margin-bottom: 50px;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.team-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 30px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.team-card {
+  text-align: center;
+}
+
+.team-avatar {
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  background: var(--bg-card);
+  margin: 0 auto 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+  color: var(--accent);
+  font-family: var(--font-heading);
+}
+
+.team-card h4 {
+  font-family: var(--font-heading);
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: var(--white);
+  margin-bottom: 4px;
+}
+
+.team-card .role {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+
+.team-card .credential {
+  font-size: 0.75rem;
+  color: var(--accent);
+}
+
+/* ========== INQUIRY FORM ========== */
+.inquiry {
+  padding: 80px 0;
+  background: var(--white);
+}
+
+.inquiry-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 60px;
+  align-items: start;
+}
+
+.inquiry-text h2 {
+  font-family: var(--font-heading);
+  font-size: 2.5rem;
+  font-weight: 400;
+  color: var(--text-dark);
+  margin-bottom: 16px;
+}
+
+.inquiry-text p {
+  font-size: 1rem;
+  color: #666;
+  line-height: 1.7;
+}
+
+.inquiry-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.inquiry-form select,
+.inquiry-form input,
+.inquiry-form textarea {
+  width: 100%;
+  padding: 16px 18px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-family: var(--font-body);
+  font-size: 0.92rem;
+  color: var(--text-dark);
+  background: var(--white);
+  transition: border-color 0.3s;
+  outline: none;
+}
+
+.inquiry-form select:focus,
+.inquiry-form input:focus,
+.inquiry-form textarea:focus {
+  border-color: var(--accent);
+}
+
+.inquiry-form textarea {
+  min-height: 140px;
+  resize: vertical;
+}
+
+.inquiry-form .btn-cta {
+  align-self: flex-start;
+}
+
+/* ========== FOOTER ========== */
+footer {
+  background: var(--bg-dark);
+  padding: 60px 0 0;
+}
+
+.footer-main {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr 1fr 1fr 1.5fr;
+  gap: 40px;
+  padding-bottom: 40px;
+  border-bottom: 1px solid var(--divider);
+}
+
+.footer-brand img {
+  height: 50px;
+  width: auto;
+  margin-bottom: 24px;
+}
+
+.footer-brand h4 {
+  font-family: var(--font-heading);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--white);
+  margin-bottom: 14px;
+}
+
+.footer-brand .contact-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  margin-bottom: 8px;
+}
+
+.footer-brand .contact-item svg {
+  width: 16px;
+  height: 16px;
+  opacity: 0.5;
+}
+
+.footer-col h5 {
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--white);
+  margin-bottom: 18px;
+}
+
+.footer-col a {
+  display: block;
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+  transition: color 0.3s;
+}
+
+.footer-col a:hover {
+  color: var(--white);
+}
+
+.footer-newsletter {
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid rgba(255,255,255,0.2);
+  padding-bottom: 8px;
+  gap: 10px;
+}
+
+.footer-newsletter svg {
+  width: 18px;
+  height: 18px;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.footer-newsletter input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: var(--white);
+  font-family: var(--font-body);
+  font-size: 0.88rem;
+  outline: none;
+}
+
+.footer-newsletter input::placeholder {
+  color: var(--text-muted);
+}
+
+.footer-newsletter button {
+  background: none;
+  border: none;
+  color: var(--accent);
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: color 0.3s;
+  white-space: nowrap;
+}
+
+.footer-newsletter button:hover {
+  color: var(--accent-light);
+}
+
+.footer-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 0;
+}
+
+.footer-bottom span {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+.social-icons {
+  display: flex;
+  gap: 20px;
+}
+
+.social-icons a {
+  color: var(--white);
+  transition: color 0.3s;
+}
+
+.social-icons a:hover {
+  color: var(--accent);
+}
+
+.social-icons svg {
+  width: 22px;
+  height: 22px;
+}
+
+/* ========== ANIMATIONS ========== */
+.reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ========== RESPONSIVE ========== */
+@media (max-width: 1024px) {
+  nav { padding: 16px 30px; }
+  .hero-content { padding: 0 30px; }
+  .hero-dots { left: 30px; }
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .philosophy { grid-template-columns: 1fr; }
+  .philosophy-img { min-height: 350px; }
+  .projects-grid { grid-template-columns: repeat(2, 1fr); }
+  .footer-main { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 768px) {
+  nav { padding: 14px 20px; }
+  .nav-links { display: none; }
+  .hero-content { padding: 0 20px; }
+  .hero-dots { left: 20px; bottom: 30px; }
+  .container { padding: 0 20px; }
+  .stats-grid { grid-template-columns: 1fr 1fr; }
+  .projects-grid { grid-template-columns: 1fr; }
+  .inquiry-grid { grid-template-columns: 1fr; }
+  .team-grid { grid-template-columns: repeat(2, 1fr); }
+  .footer-main { grid-template-columns: 1fr; }
+  .philosophy-content { padding: 40px 20px; }
+}
+
+@media (max-width: 480px) {
+  .stats-grid { grid-template-columns: 1fr; }
+  .team-grid { grid-template-columns: 1fr; }
+  .vendor-grid { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- ========== NAV ========== -->
+<nav id="nav">
+  <a href="#" class="nav-brand">
+    <div class="nav-brand-icon">F</div>
+    <span class="nav-brand-text">Foundry<br>Fund I</span>
+  </a>
+  <div class="nav-links">
+    <a href="#overview">Overview</a>
+    <a href="#philosophy">Philosophy</a>
+    <a href="#case-studies">Portfolio</a>
+    <a href="#team">Team</a>
+    <a href="#inquiry">Contact Us</a>
+  </div>
+</nav>
+
+<!-- ========== HERO ========== -->
+<section class="hero" id="hero">
+  <div class="hero-slides">
+    <div class="hero-slide active"></div>
+    <div class="hero-slide"></div>
+    <div class="hero-slide"></div>
+    <div class="hero-slide"></div>
+  </div>
+  <div class="hero-content">
+    <span class="hero-tag">Fund I</span>
+    <h1>Invest Where Design Creates Enduring Value</h1>
+    <p>Managed by Foundry Fund Management, Human-Centered Development.</p>
+    <a href="#inquiry" class="btn-cta">
+      Request Investor Deck <span class="arrow">&rarr;</span>
+    </a>
+  </div>
+  <div class="hero-dots">
+    <div class="hero-dot active"><div class="fill"></div></div>
+    <div class="hero-dot"><div class="fill"></div></div>
+    <div class="hero-dot"><div class="fill"></div></div>
+    <div class="hero-dot"><div class="fill"></div></div>
+  </div>
+</section>
+
+<!-- ========== FUND I OVERVIEW ========== -->
+<section class="overview" id="overview">
+  <div class="container">
+    <h2 class="reveal">Fund I Overview</h2>
+    <p class="reveal">Institutional-grade real estate investment focused on design-led value creation</p>
+    <div class="stats-grid">
+      <div class="stat-card reveal">
+        <div class="stat-icon">
+          <img src="https://images.leadconnectorhq.com/image/f_webp/q_80/r_1200/u_https://assets.cdn.filesafe.space/43kWeETY6y2nfRl7d6fg/media/690afdc0188ff91d6b8179e8.png" alt="">
+        </div>
+        <div class="stat-value">$ 20 M</div>
+        <div class="stat-label">Fund Size (Target Fund 1)</div>
+      </div>
+      <div class="stat-card reveal">
+        <div class="stat-icon">
+          <img src="https://images.leadconnectorhq.com/image/f_webp/q_80/r_1200/u_https://assets.cdn.filesafe.space/43kWeETY6y2nfRl7d6fg/media/690afe9ec7405b7576347b71.png" alt="">
+        </div>
+        <div class="stat-value">24% IRR</div>
+        <div class="stat-label">Target IRR (Net to LPs)</div>
+      </div>
+      <div class="stat-card reveal">
+        <div class="stat-icon">
+          <img src="https://images.leadconnectorhq.com/image/f_webp/q_80/r_1200/u_https://assets.cdn.filesafe.space/43kWeETY6y2nfRl7d6fg/media/690b22986917d2bc018ea00b.png" alt="">
+        </div>
+        <div class="stat-value">$ 4 M</div>
+        <div class="stat-label">Deployed (Across 8 Projects)</div>
+      </div>
+      <div class="stat-card reveal">
+        <div class="stat-icon">
+          <img src="https://images.leadconnectorhq.com/image/f_webp/q_80/r_1200/u_https://assets.cdn.filesafe.space/43kWeETY6y2nfRl7d6fg/media/690b22816fa37f2c667f51ca.png" alt="">
+        </div>
+        <div class="stat-value">2-3 Year</div>
+        <div class="stat-label">Fund Term (Plus Extensions)</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== INVESTMENT PHILOSOPHY ========== -->
+<section class="philosophy" id="philosophy">
+  <div class="philosophy-img"></div>
+  <div class="philosophy-content">
+    <h2 class="reveal">Investment Philosophy</h2>
+    <p class="reveal"><strong>We invest in projects where thoughtful design drives long-term value creation</strong>. Our integrated approach combines capital expertise with direct development capability.</p>
+    <div class="pillar reveal">
+      <div class="pillar-header">
+        <div class="pillar-icon">
+          <img src="https://images.leadconnectorhq.com/image/f_webp/q_80/r_1200/u_https://assets.cdn.filesafe.space/43kWeETY6y2nfRl7d6fg/media/690b035a20c6915cc89cd4a8.png" alt="">
+        </div>
+        <h3>Design-Led Investment</h3>
+      </div>
+      <p>Capital deployed where exceptional design creates measurable value and lasting impact.</p>
+    </div>
+    <div class="pillar reveal">
+      <div class="pillar-header">
+        <div class="pillar-icon">
+          <img src="https://images.leadconnectorhq.com/image/f_webp/q_80/r_1200/u_https://assets.cdn.filesafe.space/43kWeETY6y2nfRl7d6fg/media/690b47ba095b9cc9dac8ad90.png" alt="">
+        </div>
+        <h3>Human Center Developments</h3>
+      </div>
+      <p>Investment thesis grounded in spaces that enhance how people live, work, and gather.</p>
+    </div>
+    <div class="pillar reveal">
+      <div class="pillar-header">
+        <div class="pillar-icon">
+          <img src="https://images.leadconnectorhq.com/image/f_webp/q_80/r_1200/u_https://assets.cdn.filesafe.space/43kWeETY6y2nfRl7d6fg/media/690b4905095b9c8c13c8dc52.png" alt="">
+        </div>
+        <h3>Integrated Execution</h3>
+      </div>
+      <p>Direct development expertise ensuring capital translates to built form seamlessly.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== VENDORS ========== -->
+<section class="vendors">
+  <h2 class="reveal">See Our Vendors</h2>
+  <div class="vendor-grid">
+    <div class="vendor-cell"><img src="https://images.leadconnectorhq.com/image/f_webp/q_80/r_1200/u_https://assets.cdn.filesafe.space/43kWeETY6y2nfRl7d6fg/media/696e39eae40b2c21c9c277c1.webp" alt="Marfa Cabinets"></div>
+    <div class="vendor-cell"><img src="https://images.leadconnectorhq.com/image/f_webp/q_80/r_1200/u_https://assets.cdn.filesafe.space/43kWeETY6y2nfRl7d6fg/media/696e3a6d978534f09d85c7e8.webp" alt="Studio 41"></div>
+    <div class="vendor-cell"><img src="https://images.leadconnectorhq.com/image/f_webp/q_80/r_1200/u_https://assets.cdn.filesafe.space/43kWeETY6y2nfRl7d6fg/media/696b3a43f8c5b85289033899.png" alt="Jesse Chicago"></div>
+    <div class="vendor-cell"><img src="https://images.leadconnectorhq.com/image/f_webp/q_80/r_1200/u_https://assets.cdn.filesafe.space/43kWeETY6y2nfRl7d6fg/media/696e3abbccb051eda16d0528.webp" alt="Lightology"></div>
+    <div class="vendor-cell"><img src="https://images.leadconnectorhq.com/image/f_webp/q_80/r_1200/u_https://assets.cdn.filesafe.space/43kWeETY6y2nfRl7d6fg/media/696e3a25156e0ab5fed678bd.webp" alt="MSI"></div>
+    <div class="vendor-cell"><img src="https://images.leadconnectorhq.com/image/f_webp/q_80/r_1200/u_https://assets.cdn.filesafe.space/43kWeETY6y2nfRl7d6fg/media/696e3b7ae40b2c19d8c2acf8.webp" alt="Pure Edge Lighting"></div>
+  </div>
+</section>
+
+<!-- ========== CASE STUDIES ========== -->
+<section class="case-studies" id="case-studies">
+  <div class="container">
+    <h2 class="reveal">Case Studies</h2>
+    <p class="reveal">Representative projects demonstrating our integrated development approach</p>
+    <div class="projects-grid">
+
+      <div class="project-card reveal">
+        <img class="project-img" src="https://images.leadconnectorhq.com/image/f_webp/q_80/r_1200/u_https://assets.cdn.filesafe.space/43kWeETY6y2nfRl7d6fg/media/696df808e125ef7d0d2feeaf.png" alt="4323 N. Hermitage Ave.">
+        <div class="project-body">
+          <span class="project-tag">Completed</span>
+          <h3>4323 N. Hermitage Ave.</h3>
+          <p>Contemporary two-story residence with light-gray siding, black-trim windows, and a simple gabled roof. Elevated entry stair and metal railings face a fenced front yard, fitting neatly between urban neighbors.</p>
+          <div class="project-meta">
+            <div class="project-meta-row">
+              <span class="label">
+                <img src="https://images.leadconnectorhq.com/image/f_webp/q_80/r_1200/u_https://assets.cdn.filesafe.space/43kWeETY6y2nfRl7d6fg/media/691836475d55fcd9a3475046.png" alt="">
+                Location
+              </span>
+              <span class="value">4323 N. Hermitage Ave.</span>
+            </div>
+            <div class="project-meta-row">
+              <span class="label">
+                <img src="https://images.leadconnectorhq.com/image/f_webp/q_80/r_1200/u_https://assets.cdn.filesafe.space/43kWeETY6y2nfRl7d6fg/media/6909fa113cd4a73bd24b34b3.png" alt="">
+                Size
+              </span>
+              <span class="value">Single Family</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="project-card reveal">
+        <img class="project-img" src="https://images.leadconnectorhq.com/image/f_webp/q_80/r_1200/u_https://assets.cdn.filesafe.space/43kWeETY6y2nfRl7d6fg/media/696df81fe125ef5c162ff570.png" alt="1913 W Addison">
+        <div class="project-body">
+          <span class="project-tag">Completed</span>
+          <h3>1913 W Addison</h3>
+          <p>Contemporary three-story residence with dark brick façade, expansive floor-to-ceiling glazing, and vertical wood accent panel. Glass-railed balconies overlook a fenced front court, creating a crisp, urban, light-filled statement.</p>
+          <div class="project-meta">
+            <div class="project-meta-row">
+              <span class="label">
+                <img src="https://images.leadconnectorhq.com/image/f_webp/q_80/r_1200/u_https://assets.cdn.filesafe.space/43kWeETY6y2nfRl7d6fg/media/691836475d55fcd9a3475046.png" alt="">
+                Location
+              </span>
+              <span class="value">1913 W Addison</span>
+            </div>
+            <div class="project-meta-row">
+              <span class="label">
+                <img src="https://images.leadconnectorhq.com/image/f_webp/q_80/r_1200/u_https://assets.cdn.filesafe.space/43kWeETY6y2nfRl7d6fg/media/6909fa113cd4a73bd24b34b3.png" alt="">
+                Size
+              </span>
+              <span class="value">3 Units</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="project-card reveal">
+        <img class="project-img" src="https://images.leadconnectorhq.com/image/f_webp/q_80/r_1200/u_https://assets.cdn.filesafe.space/43kWeETY6y2nfRl7d6fg/media/696df8314e42b90c44d7a3f1.png" alt="1840 W Grace">
+        <div class="project-body">
+          <span class="project-tag">Completed</span>
+          <h3>1840 W Grace</h3>
+          <p>Modern four-story gray-brick apartment building with a bold black central bay, tall vertical windows, and recessed balconies with glass railings. Clean lines, secure entry, and urban curb appeal for residents.</p>
+          <div class="project-meta">
+            <div class="project-meta-row">
+              <span class="label">
+                <img src="https://images.leadconnectorhq.com/image/f_webp/q_80/r_1200/u_https://assets.cdn.filesafe.space/43kWeETY6y2nfRl7d6fg/media/691836475d55fcd9a3475046.png" alt="">
+                Location
+              </span>
+              <span class="value">1840 W Grace</span>
+            </div>
+            <div class="project-meta-row">
+              <span class="label">
+                <img src="https://images.leadconnectorhq.com/image/f_webp/q_80/r_1200/u_https://assets.cdn.filesafe.space/43kWeETY6y2nfRl7d6fg/media/6909fa113cd4a73bd24b34b3.png" alt="">
+                Size
+              </span>
+              <span class="value">6 Units</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ========== INVESTMENT TEAM ========== -->
+<section class="team" id="team">
+  <div class="container">
+    <h2 class="reveal">Investment Team</h2>
+    <p class="reveal">Combined decades of experience in real estate investment, development, and design</p>
+    <div class="team-grid">
+      <div class="team-card reveal">
+        <div class="team-avatar">CS</div>
+        <h4>Charlotte Samanzha</h4>
+        <div class="role">Managing Partner</div>
+        <div class="credential">100M+ Funding on Startup</div>
+      </div>
+      <div class="team-card reveal">
+        <div class="team-avatar">SH</div>
+        <h4>Sebastian Hillasarni</h4>
+        <div class="role">Investment Partner</div>
+        <div class="credential">Top 3 Australia Entrepreneur 2025</div>
+      </div>
+      <div class="team-card reveal">
+        <div class="team-avatar">KS</div>
+        <h4>Kevin Sebastian</h4>
+        <div class="role">Development Partner</div>
+        <div class="credential">Rising Star Entrepreneur 2025</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== INVESTOR INQUIRY ========== -->
+<section class="inquiry" id="inquiry">
+  <div class="container">
+    <div class="inquiry-grid">
+      <div class="inquiry-text reveal">
+        <h2>Investor Inquiry</h2>
+        <p>Request the Investor Deck and connect<br>with our Investor Relations team.</p>
+      </div>
+      <form class="inquiry-form reveal" onsubmit="return false;">
+        <select>
+          <option value="" disabled selected>Choose category*</option>
+          <option value="investor">Investor Inquiry</option>
+          <option value="partner">Partnership Opportunity</option>
+          <option value="general">General Inquiry</option>
+        </select>
+        <input type="text" placeholder="Your Name*" required>
+        <input type="text" placeholder="Company*" required>
+        <input type="email" placeholder="Email*" required>
+        <input type="tel" placeholder="Phone">
+        <textarea placeholder="Message...*" required></textarea>
+        <button type="submit" class="btn-cta">
+          Submit Now <span class="arrow">&rarr;</span>
+        </button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- ========== FOOTER ========== -->
+<footer>
+  <div class="container">
+    <div class="footer-main">
+      <div class="footer-brand">
+        <img src="https://images.leadconnectorhq.com/image/f_webp/q_80/r_1200/u_https://assets.cdn.filesafe.space/43kWeETY6y2nfRl7d6fg/media/690b458c92b35544a0ebb4ba.png" alt="Foundry Fund">
+        <h4>Contact</h4>
+        <div class="contact-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+          hello@foundryrooms.com
+        </div>
+        <div class="contact-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+          invest@foundryfund.com
+        </div>
+        <div class="contact-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+          kc@foundrymgmt.com
+        </div>
+      </div>
+
+      <div class="footer-col">
+        <h5>Quick Menu</h5>
+        <a href="#overview">Overview</a>
+        <a href="#philosophy">Philosophy</a>
+        <a href="#case-studies">Portfolio</a>
+        <a href="#inquiry">Contact</a>
+      </div>
+
+      <div class="footer-col">
+        <h5>Platform</h5>
+        <a href="https://foundryrooms.com">Foundry Rooms</a>
+        <a href="#">Foundry Fund Management</a>
+        <a href="https://foundryrooms.com/concierge">Foundry Concierge</a>
+      </div>
+
+      <div class="footer-col">
+        <h5>Help</h5>
+        <a href="#">FAQ</a>
+        <a href="#">Terms &amp; Condition</a>
+        <a href="#">Privacy Policy</a>
+        <a href="#">Cookies</a>
+      </div>
+
+      <div class="footer-col">
+        <h5>Subscribe to Our Newsletter</h5>
+        <div class="footer-newsletter">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+          <input type="email" placeholder="Enter Your Email*">
+          <button>Subscribe &rarr;</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <span>&copy; 2026 Foundry / SHB Studio, Inc.</span>
+      <div class="social-icons">
+        <a href="#"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg></a>
+        <a href="#"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg></a>
+        <a href="#"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/></svg></a>
+        <a href="#"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg></a>
+        <a href="#"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+// Nav scroll effect
+const nav = document.getElementById('nav');
+window.addEventListener('scroll', () => {
+  nav.classList.toggle('scrolled', window.scrollY > 60);
+});
+
+// Reveal on scroll
+const revealElements = document.querySelectorAll('.reveal');
+const revealObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+    }
+  });
+}, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+
+revealElements.forEach(el => revealObserver.observe(el));
+
+// Smooth scroll for anchor links
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+  anchor.addEventListener('click', function(e) {
+    e.preventDefault();
+    const target = document.querySelector(this.getAttribute('href'));
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  });
+});
+
+// Hero slideshow
+(function() {
+  const slides = document.querySelectorAll('.hero-slide');
+  const dots = document.querySelectorAll('.hero-dot');
+  let current = 0;
+  const interval = 5000;
+
+  function goTo(index) {
+    slides[current].classList.remove('active');
+    dots[current].classList.remove('active');
+    current = index % slides.length;
+    slides[current].classList.add('active');
+    dots[current].classList.remove('active');
+    // Force reflow to restart animation
+    void dots[current].offsetWidth;
+    dots[current].classList.add('active');
+  }
+
+  let timer = setInterval(() => goTo(current + 1), interval);
+
+  dots.forEach((dot, i) => {
+    dot.addEventListener('click', () => {
+      clearInterval(timer);
+      goTo(i);
+      timer = setInterval(() => goTo(current + 1), interval);
+    });
+  });
+})();
+</script>
+
+</body>
+</html>
