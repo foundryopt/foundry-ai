@@ -557,7 +557,7 @@ router.get('/public/dashboard', async (req: Request, res: Response, next: NextFu
         dateReported: c.dateReported,
         pmSignoff: c.pmSignoff,
         gcSignoff: c.gcSignoff,
-        assignedTo: c.assignedTo,
+        responsibleContractor: c.responsibleContractor,
         beforePhotosUrl: c.beforePhotosUrl,
         repairSignoff: c.repairSignoff,
         afterPhotosUrl: c.afterPhotosUrl,
