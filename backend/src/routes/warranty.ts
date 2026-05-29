@@ -528,6 +528,45 @@ router.post('/claims/:claimNumber/signoff/close', authenticate, async (req: Requ
 // Public Status Lookup (for www.shb.studio/warranty/status)
 // ══════════════════════════════════════════════════════════════
 
+// GET /api/warranty/public/dashboard — Temporary demo endpoint (all claims, no auth)
+router.get('/public/dashboard', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const claims = await prisma.warrantyClaim.findMany({
+      orderBy: { dateReported: 'desc' },
+      take: 50,
+    });
+    const total = await prisma.warrantyClaim.count();
+    const stats = {
+      total,
+      open: await prisma.warrantyClaim.count({ where: { status: 'open' } }),
+      inProgress: await prisma.warrantyClaim.count({ where: { status: { in: ['assigned', 'in-repair'] } } }),
+      resolved: await prisma.warrantyClaim.count({ where: { status: { in: ['resolved', 'closed'] } } }),
+    };
+    res.json({
+      claims: claims.map(c => ({
+        claimNumber: c.claimNumber,
+        projectId: c.projectId,
+        unit: c.unitLocation,
+        name: c.reportedBy,
+        email: c.reportedByEmail,
+        phone: c.reportedByPhone,
+        category: c.category,
+        priority: c.priority,
+        status: c.status,
+        description: c.defectDescription,
+        dateReported: c.dateReported,
+        pmReview: c.pmReview,
+        gcAssignment: c.gcAssignment,
+        beforePhotosUrl: c.beforePhotosUrl,
+        repairSignoff: c.repairSignoff,
+        afterPhotosUrl: c.afterPhotosUrl,
+        homeownerSignoff: c.homeownerSignoff,
+      })),
+      stats,
+    });
+  } catch (err) { next(err); }
+});
+
 // GET /api/warranty/public/status — Lookup claim status (public endpoint)
 router.get('/public/status', async (req: Request, res: Response, next: NextFunction) => {
   try {
