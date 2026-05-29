@@ -401,6 +401,88 @@ model WarrantyItem {
   @@map("warranty_items")
 }
 
+// Warranty Claims — Full GHL Integration with Signoff Protocol
+model WarrantyClaim {
+  id                    String   @id @default(cuid())
+  claimNumber           String   @unique @map("claim_number")
+  projectId             String   @map("project_id")
+  unitLocation          String   @map("unit_location")
+  reportedBy            String   @map("reported_by")
+  reportedByEmail       String?  @map("reported_by_email")
+  reportedByPhone       String?  @map("reported_by_phone")
+  dateReported          DateTime @map("date_reported")
+  priority              String   // emergency, urgent, standard
+  status                String   // open, assigned, in-repair, resolved, disputed, closed
+  defectDescription     String   @map("defect_description")
+  category              String   // general, roofing, mechanical, plumbing, electrical, waterproofing, appliance, finish, structural
+  photoEvidence         Boolean  @default(false) @map("photo_evidence")
+  warrantyItemRef       String?  @map("warranty_item_ref")
+  warrantyExpiry        DateTime? @map("warranty_expiry")
+  covered               String   @default("under-review") // covered, excluded, under-review
+  responsibleContractor String?  @map("responsible_contractor")
+  dateAssigned          DateTime? @map("date_assigned")
+  responseDue           DateTime? @map("response_due")
+  dateContractorResponded DateTime? @map("date_contractor_responded")
+  dateRepairScheduled   DateTime? @map("date_repair_scheduled")
+  dateRepairCompleted   DateTime? @map("date_repair_completed")
+  repairDescription     String?  @map("repair_description")
+  repairVerified        Boolean  @default(false) @map("repair_verified")
+  dateClosed            DateTime? @map("date_closed")
+  escalationHistory     String?  @map("escalation_history")
+  linkedSpecSection     String?  @map("linked_spec_section")
+  linkedSubmittal       String?  @map("linked_submittal")
+  notes                 String?
+
+  // Signoff Fields
+  pmSignoff             Boolean  @default(false) @map("pm_signoff")
+  pmSignoffDate         DateTime? @map("pm_signoff_date")
+  pmSignoffBy           String?  @map("pm_signoff_by")
+  gcSignoff             Boolean  @default(false) @map("gc_signoff")
+  gcSignoffDate         DateTime? @map("gc_signoff_date")
+  gcSignoffBy           String?  @map("gc_signoff_by")
+  beforePhotosUrl       String?  @map("before_photos_url")
+  afterPhotosUrl        String?  @map("after_photos_url")
+  repairSignoff         Boolean  @default(false) @map("repair_signoff")
+  repairSignoffDate     DateTime? @map("repair_signoff_date")
+  repairSignoffBy       String?  @map("repair_signoff_by")
+  homeownerSignoff      Boolean  @default(false) @map("homeowner_signoff")
+  homeownerSignoffDate  DateTime? @map("homeowner_signoff_date")
+  homeownerSignoffSent  DateTime? @map("homeowner_signoff_sent")
+  homeownerSignoffMethod String? @map("homeowner_signoff_method") // signed, auto-approved, reopened
+  homeownerSignoffNotes String?  @map("homeowner_signoff_notes")
+  closeSignoff          Boolean  @default(false) @map("close_signoff")
+  closeSignoffDate      DateTime? @map("close_signoff_date")
+  closeSignoffBy        String?  @map("close_signoff_by")
+
+  // GHL Integration
+  ghlContactId          String?  @map("ghl_contact_id")
+  ghlConversationId     String?  @map("ghl_conversation_id")
+  intakeSource          String   @default("manual") @map("intake_source") // ghl-form, email, manual, phone
+
+  createdAt             DateTime @default(now()) @map("created_at")
+  updatedAt             DateTime @updatedAt @map("updated_at")
+
+  @@index([projectId])
+  @@index([status])
+  @@index([claimNumber])
+  @@index([reportedByEmail])
+  @@map("warranty_claims")
+}
+
+// Warranty Claim Activity Log — Full Audit Trail
+model WarrantyClaimActivity {
+  id            String   @id @default(cuid())
+  claimId       String   @map("claim_id")
+  action        String   // created, status_change, signoff, assignment, note, escalation, photo_upload
+  description   String
+  performedBy   String   @map("performed_by")
+  performedAt   DateTime @default(now()) @map("performed_at")
+  metadata      Json     @default("{}")
+
+  @@index([claimId])
+  @@map("warranty_claim_activities")
+}
+
 // ──────────────────────────────────────────────
 // Development
 // ──────────────────────────────────────────────
