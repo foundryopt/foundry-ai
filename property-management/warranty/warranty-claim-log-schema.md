@@ -40,6 +40,23 @@ Defines the standard field structure for tracking warranty claims from intake th
 | 24 | `linked_spec_section` | string | — | Original spec section for reference |
 | 25 | `linked_submittal` | string | — | Submittal number for reference |
 | 26 | `notes` | text | — | Dispute details, tenant communication, or other remarks |
+| 27 | `pm_signoff` | boolean | — | Property Management verified claim entry |
+| 28 | `pm_signoff_date` | date | — | Date PM signed off on claim |
+| 29 | `gc_signoff` | boolean | — | GC/CM confirmed contractor assignment |
+| 30 | `gc_signoff_date` | date | — | Date GC signed off on assignment |
+| 31 | `before_photos_url` | string | Yes (repair) | Link to before photos (Drive or GHL) |
+| 32 | `after_photos_url` | string | Yes (repair) | Link to after photos (Drive or GHL) |
+| 33 | `repair_signoff` | boolean | — | PM verified repair completion |
+| 34 | `repair_signoff_date` | date | — | Date PM signed off on repair |
+| 35 | `homeowner_signoff` | boolean | — | Homeowner confirmed satisfaction |
+| 36 | `homeowner_signoff_date` | date | — | Date homeowner signed off |
+| 37 | `homeowner_signoff_sent` | datetime | — | When signoff request was sent via GHL |
+| 38 | `homeowner_signoff_method` | enum | — | `signed`, `auto-approved`, `reopened` |
+| 39 | `homeowner_signoff_notes` | text | — | Notes (e.g., "Auto-approved: no response within 24 hours") |
+| 40 | `close_signoff` | boolean | — | Owner's Rep approved closure |
+| 41 | `close_signoff_date` | date | — | Date closure was approved |
+| 42 | `ghl_contact_id` | string | — | GHL contact record ID |
+| 43 | `ghl_conversation_id` | string | — | GHL conversation thread ID |
 
 ## Status Lifecycle
 
@@ -57,6 +74,16 @@ open → assigned → in-repair → resolved → closed
 - `covered` = `excluded` requires a non-empty `notes` field explaining the exclusion.
 - `status` cannot move to `resolved` without `date_repair_completed` and `repair_verified` = true.
 - `disputed` requires `escalation_history` to be non-empty.
+- `pm_signoff_date` required when `pm_signoff` = true.
+- `gc_signoff_date` required when `gc_signoff` = true.
+- `before_photos_url` required before `repair_signoff` can be set.
+- `after_photos_url` required before `repair_signoff` can be set.
+- `repair_signoff_date` required when `repair_signoff` = true.
+- `homeowner_signoff_date` required when `homeowner_signoff` = true.
+- `homeowner_signoff_method` must be one of: `signed`, `auto-approved`, `reopened`.
+- `status` cannot move to `closed` without `homeowner_signoff` = true.
+- `close_signoff_date` required when `close_signoff` = true.
+- `status` cannot move to `closed` without `close_signoff` = true.
 
 ## Usage Notes
 
