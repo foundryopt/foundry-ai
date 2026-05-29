@@ -23,6 +23,82 @@ GHL handles the **tenant-facing interface**. Google Sheets is the **system of re
 
 ---
 
+## Landing Page — www.shb.studio/warranty
+
+### Purpose
+
+Public-facing warranty portal for homeowners to file claims and check claim status.
+
+### URL Structure
+
+| URL | Function |
+|---|---|
+| `www.shb.studio/warranty` | Landing page with options |
+| `www.shb.studio/warranty/new` | File a new claim (GHL form) |
+| `www.shb.studio/warranty/status` | Check claim status (lookup by claim # or email) |
+
+### Landing Page Content
+
+```
+SHB Studio — Warranty Service
+
+We stand behind our work. Use this portal to report warranty issues 
+or check the status of an existing claim.
+
+[FILE A NEW CLAIM]          [CHECK CLAIM STATUS]
+
+---
+
+What's Covered:
+• Defects in workmanship or materials
+• Building system issues from installation
+• Waterproofing failures within warranty period
+
+Not Covered:
+• Normal wear and tear
+• Tenant-caused damage
+• Cosmetic preferences
+
+Questions? Contact support@shb.studio
+```
+
+### File New Claim Page (`/warranty/new`)
+
+Embeds the GHL warranty claim form (see below). After submission:
+- Homeowner sees confirmation with claim number
+- Receives SMS/email confirmation via GHL
+- Redirects to status page with their claim #
+
+### Check Status Page (`/warranty/status`)
+
+**Lookup options:**
+1. Enter claim number (e.g., WC-042)
+2. Enter email address to see all claims
+
+**Status display:**
+| Field | Shown |
+|---|---|
+| Claim # | Yes |
+| Date filed | Yes |
+| Status | Yes (friendly: "Under Review", "Repair Scheduled", "Completed") |
+| Category | Yes |
+| Next step | Yes (e.g., "Awaiting contractor response") |
+| Before/after photos | Yes (if repair complete) |
+| Signoff link | Yes (if awaiting homeowner signoff) |
+
+**Privacy:** Requires email verification or claim # + unit match to view details.
+
+### Implementation
+
+| Component | Tool | Notes |
+|---|---|---|
+| Landing page | GHL Funnel or Webflow | Simple 2-button layout |
+| New claim form | GHL Form (embedded) | See form fields below |
+| Status lookup | GHL or custom integration | Query Google Sheet via API |
+| Hosting | GHL subdomain or Webflow | Point `www.shb.studio/warranty` |
+
+---
+
 ## GHL Setup — Warranty Portal
 
 ### Tenant-Facing Form (GHL)
@@ -425,12 +501,21 @@ Dashboard views powered by Google Sheets data:
 
 ## Implementation Checklist
 
+### Landing Page (www.shb.studio/warranty)
+- [ ] Create landing page with "File Claim" and "Check Status" buttons
+- [ ] Set up `/warranty/new` with embedded GHL form
+- [ ] Set up `/warranty/status` with claim lookup
+- [ ] Configure DNS/subdomain routing
+- [ ] Add email verification for status lookup
+- [ ] Style to match SHB Studio branding
+
 ### GHL Setup
 - [ ] Create warranty claim form with required fields
 - [ ] Configure webhook to Slack `#warranty`
 - [ ] Create warranty pipeline stages
 - [ ] Set up contact tagging rules
 - [ ] Create SMS/email templates (for human-triggered sends)
+- [ ] Create homeowner signoff form with signature field
 
 ### Google Sheets Setup
 - [ ] Add signoff fields to warranty claim log schema
