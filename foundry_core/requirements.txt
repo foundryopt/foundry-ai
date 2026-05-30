@@ -1,0 +1,21 @@
+# Foundry Core Dependencies
+
+# Gateway
+fastapi>=0.104.0
+uvicorn>=0.24.0
+httpx>=0.25.0
+pydantic>=2.5.0
+
+# Slack Integration
+slack-bolt>=1.18.0
+slack-sdk>=3.23.0
+
+# AI/LLM
+google-generativeai>=0.3.0
+
+# Core Python (stdlib)
+# sqlite3 - included in Python
+# json - included in Python
+# logging - included in Python
+# dataclasses - included in Python
+# pathlib - included in Python

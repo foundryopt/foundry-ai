@@ -1,0 +1,33 @@
+{
+  "version": "1.0.0",
+  "description": "Threshold guardrails for silent logging vs active alerts",
+  "last_updated": "2026-05-30",
+  "time_variance": {
+    "silent_threshold_hours": 4,
+    "description": "Variations under this threshold are silently appended to local SQLite ledger",
+    "action_below_threshold": "silent_log",
+    "action_above_threshold": "slack_alert",
+    "ledger_path": "data/time_variance_ledger.db",
+    "alert_channels": ["#schedule-alerts", "#shb-dispatcher"]
+  },
+  "budget_variance": {
+    "auto_contingency_threshold_usd": 500,
+    "description": "Adjustments under this threshold are automatically drawn from contingency",
+    "action_below_threshold": "auto_contingency_draw",
+    "action_above_threshold": "manual_approval_lock",
+    "contingency_account": "project_contingency",
+    "approval_required_roles": ["shb_group", "foundry_fund"],
+    "alert_channels": ["#budget-alerts", "#shb-dispatcher"]
+  },
+  "escalation_rules": {
+    "time_critical_hours": 24,
+    "budget_critical_usd": 5000,
+    "auto_escalate_to": "shb_group",
+    "escalation_channel": "#executive-escalations"
+  },
+  "logging": {
+    "sqlite_database": "data/variance_ledger.db",
+    "retention_days": 365,
+    "backup_to_drive": true
+  }
+}
