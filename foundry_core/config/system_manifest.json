@@ -1,0 +1,63 @@
+{
+  "version": "1.0.0",
+  "description": "Foundry AI - Vertically Integrated Enterprise Entity Mapping",
+  "last_updated": "2026-05-30",
+  "entities": {
+    "shb_group": {
+      "legal_name": "SHB Group",
+      "functions": ["Development", "Property Management"],
+      "role": "Principal / Owner's Representative / Escalation Authority",
+      "slack_channels": ["#shb-dispatcher", "#property-management"],
+      "ghl_routing": "homeowner",
+      "threshold_authority": "executive"
+    },
+    "shb_studio": {
+      "legal_name": "SHB Studio",
+      "functions": ["Design", "RFIs", "Architectural Documentation"],
+      "role": "Design Entity",
+      "slack_channels": ["#design-studio", "#rfi-log"],
+      "ghl_routing": null,
+      "threshold_authority": "design"
+    },
+    "simple_home_builders": {
+      "legal_name": "Simple Home Builders Inc.",
+      "functions": ["Construction", "Build Execution", "Warranties"],
+      "role": "GC / CM",
+      "slack_channels": ["#simple-home-builders", "#warranties"],
+      "ghl_routing": "subcontractor",
+      "threshold_authority": "construction"
+    },
+    "builiq_inc": {
+      "legal_name": "Builiq Inc.",
+      "functions": ["Wholesale", "Imports", "Procurement"],
+      "role": "Procurement Entity",
+      "slack_channels": ["#builiq-supply", "#procurement"],
+      "ghl_routing": "vendor",
+      "threshold_authority": "procurement"
+    },
+    "foundry_rooms": {
+      "legal_name": "Foundry Rooms",
+      "functions": ["Venue", "Showroom", "Retail Experience"],
+      "role": "Sales / Experience Entity",
+      "slack_channels": ["#foundry-rooms", "#showroom"],
+      "ghl_routing": null,
+      "threshold_authority": "sales"
+    },
+    "foundry_fund": {
+      "legal_name": "Foundry Fund",
+      "functions": ["Finance", "Custom Investment Pools", "Investor Relations"],
+      "role": "Finance / Fund Management Entity",
+      "slack_channels": ["#foundry-fund", "#investor-relations"],
+      "ghl_routing": null,
+      "threshold_authority": "finance"
+    }
+  },
+  "raci_mapping": {
+    "development": "shb_group",
+    "design": "shb_studio",
+    "construction": "simple_home_builders",
+    "procurement": "builiq_inc",
+    "sales": "foundry_rooms",
+    "finance": "foundry_fund"
+  }
+}
